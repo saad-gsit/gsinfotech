@@ -1,12 +1,25 @@
+// Enhanced server.js with all middleware integrated
 const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const db = require('./models');
+
+// Import enhanced middleware
+const securityMiddleware = require('./middleware/security');
+const { createImageOptimizerMiddleware } = require('./middleware/imageOptimizer');
+const { createSEOMiddleware, autoGenerateBlogSEO } = require('./middleware/seoEnhancer');
+const { cacheMiddleware, cacheInvalidationMiddleware } = require('./middleware/cache');
+const { addPerformanceMonitoring } = require('./middleware/performanceMonitor');
+const { sanitizeRequest, validationSchemas } = require('./middleware/validation');
+
+// Import routes
+const projectRoutes = require('./routes/projects');
+const blogRoutes = require('./routes/blog');
+const contactRoutes = require('./routes/contact');
+const seoRoutes = require('./routes/seo');
+const analyticsRoutes = require('./routes/analytics');
 
 require('dotenv').config();
 
@@ -15,81 +28,76 @@ const app = express();
 // Trust proxy (for production)
 app.set('trust proxy', 1);
 
-// Enhanced Security Middleware
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            scriptSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "https:"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"]
-        }
-    },
-    crossOriginEmbedderPolicy: false
-}));
+// 1. SECURITY MIDDLEWARE (First priority)
+// Enhanced Helmet security headers
+app.use(securityMiddleware.helmet);
 
-// CORS Configuration
-app.use(cors({
-    origin: function (origin, callback) {
-        const allowedOrigins = [
-            'http://localhost:3000',
-            'http://localhost:5173',
-            process.env.CORS_ORIGIN
-        ].filter(Boolean);
+// Enhanced CORS with logging
+app.use(securityMiddleware.cors);
 
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
-}));
+// Request sanitization and security validation
+app.use(securityMiddleware.sanitizeRequest);
 
-// Rate Limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: {
-        error: 'Too many requests from this IP, please try again later.',
-        retryAfter: 900
-    },
-    standardHeaders: true,
-    legacyHeaders: false
-});
+// Additional security headers
+app.use(securityMiddleware.securityHeaders);
 
-app.use('/api/', limiter);
+// NoSQL injection and XSS protection
+app.use(securityMiddleware.mongoSanitize);
+app.use(securityMiddleware.hpp);
 
-// Body parsing middleware
+// Speed limiting for performance
+app.use(securityMiddleware.speedLimit);
+
+// 2. PERFORMANCE MONITORING (Early to track everything)
+addPerformanceMonitoring(app);
+
+// 3. RATE LIMITING (Apply different limits to different routes)
+// General API rate limiting
+app.use('/api/', securityMiddleware.rateLimit.general);
+
+// Use routes
+app.use('/api/projects', projectRoutes);
+app.use('/api/blog', blogRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/seo', seoRoutes);
+app.use('/api/analytics', analyticsRoutes);
+
+// Specific rate limits for sensitive endpoints
+app.use('/api/contact', securityMiddleware.rateLimit.contact);
+app.use('/api/auth', securityMiddleware.rateLimit.auth);
+app.use('/api/admin', securityMiddleware.rateLimit.admin);
+
+// 4. BODY PARSING AND COMPRESSION
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
-
-// Compression middleware
 app.use(compression());
 
-// Logging middleware
+// 5. REQUEST SANITIZATION
+app.use(sanitizeRequest);
+
+// 6. LOGGING
 app.use(morgan('combined'));
 
-// Static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// 7. SEO ENHANCEMENT
+app.use(createSEOMiddleware());
 
-// Health check endpoint
+// 8. STATIC FILES with caching
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+    maxAge: '1d',
+    etag: true
+}));
+
+// 9. API ROUTES WITH CACHING AND VALIDATION
+
+// Health check endpoint (no caching)
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'OK',
-        message: 'GS Infotech API Server Running',
+        message: 'GS Infotech Enhanced API Server Running',
         environment: process.env.NODE_ENV,
         timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        database: {
-            host: process.env.DB_HOST,
-            name: process.env.DB_NAME,
-            port: process.env.DB_PORT
-        }
+        uptime: process.uptime()
     });
 });
 
@@ -101,6 +109,7 @@ app.get('/api', (req, res) => {
         documentation: '/api/docs',
         endpoints: {
             health: '/api/health',
+            performance: '/api/performance',
             projects: '/api/projects',
             team: '/api/team',
             blog: '/api/blog',
@@ -110,14 +119,12 @@ app.get('/api', (req, res) => {
     });
 });
 
-// Test database connection endpoint
-
+// Database test endpoint
 app.get('/api/db-test', async (req, res) => {
     try {
         const isConnected = await db.testConnection();
 
         if (isConnected) {
-            // Use simpler queries that work with all MySQL versions
             const [dbResult] = await db.sequelize.query('SELECT DATABASE() as current_db');
             const [versionResult] = await db.sequelize.query('SELECT VERSION() as mysql_version');
             const [timeResult] = await db.sequelize.query('SELECT NOW() as server_time');
@@ -153,21 +160,133 @@ app.get('/api/db-test', async (req, res) => {
         });
     }
 });
-  
+
+// EXAMPLE API ROUTES WITH ENHANCED MIDDLEWARE
+
+// Projects API with caching, validation, and image optimization
+app.get('/api/projects',
+    validationSchemas.queryParams,
+    cacheMiddleware.projects,
+    async (req, res) => {
+        // Your projects logic here
+        res.json({ message: 'Projects endpoint with caching' });
+    }
+);
+
+app.post('/api/projects',
+    createImageOptimizerMiddleware('projects'),
+    validationSchemas.project,
+    cacheInvalidationMiddleware(['projects']),
+    async (req, res) => {
+        // Your project creation logic here
+        // req.processedImages will contain optimized images
+        res.json({
+            message: 'Project created with optimized images',
+            images: req.processedImages
+        });
+    }
+);
+
+// Blog API with SEO auto-generation
+app.get('/api/blog',
+    validationSchemas.queryParams,
+    cacheMiddleware.blog,
+    async (req, res) => {
+        // Your blog posts logic here
+        res.json({ message: 'Blog posts with caching' });
+    }
+);
+
+app.post('/api/blog',
+    createImageOptimizerMiddleware('blog'),
+    autoGenerateBlogSEO,
+    validationSchemas.blogPost,
+    cacheInvalidationMiddleware(['blog']),
+    async (req, res) => {
+        // Your blog creation logic here
+        // req.body will have auto-generated SEO fields
+        res.json({
+            message: 'Blog post created with SEO optimization',
+            seo: {
+                slug: req.body.slug,
+                metaDescription: req.body.metaDescription,
+                readingTime: req.body.readingTime
+            }
+        });
+    }
+);
+
+// Team API with image optimization
+app.get('/api/team',
+    cacheMiddleware.team,
+    async (req, res) => {
+        res.json({ message: 'Team members with caching' });
+    }
+);
+
+app.post('/api/team',
+    createImageOptimizerMiddleware('team'),
+    validationSchemas.teamMember,
+    cacheInvalidationMiddleware(['team']),
+    async (req, res) => {
+        res.json({
+            message: 'Team member added with optimized images',
+            images: req.processedImages
+        });
+    }
+);
+
+// Contact API with enhanced validation and rate limiting
+app.post('/api/contact',
+    validationSchemas.contact,
+    async (req, res) => {
+        // Your contact form logic here
+        res.json({ message: 'Contact form submitted successfully' });
+    }
+);
+
+// Services API with caching
+app.get('/api/services',
+    cacheMiddleware.long, // Services change infrequently
+    async (req, res) => {
+        res.json({ message: 'Services with long-term caching' });
+    }
+);
+
+// Admin routes with API key validation
+app.use('/api/admin', securityMiddleware.validateApiKey);
+
+app.get('/api/admin/stats', (req, res) => {
+    res.json({ message: 'Admin stats - API key validated' });
+});
+
+// 10. ERROR HANDLING
 
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {
     res.status(404).json({
         error: 'API endpoint not found',
         path: req.originalUrl,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        suggestion: 'Check /api for available endpoints'
     });
 });
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err.stack);
-    res.status(500).json({
+
+    // Log security-related errors
+    if (err.message.includes('CORS') || err.message.includes('rate limit')) {
+        require('./utils/logger').logger.security('Security error', {
+            error: err.message,
+            ip: req.ip,
+            path: req.path,
+            userAgent: req.get('User-Agent')
+        });
+    }
+
+    res.status(err.status || 500).json({
         error: 'Something went wrong!',
         message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
         timestamp: new Date().toISOString()
@@ -176,7 +295,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || 'localhost';
-
 
 const startServer = async () => {
     try {
@@ -196,21 +314,26 @@ const startServer = async () => {
         // Start the server
         app.listen(PORT, HOST, () => {
             console.log(`
-  🚀 GS Infotech Enhanced Server Started!
-  📍 Environment: ${process.env.NODE_ENV}
-  🌐 Server: http://${HOST}:${PORT}
-  📊 Health Check: http://${HOST}:${PORT}/api/health
-  📖 API Info: http://${HOST}:${PORT}/api
-  🔧 DB Test: http://${HOST}:${PORT}/api/db-test
-  💾 Database: Connected to ${process.env.DB_NAME}
-  ⏰ Started at: ${new Date().toISOString()}
-        `);
+🚀 GS Infotech Enhanced Server Started!
+📍 Environment: ${process.env.NODE_ENV}
+🌐 Server: http://${HOST}:${PORT}
+📊 Health Check: http://${HOST}:${PORT}/api/health
+📈 Performance: http://${HOST}:${PORT}/api/performance
+📖 API Info: http://${HOST}:${PORT}/api
+🔧 DB Test: http://${HOST}:${PORT}/api/db-test
+💾 Database: Connected to ${process.env.DB_NAME}
+🛡️  Security: Enhanced middleware active
+⚡ Performance: Monitoring enabled
+🗄️  Cache: ${process.env.ENABLE_CACHE !== 'false' ? 'Enabled' : 'Disabled'}
+⏰ Started at: ${new Date().toISOString()}
+            `);
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error.message);
         process.exit(1);
     }
 };
-startServer();  
+
+startServer();
 
 module.exports = app;

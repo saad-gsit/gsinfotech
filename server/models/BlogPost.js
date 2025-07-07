@@ -186,11 +186,20 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     BlogPost.associate = (models) => {
+        // BlogPost belongs to TeamMember (author)
         BlogPost.belongsTo(models.TeamMember, {
             foreignKey: 'author_id',
             as: 'author'
         });
+
+        // Simple SEO association - we'll handle path matching in controllers
+        BlogPost.hasOne(models.SEOMetadata, {
+            foreignKey: 'page_path',
+            sourceKey: 'slug',
+            as: 'seoData',
+            constraints: false
+        });
     };
 
     return BlogPost;
-  };
+};

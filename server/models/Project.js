@@ -154,9 +154,14 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Project.associate = (models) => {
-        // Add associations here when other models are created
-        // Project.belongsToMany(models.TeamMember, { through: 'ProjectTeamMembers' });
+        // Simple association - we'll handle the path matching in controllers
+        Project.hasOne(models.SEOMetadata, {
+            foreignKey: 'page_path',
+            sourceKey: 'slug',
+            as: 'seoData',
+            constraints: false
+        });
     };
 
     return Project;
-  };
+};

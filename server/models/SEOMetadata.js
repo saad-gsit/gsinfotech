@@ -88,5 +88,23 @@ module.exports = (sequelize, DataTypes) => {
         updatedAt: 'updated_at'
     });
 
+    SEOMetadata.associate = (models) => {
+        // Simple associations without complex scopes
+        // We'll handle the filtering in the controllers manually
+        SEOMetadata.belongsTo(models.Project, {
+            foreignKey: 'page_path',
+            targetKey: 'slug',
+            as: 'project',
+            constraints: false
+        });
+
+        SEOMetadata.belongsTo(models.BlogPost, {
+            foreignKey: 'page_path',
+            targetKey: 'slug',
+            as: 'blogPost',
+            constraints: false
+        });
+    };
+
     return SEOMetadata;
-  };
+};
