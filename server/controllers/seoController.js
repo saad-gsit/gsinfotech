@@ -1,9 +1,10 @@
-// server/controllers/seoController.js
+// Corrected server/controllers/seoController.js to match your SEOMetadata model
 const { SEOMetadata, Project, BlogPost } = require('../models');
 const { logger } = require('../utils/logger');
 const { seoEnhancer } = require('../middleware/seoEnhancer');
 const { cacheManager } = require('../middleware/cache');
 const { Op } = require('sequelize');
+const seoGenerator = require('../utils/seoGenerator');
 
 class SEOController {
     // Get SEO metadata for a specific page
@@ -12,18 +13,22 @@ class SEOController {
             const { page } = req.params;
 
             const seoData = await SEOMetadata.findOne({
-                where: { page }
+                where: { page_path: page } // Using page_path to match your model
             });
 
             if (!seoData) {
-                // Generate default SEO for the page
-                const defaultSEO = seoEnhancer.getPageSEO(page, { path: req.path });
+                // Generate default SEO for the page using new utility
+                const defaultSEO = seoGenerator.generateCompleteSEO({
+                    title: `${page.charAt(0).toUpperCase() + page.slice(1)} | ${process.env.SITE_NAME}`,
+                    url: `/${page}`,
+                    type: 'website'
+                });
 
                 return res.json({
                     page,
                     seo: defaultSEO,
                     isDefault: true,
-                    message: 'Using default SEO metadata'
+                    message: 'Using generated default SEO metadata'
                 });
             }
 
@@ -44,14 +49,14 @@ class SEOController {
         }
     }
 
-    // Get all SEO metadata with filtering
+    // Get all SEO metadata with filtering - CORRECTED VERSION
     static async getAllSEOData(req, res) {
         try {
             const {
                 page = 1,
                 limit = 20,
                 search,
-                sort = 'createdAt',
+                sort = 'updated_at', // Using snake_case to match your model
                 order = 'DESC'
             } = req.query;
 
@@ -59,7 +64,7 @@ class SEOController {
 
             if (search) {
                 whereClause[Op.or] = [
-                    { page: { [Op.like]: `%${search}%` } },
+                    { page_path: { [Op.like]: `%${search}%` } }, // Using page_path
                     { title: { [Op.like]: `%${search}%` } },
                     { description: { [Op.like]: `%${search}%` } }
                 ];
@@ -67,11 +72,15 @@ class SEOController {
 
             const offset = (parseInt(page) - 1) * parseInt(limit);
 
+            // Check if the sort column exists in your SEOMetadata model
+            const allowedSortColumns = ['id', 'page_path', 'title', 'description', 'updated_at', 'created_at', 'priority'];
+            const safeSortColumn = allowedSortColumns.includes(sort) ? sort : 'updated_at';
+
             const { count, rows: seoData } = await SEOMetadata.findAndCountAll({
                 where: whereClause,
                 limit: parseInt(limit),
                 offset,
-                order: [[sort, order.toUpperCase()]],
+                order: [[safeSortColumn, order.toUpperCase()]],
                 include: [
                     {
                         model: Project,
@@ -99,7 +108,9 @@ class SEOController {
                     entriesPerPage: parseInt(limit),
                     hasNext: parseInt(page) < totalPages,
                     hasPrev: parseInt(page) > 1
-                }
+                },
+                sortedBy: safeSortColumn,
+                sortOrder: order
             });
 
         } catch (error) {
@@ -120,10 +131,17 @@ class SEOController {
                 description,
                 keywords,
                 canonicalUrl,
-                robots = 'index,follow',
+                robots = 'index, follow',
                 ogImage,
                 twitterImage,
-                customMeta = {}
+                ogTitle,
+                ogDescription,
+                ogType = 'website',
+                twitterCard = 'summary_large_image',
+                structuredData = {},
+                priority = 0.5,
+                changeFrequency = 'monthly',
+                isActive = true
             } = req.body;
 
             // Validate required fields
@@ -135,18 +153,24 @@ class SEOController {
             }
 
             // Check if SEO data exists
-            let seoData = await SEOMetadata.findOne({ where: { page } });
+            let seoData = await SEOMetadata.findOne({ where: { page_path: page } });
 
             const seoPayload = {
-                page,
+                page_path: page, // Using your model's field name
                 title,
                 description,
-                keywords,
-                canonicalUrl: canonicalUrl || `${process.env.SITE_URL}/${page.replace(/^(home|index)$/, '')}`,
+                keywords: Array.isArray(keywords) ? keywords : (keywords ? keywords.split(',').map(k => k.trim()) : []),
+                canonical_url: canonicalUrl || `${process.env.SITE_URL}/${page.replace(/^(home|index)$/, '')}`,
                 robots,
-                ogImage,
-                twitterImage,
-                customMeta
+                og_image: ogImage,
+                og_title: ogTitle || title,
+                og_description: ogDescription || description,
+                og_type: ogType,
+                twitter_card: twitterCard,
+                structured_data: structuredData,
+                priority: parseFloat(priority),
+                change_frequency: changeFrequency,
+                is_active: isActive
             };
 
             if (seoData) {
@@ -160,8 +184,12 @@ class SEOController {
             }
 
             // Invalidate related caches
-            if (cacheManager.isConnected) {
-                await cacheManager.invalidateByTags(['seo', page]);
+            try {
+                if (cacheManager && cacheManager.isConnected) {
+                    await cacheManager.invalidateByTags(['seo', page]);
+                }
+            } catch (cacheError) {
+                logger.debug('Cache invalidation failed (non-critical):', cacheError);
             }
 
             res.json({
@@ -183,7 +211,7 @@ class SEOController {
         try {
             const { page } = req.params;
 
-            const seoData = await SEOMetadata.findOne({ where: { page } });
+            const seoData = await SEOMetadata.findOne({ where: { page_path: page } });
 
             if (!seoData) {
                 return res.status(404).json({
@@ -195,8 +223,12 @@ class SEOController {
             await seoData.destroy();
 
             // Invalidate cache
-            if (cacheManager.isConnected) {
-                await cacheManager.invalidateByTags(['seo', page]);
+            try {
+                if (cacheManager && cacheManager.isConnected) {
+                    await cacheManager.invalidateByTags(['seo', page]);
+                }
+            } catch (cacheError) {
+                logger.debug('Cache invalidation failed (non-critical):', cacheError);
             }
 
             logger.api('SEO metadata deleted', { page });
@@ -215,10 +247,10 @@ class SEOController {
         }
     }
 
-    // Generate SEO suggestions for content
+    // Enhanced SEO suggestions using new utility
     static async generateSEOSuggestions(req, res) {
         try {
-            const { content, title, currentDescription = '', currentKeywords = '' } = req.body;
+            const { content, title, currentDescription = '', currentKeywords = '', url = '' } = req.body;
 
             if (!content && !title) {
                 return res.status(400).json({
@@ -226,15 +258,33 @@ class SEOController {
                 });
             }
 
-            // Generate suggestions
+            // Use the new SEO generator for comprehensive SEO data
+            const completeSEO = seoGenerator.generateCompleteSEO({
+                title,
+                description: currentDescription,
+                content,
+                url,
+                keywords: currentKeywords ? currentKeywords.split(',').map(k => k.trim()) : []
+            });
+
+            // Generate suggestions using new utility
             const suggestions = {
-                metaDescription: seoEnhancer.generateMetaDescription(content || title),
-                keywords: seoEnhancer.extractKeywords(content || title),
-                readingTime: content ? seoEnhancer.calculateReadingTime(content) : null,
-                slug: title ? seoEnhancer.generateSlug(title) : null
+                metaDescription: seoGenerator.generateMetaDescription(content || title),
+                keywords: seoGenerator.extractKeywords(content || title),
+                readingTime: content ? seoGenerator.calculateReadingTime(content) : null,
+                slug: title ? seoGenerator.generateSlug(title) : null,
+                completeSEO: completeSEO
             };
 
-            // Analyze current SEO
+            // Validate SEO data using new utility
+            const validation = seoGenerator.validateSEO({
+                title,
+                description: currentDescription,
+                keywords: currentKeywords,
+                openGraph: completeSEO.openGraph
+            });
+
+            // Enhanced analysis with new features
             const analysis = {
                 title: {
                     length: title ? title.length : 0,
@@ -259,27 +309,33 @@ class SEOController {
                             currentKeywords.split(',').length < 3 ? 'Consider adding more keywords (aim for 5-10)' :
                                 'Keyword count is good'
                     ) : 'Keywords are recommended for better SEO'
+                },
+                structuredData: {
+                    available: Object.keys(completeSEO.structuredData).length,
+                    recommendation: 'Structured data will improve search visibility'
+                },
+                openGraph: {
+                    complete: completeSEO.openGraph['og:title'] && completeSEO.openGraph['og:description'],
+                    recommendation: completeSEO.openGraph['og:title'] && completeSEO.openGraph['og:description']
+                        ? 'Open Graph data is complete'
+                        : 'Add Open Graph data for better social sharing'
                 }
             };
 
-            // SEO score calculation
-            let seoScore = 0;
-            if (title && title.length >= 30 && title.length <= 60) seoScore += 25;
-            if (currentDescription.length >= 120 && currentDescription.length <= 160) seoScore += 25;
-            if (currentKeywords && currentKeywords.split(',').length >= 3 && currentKeywords.split(',').length <= 10) seoScore += 25;
-            if (content && content.length >= 300) seoScore += 25;
-
-            logger.api('SEO suggestions generated', {
+            logger.api('Enhanced SEO suggestions generated', {
                 contentLength: content ? content.length : 0,
-                seoScore
+                seoScore: validation.score,
+                hasStructuredData: Object.keys(completeSEO.structuredData).length > 0
             });
 
             res.json({
                 suggestions,
                 analysis,
-                seoScore,
+                validation,
+                seoScore: validation.score,
                 recommendations: [
-                    seoScore < 50 ? 'Consider improving title and meta description length' : null,
+                    ...validation.recommendations,
+                    validation.score < 50 ? 'Consider improving title and meta description length' : null,
                     !currentKeywords ? 'Add relevant keywords for better search visibility' : null,
                     content && content.length < 300 ? 'Consider adding more content (300+ words recommended)' : null,
                     title && !title.includes(process.env.SITE_NAME) ? `Consider including "${process.env.SITE_NAME}" in the title` : null
@@ -304,8 +360,15 @@ class SEOController {
             // Get pages without SEO
             const totalProjects = await Project.count({ where: { status: 'published' } });
             const totalBlogPosts = await BlogPost.count({ where: { status: 'published' } });
-            const projectsWithSEO = await SEOMetadata.count({ where: { projectId: { [Op.ne]: null } } });
-            const blogPostsWithSEO = await SEOMetadata.count({ where: { blogPostId: { [Op.ne]: null } } });
+
+            // Use page_path patterns since you don't have direct foreign keys
+            const projectsWithSEO = await SEOMetadata.count({
+                where: { page_path: { [Op.like]: '/projects/%' } }
+            });
+
+            const blogPostsWithSEO = await SEOMetadata.count({
+                where: { page_path: { [Op.like]: '/blog/%' } }
+            });
 
             // SEO coverage analysis
             const coverage = {
@@ -323,7 +386,8 @@ class SEOController {
 
             // Get SEO quality analysis
             const allSEOData = await SEOMetadata.findAll({
-                attributes: ['title', 'description', 'keywords', 'page']
+                attributes: ['title', 'description', 'keywords', 'page_path'],
+                where: { is_active: true }
             });
 
             const qualityAnalysis = {
@@ -339,7 +403,7 @@ class SEOController {
                     qualityAnalysis.optimalTitles++;
                 } else {
                     qualityAnalysis.issues.push({
-                        page: seo.page,
+                        page: seo.page_path,
                         issue: 'title_length',
                         message: 'Title length not optimal (30-60 characters recommended)'
                     });
@@ -350,14 +414,14 @@ class SEOController {
                     qualityAnalysis.optimalDescriptions++;
                 } else {
                     qualityAnalysis.issues.push({
-                        page: seo.page,
+                        page: seo.page_path,
                         issue: 'description_length',
                         message: 'Description length not optimal (120-160 characters recommended)'
                     });
                 }
 
-                // Keywords analysis
-                if (seo.keywords && seo.keywords.trim()) {
+                // Keywords analysis (checking if it's an array with content)
+                if (seo.keywords && Array.isArray(seo.keywords) && seo.keywords.length > 0) {
                     qualityAnalysis.withKeywords++;
                 }
             });
@@ -394,7 +458,51 @@ class SEOController {
         }
     }
 
-    // Generate sitemap data
+    // Generate sitemap using new utility
+    static async generateSitemap(req, res) {
+        try {
+            const sitemapGenerator = require('../utils/sitemapGenerator');
+
+            const { type = 'xml' } = req.query;
+
+            let result;
+            switch (type) {
+                case 'xml':
+                    result = await sitemapGenerator.generateXMLSitemap();
+                    break;
+                case 'html':
+                    result = await sitemapGenerator.generateHTMLSitemap();
+                    break;
+                case 'robots':
+                    result = await sitemapGenerator.generateRobotsTxt();
+                    break;
+                case 'all':
+                    result = await sitemapGenerator.generateAll();
+                    break;
+                default:
+                    return res.status(400).json({
+                        error: 'Invalid sitemap type',
+                        message: 'Valid types: xml, html, robots, all'
+                    });
+            }
+
+            logger.api('Sitemap generated', { type, success: result.success });
+
+            res.json({
+                message: `${type.toUpperCase()} sitemap generated successfully`,
+                result
+            });
+
+        } catch (error) {
+            logger.error('Error generating sitemap:', error);
+            res.status(500).json({
+                error: 'Failed to generate sitemap',
+                message: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            });
+        }
+    }
+
+    // Generate sitemap data (your existing method - updated for your model)
     static async generateSitemapData(req, res) {
         try {
             const sitemapEntries = [];
@@ -421,14 +529,14 @@ class SEOController {
             // Add published projects
             const projects = await Project.findAll({
                 where: { status: 'published' },
-                attributes: ['slug', 'updatedAt'],
-                order: [['updatedAt', 'DESC']]
+                attributes: ['slug', 'updated_at'], // Using your model's field names
+                order: [['updated_at', 'DESC']]
             });
 
             projects.forEach(project => {
                 sitemapEntries.push({
                     url: `${process.env.SITE_URL}/projects/${project.slug}`,
-                    lastmod: project.updatedAt.toISOString(),
+                    lastmod: project.updated_at ? project.updated_at.toISOString() : new Date().toISOString(),
                     priority: 0.7,
                     changefreq: 'monthly'
                 });
@@ -438,16 +546,16 @@ class SEOController {
             const blogPosts = await BlogPost.findAll({
                 where: {
                     status: 'published',
-                    publishedAt: { [Op.lte]: new Date() }
+                    published_at: { [Op.lte]: new Date() } // Assuming you use published_at
                 },
-                attributes: ['slug', 'updatedAt'],
-                order: [['publishedAt', 'DESC']]
+                attributes: ['slug', 'updated_at'],
+                order: [['published_at', 'DESC']]
             });
 
             blogPosts.forEach(post => {
                 sitemapEntries.push({
                     url: `${process.env.SITE_URL}/blog/${post.slug}`,
-                    lastmod: post.updatedAt.toISOString(),
+                    lastmod: post.updated_at ? post.updated_at.toISOString() : new Date().toISOString(),
                     priority: 0.6,
                     changefreq: 'monthly'
                 });

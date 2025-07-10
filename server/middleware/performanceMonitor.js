@@ -1,7 +1,8 @@
-// server/middleware/performanceMonitor.js
-const { logger } = require('../utils/logger');
 
-// Performance monitoring configuration
+const { logger } = require('../utils/logger');
+const performanceMonitorUtility = require('../utils/performanceMonitor'); // Import the new utility
+
+// Performance monitoring configuration (keep your existing config)
 const PERFORMANCE_CONFIG = {
     // Response time thresholds (in milliseconds)
     thresholds: {
@@ -56,9 +57,22 @@ class PerformanceMonitor {
         this.maxResponseTimes = 1000; // Keep last 1000 response times
 
         this.startMetricsCollection();
+
+        // Start the new utility monitoring as well
+        this.startUtilityMonitoring();
     }
 
-    // Start periodic metrics collection
+    // NEW: Start the enhanced utility monitoring
+    startUtilityMonitoring() {
+        try {
+            performanceMonitorUtility.startMonitoring();
+            logger.info('Enhanced performance monitoring utility started');
+        } catch (error) {
+            logger.error('Failed to start enhanced performance monitoring:', error);
+        }
+    }
+
+    // Start periodic metrics collection (your existing method)
     startMetricsCollection() {
         setInterval(() => {
             this.collectSystemMetrics();
@@ -67,7 +81,7 @@ class PerformanceMonitor {
         logger.info('Performance monitoring started');
     }
 
-    // Collect system-level metrics
+    // Enhanced system metrics collection
     collectSystemMetrics() {
         const memUsage = process.memoryUsage();
         const currentMemoryMB = memUsage.heapUsed / 1024 / 1024;
@@ -77,6 +91,9 @@ class PerformanceMonitor {
         if (currentMemoryMB > this.metrics.memory.peak) {
             this.metrics.memory.peak = currentMemoryMB;
         }
+
+        // Record memory metrics in the new utility too
+        performanceMonitorUtility.recordMemoryMetrics();
 
         // Check memory thresholds
         if (currentMemoryMB > this.config.memoryThresholds.critical) {
@@ -98,8 +115,9 @@ class PerformanceMonitor {
         this.logPerformanceSummary();
     }
 
-    // Record request metrics
+    // Enhanced record request with utility integration
     recordRequest(req, res, responseTime) {
+        // Your existing logic
         this.metrics.requests.total++;
 
         // Track response times
@@ -152,9 +170,36 @@ class PerformanceMonitor {
         if (responseTime > this.config.thresholds.slow) {
             routeMetrics.slowRequests++;
         }
+
+        // NEW: Also record in the enhanced utility
+        try {
+            const startTime = Date.now() - responseTime;
+            performanceMonitorUtility.recordRequest(req, startTime);
+            performanceMonitorUtility.recordResponse(req, res, startTime);
+        } catch (error) {
+            logger.debug('Failed to record in utility monitor:', error);
+        }
     }
 
-    // Normalize route paths for consistent tracking
+    // Enhanced error recording
+    recordError(error, req, context = {}) {
+        try {
+            performanceMonitorUtility.recordError(error, req, context);
+        } catch (utilityError) {
+            logger.debug('Failed to record error in utility monitor:', utilityError);
+        }
+    }
+
+    // NEW: Record database operations
+    recordDatabaseOperation(operation, duration, query = null) {
+        try {
+            performanceMonitorUtility.recordDatabaseOperation(operation, duration, query);
+        } catch (error) {
+            logger.debug('Failed to record database operation:', error);
+        }
+    }
+
+    // Normalize route paths for consistent tracking (your existing method)
     normalizeRoute(path) {
         if (!path) return 'unknown';
 
@@ -165,7 +210,7 @@ class PerformanceMonitor {
             .replace(/\/[a-zA-Z0-9-_]+\.(jpg|jpeg|png|gif|webp|pdf|doc|docx)$/i, '/:file');
     }
 
-    // Analyze performance and generate insights
+    // Enhanced performance analysis
     analyzePerformance(req, res, responseTime) {
         const route = this.normalizeRoute(req.route?.path || req.path);
         const method = req.method;
@@ -221,10 +266,18 @@ class PerformanceMonitor {
         };
     }
 
-    // Get current performance metrics
+    // Enhanced metrics with utility data
     getMetrics() {
         const uptime = Date.now() - this.metrics.startTime;
         const memUsage = process.memoryUsage();
+
+        // Get enhanced metrics from utility
+        let enhancedMetrics = {};
+        try {
+            enhancedMetrics = performanceMonitorUtility.getPerformanceSummary();
+        } catch (error) {
+            logger.debug('Failed to get enhanced metrics:', error);
+        }
 
         return {
             uptime: Math.floor(uptime / 1000), // seconds
@@ -249,11 +302,41 @@ class PerformanceMonitor {
                     }
                 ])
             ),
-            thresholds: this.config.thresholds
+            thresholds: this.config.thresholds,
+            // NEW: Include enhanced metrics from utility
+            enhanced: enhancedMetrics
         };
     }
 
-    // Log performance summary
+    // NEW: Get health status from utility
+    getHealthStatus() {
+        try {
+            return performanceMonitorUtility.getHealthStatus();
+        } catch (error) {
+            logger.debug('Failed to get health status from utility:', error);
+            // Fallback to basic health check
+            const metrics = this.getMetrics();
+            return {
+                status: 'healthy',
+                score: 85,
+                summary: metrics,
+                uptime: metrics.uptime,
+                timestamp: Date.now()
+            };
+        }
+    }
+
+    // NEW: Generate performance report
+    async generateReport(hours = 24) {
+        try {
+            return await performanceMonitorUtility.generateReport(hours);
+        } catch (error) {
+            logger.error('Failed to generate performance report:', error);
+            throw error;
+        }
+    }
+
+    // Log performance summary (your existing method with enhancements)
     logPerformanceSummary() {
         const metrics = this.getMetrics();
         const requestsPerMinute = (metrics.requests.total / (metrics.uptime / 60)).toFixed(2);
@@ -272,7 +355,7 @@ class PerformanceMonitor {
         });
     }
 
-    // Reset metrics
+    // Reset metrics (your existing method)
     resetMetrics() {
         this.metrics = {
             requests: {
@@ -292,6 +375,13 @@ class PerformanceMonitor {
         };
         this.responseTimes = [];
 
+        // Also reset utility metrics
+        try {
+            performanceMonitorUtility.resetMetrics();
+        } catch (error) {
+            logger.debug('Failed to reset utility metrics:', error);
+        }
+
         logger.info('Performance metrics reset');
     }
 }
@@ -299,7 +389,7 @@ class PerformanceMonitor {
 // Create performance monitor instance
 const performanceMonitor = new PerformanceMonitor();
 
-// Main performance monitoring middleware - FIXED VERSION
+// Enhanced middleware with error recording
 const performanceMiddleware = (req, res, next) => {
     const startTime = process.hrtime.bigint();
     const startMemory = process.memoryUsage();
@@ -317,14 +407,13 @@ const performanceMiddleware = (req, res, next) => {
     // Override res.end to capture metrics
     const originalEnd = res.end;
     res.end = function (chunk, encoding) {
-        // Prevent multiple executions
         if (responseSent) {
             return originalEnd.call(this, chunk, encoding);
         }
         responseSent = true;
 
         const endTime = process.hrtime.bigint();
-        const responseTime = Number(endTime - startTime) / 1000000; // Convert to milliseconds
+        const responseTime = Number(endTime - startTime) / 1000000;
 
         // Record metrics
         performanceMonitor.recordRequest(req, res, responseTime);
@@ -332,25 +421,23 @@ const performanceMiddleware = (req, res, next) => {
         // Analyze performance
         const analysis = performanceMonitor.analyzePerformance(req, res, responseTime);
 
-        // Add performance headers ONLY if response hasn't been sent yet
+        // Add performance headers
         if (!res.headersSent) {
             try {
                 res.setHeader('X-Response-Time', `${responseTime.toFixed(2)}ms`);
                 res.setHeader('X-Performance-Level', analysis.performanceLevel);
             } catch (error) {
-                // Headers already sent, log but don't fail
-                logger.debug('Performance headers could not be set - response already sent', {
+                logger.debug('Performance headers could not be set', {
                     route: req.path,
                     responseTime: `${responseTime.toFixed(2)}ms`
                 });
             }
         }
 
-        // Call original end
         originalEnd.call(this, chunk, encoding);
     };
 
-    // Also override res.json, res.send, etc. to ensure we catch all response methods
+    // Override res.json
     const originalJson = res.json;
     res.json = function (obj) {
         if (!responseSent) {
@@ -358,20 +445,15 @@ const performanceMiddleware = (req, res, next) => {
             const endTime = process.hrtime.bigint();
             const responseTime = Number(endTime - startTime) / 1000000;
 
-            // Record metrics
             performanceMonitor.recordRequest(req, res, responseTime);
             const analysis = performanceMonitor.analyzePerformance(req, res, responseTime);
 
-            // Add performance headers before sending JSON
             if (!res.headersSent) {
                 try {
                     res.setHeader('X-Response-Time', `${responseTime.toFixed(2)}ms`);
                     res.setHeader('X-Performance-Level', analysis.performanceLevel);
                 } catch (error) {
-                    logger.debug('Performance headers could not be set in json method', {
-                        route: req.path,
-                        responseTime: `${responseTime.toFixed(2)}ms`
-                    });
+                    logger.debug('Performance headers could not be set in json method');
                 }
             }
         }
@@ -381,47 +463,55 @@ const performanceMiddleware = (req, res, next) => {
     next();
 };
 
-// Health check middleware with performance metrics
+// Enhanced health check with utility integration
 const healthCheckMiddleware = (req, res, next) => {
-    if (req.path === '/api/health' || req.path === '/api/performance') {
+    if (req.path === '/api/health') {
+        const healthStatus = performanceMonitor.getHealthStatus();
+        return res.json(healthStatus);
+    }
+
+    if (req.path === '/api/performance' || req.path === '/api/metrics') {
         const metrics = performanceMonitor.getMetrics();
-        const healthData = {
-            status: 'healthy',
+        return res.json({
+            status: 'ok',
             timestamp: new Date().toISOString(),
-            uptime: metrics.uptime,
-            performance: {
-                averageResponseTime: `${metrics.requests.averageResponseTime.toFixed(2)}ms`,
-                requestsPerSecond: (metrics.requests.total / metrics.uptime).toFixed(2),
-                errorRate: `${((metrics.requests.errors / metrics.requests.total) * 100 || 0).toFixed(2)}%`,
-                memoryUsage: `${metrics.memory.current.toFixed(2)}MB`
-            }
-        };
-
-        // Include detailed metrics for performance endpoint
-        if (req.path === '/api/performance') {
-            healthData.detailedMetrics = metrics;
-        }
-
-        return res.json(healthData);
+            detailedMetrics: metrics
+        });
     }
 
     next();
 };
 
-// Performance alert middleware
+// Enhanced error middleware
+const errorTrackingMiddleware = (error, req, res, next) => {
+    // Record error in performance monitor
+    performanceMonitor.recordError(error, req, {
+        timestamp: Date.now(),
+        userAgent: req.get('User-Agent'),
+        referer: req.get('Referer')
+    });
+
+    next(error);
+};
+
+// Database operation tracker (NEW)
+const trackDatabaseOperation = (operation, startTime, query = null) => {
+    const duration = Date.now() - startTime;
+    performanceMonitor.recordDatabaseOperation(operation, duration, query);
+};
+
+// Performance alert middleware (your existing with enhancements)
 const performanceAlertMiddleware = (options = {}) => {
     const {
         responseTimeThreshold = PERFORMANCE_CONFIG.thresholds.critical,
         memoryThreshold = PERFORMANCE_CONFIG.memoryThresholds.critical,
-        errorRateThreshold = 10 // 10% error rate
+        errorRateThreshold = 10
     } = options;
 
     return (req, res, next) => {
-        // Check for performance issues after request completes
         res.on('finish', () => {
             const metrics = performanceMonitor.getMetrics();
 
-            // Check error rate
             const errorRate = (metrics.requests.errors / metrics.requests.total) * 100;
             if (errorRate > errorRateThreshold && metrics.requests.total > 10) {
                 logger.security('High error rate detected', {
@@ -432,7 +522,6 @@ const performanceAlertMiddleware = (options = {}) => {
                 });
             }
 
-            // Check memory usage
             if (metrics.memory.current > memoryThreshold) {
                 logger.security('High memory usage alert', {
                     currentMemory: `${metrics.memory.current.toFixed(2)}MB`,
@@ -446,18 +535,16 @@ const performanceAlertMiddleware = (options = {}) => {
     };
 };
 
-// Express middleware to add performance monitoring
+// Express middleware setup (your existing with enhancements)
 const addPerformanceMonitoring = (app) => {
-    // Add performance monitoring to all routes
     app.use(performanceMiddleware);
-
-    // Add health check with performance metrics
     app.use(healthCheckMiddleware);
-
-    // Add performance alerts
     app.use(performanceAlertMiddleware());
 
-    logger.info('Performance monitoring middleware initialized');
+    // Add error tracking middleware
+    app.use(errorTrackingMiddleware);
+
+    logger.info('Enhanced performance monitoring middleware initialized');
 };
 
 module.exports = {
@@ -466,6 +553,8 @@ module.exports = {
     performanceMiddleware,
     healthCheckMiddleware,
     performanceAlertMiddleware,
+    errorTrackingMiddleware,
+    trackDatabaseOperation,
     addPerformanceMonitoring,
     PERFORMANCE_CONFIG
 };
