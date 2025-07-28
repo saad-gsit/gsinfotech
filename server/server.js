@@ -1,4 +1,4 @@
-// Complete Enhanced server.js with all utilities properly integrated
+// Complete Enhanced server.js with Admin Authentication integrated
 const express = require('express');
 const compression = require('compression');
 const morgan = require('morgan');
@@ -16,12 +16,22 @@ const { cacheMiddleware, cacheInvalidationMiddleware } = require('./middleware/c
 const { sanitizeRequest, validationSchemas } = require('./middleware/validation');
 const { addPerformanceMonitoring, trackDatabaseOperation, performanceMonitor } = require('./middleware/performanceMonitor');
 
+// Import auth middleware
+const {
+    authenticateAdmin,
+    authorizeRole,
+    authorizePermission,
+    adminSecurityHeaders
+} = require('./middleware/auth');
+
 // Import routes
 const projectRoutes = require('./routes/projects');
 const blogRoutes = require('./routes/blog');
 const contactRoutes = require('./routes/contact');
 const seoRoutes = require('./routes/seo');
 const analyticsRoutes = require('./routes/analytics');
+const teamRoutes = require('./routes/team');
+const authRoutes = require('./routes/auth'); // New auth routes
 
 require('dotenv').config();
 
@@ -275,7 +285,16 @@ app.get('/api', (req, res) => {
             services: '/api/services',
             contact: '/api/contact',
             seo: '/api/seo',
-            analytics: '/api/analytics'
+            analytics: '/api/analytics',
+            // New auth endpoints
+            auth: {
+                login: 'POST /api/auth/login',
+                logout: 'POST /api/auth/logout',
+                me: 'GET /api/auth/me',
+                'verify-token': 'POST /api/auth/verify-token',
+                'change-password': 'PUT /api/auth/change-password',
+                profile: 'PUT /api/auth/profile'
+            }
         },
         utilities: {
             sitemap: '/sitemap.xml',
@@ -339,14 +358,18 @@ app.get('/api/db-test', async (req, res) => {
     }
 });
 
-// 12. USE API ROUTES
+// 12. AUTHENTICATION ROUTES (New)
+app.use('/api/auth', authRoutes);
+
+// 13. PUBLIC API ROUTES
 app.use('/api/projects', projectRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/seo', seoRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/team', teamRoutes);
 
-// 13. EXAMPLE API ROUTES WITH ENHANCED MIDDLEWARE
+// 14. EXAMPLE API ROUTES WITH ENHANCED MIDDLEWARE
 
 // Projects API with caching, validation, and image optimization
 app.get('/api/projects',
@@ -452,30 +475,113 @@ app.get('/api/services',
     }
 );
 
-// 14. ADMIN ROUTES with API key validation
-app.use('/api/admin', securityMiddleware.validateApiKey);
+// 15. PROTECTED ADMIN ROUTES (Updated with new auth middleware)
+app.use('/api/admin', adminSecurityHeaders, authenticateAdmin);
 
-app.get('/api/admin/stats', async (req, res) => {
-    try {
-        const performanceStats = performanceMonitor.getMetrics();
-        const { imageProcessor } = require('./middleware/imageOptimizer');
-        const storageStats = await imageProcessor.getStorageStats();
+// Admin stats endpoint (requires authentication)
+app.get('/api/admin/stats',
+    authorizeRole('super_admin', 'admin'),
+    async (req, res) => {
+        try {
+            const performanceStats = performanceMonitor.getMetrics();
+            const { imageProcessor } = require('./middleware/imageOptimizer');
+            const storageStats = await imageProcessor.getStorageStats();
 
-        res.json({
-            message: 'Admin stats - API key validated',
-            performance: performanceStats,
-            storage: storageStats,
-            timestamp: new Date().toISOString()
-        });
-    } catch (error) {
-        res.status(500).json({
-            error: 'Failed to get admin stats',
-            message: error.message
-        });
+            res.json({
+                message: 'Admin stats - Authentication verified',
+                performance: performanceStats,
+                storage: storageStats,
+                admin: {
+                    id: req.admin.id,
+                    email: req.admin.email,
+                    role: req.admin.role,
+                    permissions: req.admin.permissions
+                },
+                timestamp: new Date().toISOString()
+            });
+        } catch (error) {
+            res.status(500).json({
+                error: 'Failed to get admin stats',
+                message: error.message
+            });
+        }
     }
-});
+);
 
-// 15. TEST ENDPOINTS for utilities
+// Admin content management endpoints
+app.get('/api/admin/content-stats',
+    authorizePermission('analytics', 'read'),
+    async (req, res) => {
+        try {
+            // Get content statistics
+            const [projects, team, blog, contacts] = await Promise.all([
+                db.Project ? db.Project.count() : 0,
+                db.TeamMember ? db.TeamMember.count() : 0,
+                db.BlogPost ? db.BlogPost.count() : 0,
+                db.ContactSubmission ? db.ContactSubmission.count() : 0
+            ]);
+
+            res.json({
+                success: true,
+                data: {
+                    projects,
+                    team,
+                    blog,
+                    contacts,
+                    total: projects + team + blog + contacts
+                },
+                admin: {
+                    id: req.admin.id,
+                    role: req.admin.role
+                },
+                timestamp: new Date().toISOString()
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Failed to get content stats',
+                message: error.message
+            });
+        }
+    }
+);
+
+// Admin system health endpoint
+app.get('/api/admin/system-health',
+    authorizeRole('super_admin', 'admin'),
+    async (req, res) => {
+        try {
+            const healthStatus = performanceMonitor.getHealthStatus();
+            const dbStatus = await db.testConnection();
+
+            res.json({
+                success: true,
+                data: {
+                    server: {
+                        status: 'healthy',
+                        uptime: process.uptime(),
+                        memory: process.memoryUsage(),
+                        environment: process.env.NODE_ENV
+                    },
+                    database: {
+                        status: dbStatus ? 'healthy' : 'error',
+                        connected: dbStatus
+                    },
+                    performance: healthStatus
+                },
+                timestamp: new Date().toISOString()
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Failed to get system health',
+                message: error.message
+            });
+        }
+    }
+);
+
+// 16. TEST ENDPOINTS for utilities
 app.post('/api/test/image-upload',
     createImageOptimizerMiddleware('optimized', {
         generateResponsive: true,
@@ -544,7 +650,24 @@ app.get('/api/test/email-status', async (req, res) => {
     }
 });
 
-// 16. ERROR HANDLING
+// Test admin authentication (protected endpoint)
+app.get('/api/test/admin-auth',
+    authenticateAdmin,
+    (req, res) => {
+        res.json({
+            message: 'Admin authentication test successful! 🎉',
+            admin: {
+                id: req.admin.id,
+                email: req.admin.email,
+                role: req.admin.role,
+                permissions: req.admin.permissions
+            },
+            timestamp: new Date().toISOString()
+        });
+    }
+);
+
+// 17. ERROR HANDLING
 
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {
@@ -578,6 +701,17 @@ app.use((err, req, res, next) => {
             ip: req.ip,
             path: req.path,
             userAgent: req.get('User-Agent')
+        });
+    }
+
+    // Log authentication errors
+    if (err.message.includes('jwt') || err.message.includes('token') || err.message.includes('auth')) {
+        logger.security('Authentication error', {
+            error: err.message,
+            ip: req.ip,
+            path: req.path,
+            userAgent: req.get('User-Agent'),
+            admin: req.admin ? req.admin.id : null
         });
     }
 
@@ -626,12 +760,25 @@ const startServer = async () => {
 🖼️  Images: Advanced processing enabled
 🔍 SEO: Auto-generation active
 🗄️  Cache: ${process.env.ENABLE_CACHE !== 'false' ? 'Enabled' : 'Disabled'}
+
+🔐 Admin Authentication:
+   • Login: POST http://${HOST}:${PORT}/api/auth/login
+   • Logout: POST http://${HOST}:${PORT}/api/auth/logout
+   • Profile: GET http://${HOST}:${PORT}/api/auth/me
+   • Test Auth: GET http://${HOST}:${PORT}/api/test/admin-auth
+
+🛡️  Protected Admin Routes:
+   • Stats: GET http://${HOST}:${PORT}/api/admin/stats
+   • Content Stats: GET http://${HOST}:${PORT}/api/admin/content-stats
+   • System Health: GET http://${HOST}:${PORT}/api/admin/system-health
+
 ⏰ Started at: ${new Date().toISOString()}
 
 🧪 Test Endpoints:
    • POST /api/test/image-upload - Test image processing
    • POST /api/test/seo - Test SEO generation
    • GET /api/test/email-status - Check email service
+   • GET /api/test/admin-auth - Test admin authentication
    • GET /generate-sitemap - Generate all sitemaps
    • POST /api/seo/generate-sitemap?type=all - Generate sitemaps via API
    • GET /api/images/cleanup?hours=1 - Cleanup temp files
@@ -640,6 +787,7 @@ const startServer = async () => {
    • All Endpoints: http://${HOST}:${PORT}/api
    • Generate Sitemap: http://${HOST}:${PORT}/generate-sitemap
    • Performance Dashboard: http://${HOST}:${PORT}/api/performance
+   • Admin Login: http://${HOST}:${PORT}/admin/login (Frontend)
             `);
         });
     } catch (error) {

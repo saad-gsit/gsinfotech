@@ -408,9 +408,18 @@ const validationSchemas = {
     queryParams: [
         query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer').toInt(),
         query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100').toInt(),
-        query('sort').optional().isIn(['createdAt', 'updatedAt', 'title', 'name']).withMessage('Invalid sort field'),
-        query('order').optional().isIn(['ASC', 'DESC']).withMessage('Order must be ASC or DESC'),
-        query('status').optional().isIn(['draft', 'published', 'archived']).withMessage('Invalid status'),
+        // Updated to match actual database column names (snake_case)
+        query('sort').optional().isIn([
+            'created_at', 'updated_at', 'name', 'email', 'subject', 'status', 'company', 'phone'
+        ]).withMessage('Invalid sort field'),
+        // Accept both cases for order
+        query('order').optional().isIn(['ASC', 'DESC', 'asc', 'desc']).withMessage('Order must be ASC or DESC'),
+        // Updated status values to match your contact submission statuses
+        query('status').optional().isIn(['new', 'in_progress', 'responded', 'closed']).withMessage('Invalid status'),
+        // Add other query parameters
+        query('search').optional().isString().trim(),
+        query('service_interest').optional().isString(),
+        query('priority').optional().isIn(['low', 'medium', 'high']).withMessage('Invalid priority'),
         handleValidationErrors
     ]
 };
