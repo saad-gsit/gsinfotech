@@ -404,6 +404,19 @@ const validationSchemas = {
         handleValidationErrors
     ],
 
+    projectQueryParams: [
+        query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer').toInt(),
+        query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100').toInt(),
+        query('status').optional().isIn(['all', 'published', 'draft', 'archived']).withMessage('Invalid status'),
+        query('category').optional().isIn(['all', 'web_application', 'mobile_application', 'desktop_application', 'e_commerce', 'cms', 'api']).withMessage('Invalid category'),
+        query('featured').optional().isIn(['true', 'false']).withMessage('Featured must be true or false'),
+        query('sort').optional().isIn(['created_at', 'updated_at', 'title', 'view_count']).withMessage('Invalid sort field'),
+        query('order').optional().isIn(['ASC', 'DESC', 'asc', 'desc']).withMessage('Order must be ASC or DESC'),
+        query('search').optional().isString().trim(),
+        query('technology').optional().isString().trim(),
+        handleValidationErrors
+    ],
+
     // Query parameters validation
     queryParams: [
         query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer').toInt(),

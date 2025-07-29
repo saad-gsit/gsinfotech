@@ -1,4 +1,4 @@
-// Fixed client/src/App.jsx - All errors resolved
+// Fixed client/src/App.jsx - All errors resolved with Services Integration
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -27,7 +27,10 @@ import ScrollToTop from './components/UI/ScrollToTop'
 // Public Pages
 import Home from './pages/Home'
 import About from './pages/About'
+import Services from './pages/Services'
+import ServiceDetail from './pages/ServiceDetail'
 import Projects from './pages/Projects'
+import ProjectDetail from './pages/ProjectDetail'
 import Team from './pages/Team'
 import Blog from './pages/Blog'
 import Contact from './pages/Contact'
@@ -35,12 +38,14 @@ import Contact from './pages/Contact'
 // Admin Pages
 import Login from './pages/admin/Login'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminServices from './pages/admin/AdminServices'
 
 // Import your actual admin components
 import ProjectsManager from './components/Admin/ProjectsManager'
 import BlogManager from './components/Admin/BlogManager'
 import ContactsManager from './components/Admin/ContactsManager'
 import TeamManager from './components/Admin/TeamManager'
+import ServicesManager from './components/Admin/ServicesManager'
 
 // Auth Guard
 import AuthGuard from './components/Admin/AuthGuard'
@@ -94,14 +99,21 @@ const FallbackPage = ({ title, description = "We're working on something amazing
 )
 
 // Fallback imports for missing pages
-const ProjectDetail = () => <FallbackPage title="Project Details" description="Dive deep into our project case studies." />
+
 const BlogPost = () => <FallbackPage title="Blog Post" />
+const TeamMember = () => <FallbackPage title="Team Member" description="Meet our team member." />
 const NotFound = () => <FallbackPage title="404" description="Oops! The page you're looking for doesn't exist." />
 
 // Admin pages with AuthGuard
 const AdminProjects = () => (
   <AuthGuard permissions={{ resource: 'projects', action: 'read' }}>
     <ProjectsManager />
+  </AuthGuard>
+)
+
+const AdminServicesPage = () => (
+  <AuthGuard permissions={{ resource: 'services', action: 'read' }}>
+    <ServicesManager />
   </AuthGuard>
 )
 
@@ -318,9 +330,12 @@ const AppContent = () => {
           <Route path="/" element={<Layout />}>
             <Route index element={<PageTransition pageKey="home"><Home /></PageTransition>} />
             <Route path="about" element={<PageTransition pageKey="about"><About /></PageTransition>} />
+            <Route path="services" element={<PageTransition pageKey="services"><Services /></PageTransition>} />
+            <Route path="services/:slug" element={<PageTransition pageKey="service-detail"><ServiceDetail /></PageTransition>} />
             <Route path="projects" element={<PageTransition pageKey="projects"><Projects /></PageTransition>} />
             <Route path="projects/:id" element={<PageTransition pageKey="project-detail"><ProjectDetail /></PageTransition>} />
             <Route path="team" element={<PageTransition pageKey="team"><Team /></PageTransition>} />
+            <Route path="team/:id" element={<PageTransition pageKey="team-member"><TeamMember /></PageTransition>} />
             <Route path="blog" element={<PageTransition pageKey="blog"><Blog /></PageTransition>} />
             <Route path="blog/:slug" element={<PageTransition pageKey="blog-post"><BlogPost /></PageTransition>} />
             <Route path="contact" element={<PageTransition pageKey="contact"><Contact /></PageTransition>} />
@@ -345,6 +360,7 @@ const AppContent = () => {
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="projects" element={<AdminProjects />} />
+            <Route path="services" element={<AdminServicesPage />} />
             <Route path="team" element={<AdminTeam />} />
             <Route path="blog" element={<AdminBlog />} />
             <Route path="contacts" element={<AdminContacts />} />

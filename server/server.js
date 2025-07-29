@@ -1,4 +1,4 @@
-// Complete Enhanced server.js with Admin Authentication integrated
+// Complete Enhanced server.js with Admin Authentication and Services integrated
 const express = require('express');
 const compression = require('compression');
 const morgan = require('morgan');
@@ -31,11 +31,23 @@ const contactRoutes = require('./routes/contact');
 const seoRoutes = require('./routes/seo');
 const analyticsRoutes = require('./routes/analytics');
 const teamRoutes = require('./routes/team');
-const authRoutes = require('./routes/auth'); // New auth routes
+const authRoutes = require('./routes/auth'); // Auth routes
+const servicesRoutes = require('./routes/services'); // Services routes - NEW
 
 require('dotenv').config();
 
 const app = express();
+
+// Add error handlers at the top
+process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+});
 
 // Trust proxy (for production)
 app.set('trust proxy', 1);
@@ -282,11 +294,11 @@ app.get('/api', (req, res) => {
             projects: '/api/projects',
             team: '/api/team',
             blog: '/api/blog',
-            services: '/api/services',
+            services: '/api/services', // NEW
             contact: '/api/contact',
             seo: '/api/seo',
             analytics: '/api/analytics',
-            // New auth endpoints
+            // Auth endpoints
             auth: {
                 login: 'POST /api/auth/login',
                 logout: 'POST /api/auth/logout',
@@ -358,7 +370,7 @@ app.get('/api/db-test', async (req, res) => {
     }
 });
 
-// 12. AUTHENTICATION ROUTES (New)
+// 12. AUTHENTICATION ROUTES
 app.use('/api/auth', authRoutes);
 
 // 13. PUBLIC API ROUTES
@@ -368,6 +380,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/seo', seoRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/team', teamRoutes);
+app.use('/api/services', servicesRoutes); // NEW SERVICES ROUTES
 
 // 14. EXAMPLE API ROUTES WITH ENHANCED MIDDLEWARE
 
@@ -467,15 +480,7 @@ app.post('/api/contact',
     }
 );
 
-// Services API with caching
-app.get('/api/services',
-    cacheMiddleware.long, // Services change infrequently
-    async (req, res) => {
-        res.json({ message: 'Services with long-term caching' });
-    }
-);
-
-// 15. PROTECTED ADMIN ROUTES (Updated with new auth middleware)
+// 15. PROTECTED ADMIN ROUTES
 app.use('/api/admin', adminSecurityHeaders, authenticateAdmin);
 
 // Admin stats endpoint (requires authentication)
@@ -513,12 +518,13 @@ app.get('/api/admin/content-stats',
     authorizePermission('analytics', 'read'),
     async (req, res) => {
         try {
-            // Get content statistics
-            const [projects, team, blog, contacts] = await Promise.all([
+            // Get content statistics including services
+            const [projects, team, blog, contacts, services] = await Promise.all([
                 db.Project ? db.Project.count() : 0,
                 db.TeamMember ? db.TeamMember.count() : 0,
                 db.BlogPost ? db.BlogPost.count() : 0,
-                db.ContactSubmission ? db.ContactSubmission.count() : 0
+                db.ContactSubmission ? db.ContactSubmission.count() : 0,
+                db.Service ? db.Service.count() : 0 // NEW
             ]);
 
             res.json({
@@ -528,7 +534,8 @@ app.get('/api/admin/content-stats',
                     team,
                     blog,
                     contacts,
-                    total: projects + team + blog + contacts
+                    services, // NEW
+                    total: projects + team + blog + contacts + services
                 },
                 admin: {
                     id: req.admin.id,
@@ -727,6 +734,9 @@ const HOST = process.env.HOST || 'localhost';
 
 const startServer = async () => {
     try {
+        console.log('📝 Server.js file loaded completely');
+        console.log('🔧 Setting up server...');
+
         // Test database connection on startup
         console.log('🔌 Testing database connection...');
         const isConnected = await db.testConnection();
@@ -739,6 +749,8 @@ const startServer = async () => {
             console.log('   - Credentials in .env are correct');
             process.exit(1);
         }
+
+        console.log('⏳ Attempting to start server...');
 
         // Start the server
         app.listen(PORT, HOST, () => {
@@ -772,6 +784,16 @@ const startServer = async () => {
    • Content Stats: GET http://${HOST}:${PORT}/api/admin/content-stats
    • System Health: GET http://${HOST}:${PORT}/api/admin/system-health
 
+🔧 Services API:
+   • All Services: GET http://${HOST}:${PORT}/api/services
+   • Service Stats: GET http://${HOST}:${PORT}/api/services/stats
+   • Featured Services: GET http://${HOST}:${PORT}/api/services/featured
+   • Service by ID/Slug: GET http://${HOST}:${PORT}/api/services/:id
+   • Services by Category: GET http://${HOST}:${PORT}/api/services/category/:category
+   • Create Service: POST http://${HOST}:${PORT}/api/services (Admin)
+   • Update Service: PUT http://${HOST}:${PORT}/api/services/:id (Admin)
+   • Delete Service: DELETE http://${HOST}:${PORT}/api/services/:id (Admin)
+
 ⏰ Started at: ${new Date().toISOString()}
 
 🧪 Test Endpoints:
@@ -788,6 +810,7 @@ const startServer = async () => {
    • Generate Sitemap: http://${HOST}:${PORT}/generate-sitemap
    • Performance Dashboard: http://${HOST}:${PORT}/api/performance
    • Admin Login: http://${HOST}:${PORT}/admin/login (Frontend)
+   • Services Page: http://${HOST}:${PORT}/services (Frontend)
             `);
         });
     } catch (error) {

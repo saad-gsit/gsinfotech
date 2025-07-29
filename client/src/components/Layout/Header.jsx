@@ -9,16 +9,12 @@ import {
     Drawer,
     Box,
     Button,
-    Menu,
-    MenuItem,
     useScrollTrigger,
-    Fade,
     Typography
 } from '@mui/material'
 import {
     Menu as MenuIcon,
-    Close as CloseIcon,
-    ExpandMore
+    Close as CloseIcon
 } from '@mui/icons-material'
 import { toggleMobileMenu } from '@/store/slices/uiSlice'
 
@@ -26,7 +22,6 @@ const Header = () => {
     const location = useLocation()
     const dispatch = useDispatch()
     const { mobileMenuOpen } = useSelector(state => state.ui)
-    const [servicesAnchor, setServicesAnchor] = useState(null)
     const [scrolled, setScrolled] = useState(false)
 
     const trigger = useScrollTrigger({
@@ -41,21 +36,15 @@ const Header = () => {
     const navigation = [
         { name: 'Home', href: '/' },
         { name: 'About', href: '/about' },
+        { name: 'Services', href: '/services' }, // Simple services link
         { name: 'Projects', href: '/projects' },
         { name: 'Team', href: '/team' },
         { name: 'Blog', href: '/blog' },
         { name: 'Contact', href: '/contact' },
     ]
 
-    const services = [
-        { name: 'Strategy & Consulting', href: '/services/strategy-consulting' },
-        { name: 'Product Design', href: '/services/product-design' },
-        { name: 'Development', href: '/services/development' },
-        { name: 'Cloud & DevOps', href: '/services/cloud-devops' },
-    ]
-
     return (
-    <>
+        <>
             <AppBar
                 position="fixed"
                 elevation={0}
@@ -86,15 +75,18 @@ const Header = () => {
                                 className="no-underline"
                             >
                                 <Button
-                                    className={`text-sm font-light tracking-wide normal-case ${location.pathname === item.href
-                                            ? 'text-black font-medium'
-                                            : 'text-gray-600 hover:text-black'
+                                    className={`text-sm font-light tracking-wide normal-case ${location.pathname === item.href ||
+                                        (item.href === '/services' && location.pathname.startsWith('/services'))
+                                        ? 'text-black font-medium'
+                                        : 'text-gray-600 hover:text-black'
                                         }`}
                                     sx={{
                                         minWidth: 'auto',
                                         padding: '4px 8px',
+                                        transition: 'all 0.2s ease',
                                         '&:hover': {
                                             backgroundColor: 'transparent',
+                                            transform: 'translateY(-1px)',
                                         }
                                     }}
                                 >
@@ -103,62 +95,18 @@ const Header = () => {
                             </Link>
                         ))}
 
-                        {/* Services Dropdown */}
-                        <Button
-                            onClick={(e) => setServicesAnchor(e.currentTarget)}
-                            endIcon={<ExpandMore sx={{ fontSize: 16 }} />}
-                            className="text-sm font-light tracking-wide normal-case text-gray-600 hover:text-black"
-                            sx={{
-                                minWidth: 'auto',
-                                padding: '4px 8px',
-                                '&:hover': {
-                                    backgroundColor: 'transparent',
-                                }
-                            }}
-                        >
-                            Services
-                        </Button>
-
-                        <Menu
-                            anchorEl={servicesAnchor}
-                            open={Boolean(servicesAnchor)}
-                            onClose={() => setServicesAnchor(null)}
-                            TransitionComponent={Fade}
-                            PaperProps={{
-                                sx: {
-                                    mt: 2,
-                                    borderRadius: 0,
-                                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                                    minWidth: 240,
-                                }
-                            }}
-                        >
-                            {services.map((service) => (
-                                <MenuItem
-                                    key={service.name}
-                                    onClick={() => setServicesAnchor(null)}
-                                    component={Link}
-                                    to={service.href}
-                                    sx={{
-                                        py: 2,
-                                        px: 3,
-                                        fontSize: '0.875rem',
-                                        fontWeight: 300,
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                        }
-                                    }}
-                                >
-                                    {service.name}
-                                </MenuItem>
-                            ))}
-                        </Menu>
-
                         <Box className="ml-4">
                             <Link to="/contact" className="no-underline">
                                 <Button
                                     variant="contained"
                                     className="bg-black hover:bg-gray-900 text-white rounded-none px-6 py-2 text-sm font-light tracking-wide normal-case shadow-none"
+                                    sx={{
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': {
+                                            transform: 'translateY(-1px)',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                                        }
+                                    }}
                                 >
                                     Start a Project
                                 </Button>
@@ -199,7 +147,8 @@ const Header = () => {
                         </IconButton>
                     </Box>
 
-                    <Box className="flex-1 p-6">
+                    <Box className="flex-1 p-6 overflow-y-auto">
+                        {/* Main Navigation */}
                         {navigation.map((item, index) => (
                             <motion.div
                                 key={item.name}
@@ -213,9 +162,10 @@ const Header = () => {
                                     className="no-underline"
                                 >
                                     <Box
-                                        className={`py-4 border-b text-lg font-light ${location.pathname === item.href
+                                        className={`py-4 border-b text-lg font-light transition-colors ${location.pathname === item.href ||
+                                                (item.href === '/services' && location.pathname.startsWith('/services'))
                                                 ? 'text-black font-medium'
-                                                : 'text-gray-600'
+                                                : 'text-gray-600 hover:text-black'
                                             }`}
                                     >
                                         {item.name}
@@ -224,32 +174,61 @@ const Header = () => {
                             </motion.div>
                         ))}
 
-                        <Box className="mt-8">
-                            <Typography variant="overline" className="text-gray-500 text-xs">
-                                Services
+                        {/* Mobile Quick Links */}
+                        <Box className="mt-8 pt-6 border-t">
+                            <Typography variant="overline" className="text-gray-400 text-xs mb-4 block">
+                                Quick Links
                             </Typography>
-                            {services.map((service, index) => (
-                                <motion.div
-                                    key={service.name}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: (navigation.length + index) * 0.05 }}
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: (navigation.length + 1) * 0.05 }}
+                            >
+                                <Link
+                                    to="/projects"
+                                    onClick={() => dispatch(toggleMobileMenu())}
+                                    className="no-underline"
                                 >
-                                    <Link
-                                        to={service.href}
-                                        onClick={() => dispatch(toggleMobileMenu())}
-                                        className="no-underline"
-                                    >
-                                        <Box className="py-3 text-gray-600 font-light">
-                                            {service.name}
-                                        </Box>
-                                    </Link>
-                                </motion.div>
-                            ))}
+                                    <Box className="py-2 text-gray-600 font-light hover:text-black transition-colors">
+                                        View Our Work
+                                    </Box>
+                                </Link>
+                            </motion.div>
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: (navigation.length + 2) * 0.05 }}
+                            >
+                                <Link
+                                    to="/about"
+                                    onClick={() => dispatch(toggleMobileMenu())}
+                                    className="no-underline"
+                                >
+                                    <Box className="py-2 text-gray-600 font-light hover:text-black transition-colors">
+                                        About Our Team
+                                    </Box>
+                                </Link>
+                            </motion.div>
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: (navigation.length + 3) * 0.05 }}
+                            >
+                                <Link
+                                    to="/services"
+                                    onClick={() => dispatch(toggleMobileMenu())}
+                                    className="no-underline"
+                                >
+                                    <Box className="py-2 text-gray-600 font-light hover:text-black transition-colors">
+                                        Our Services
+                                    </Box>
+                                </Link>
+                            </motion.div>
                         </Box>
                     </Box>
 
-                    <Box className="p-6 border-t">
+                    {/* Mobile CTA Button */}
+                    <Box className="p-6 border-t bg-gray-50">
                         <Link
                             to="/contact"
                             onClick={() => dispatch(toggleMobileMenu())}
@@ -259,10 +238,29 @@ const Header = () => {
                                 variant="contained"
                                 fullWidth
                                 className="bg-black hover:bg-gray-900 text-white rounded-none py-3 text-base font-light tracking-wide normal-case"
+                                sx={{
+                                    boxShadow: 'none',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                                        transform: 'translateY(-1px)'
+                                    }
+                                }}
                             >
                                 Start a Project
                             </Button>
                         </Link>
+
+                        {/* Mobile Contact Info */}
+                        <Box className="mt-4 text-center">
+                            <Typography variant="caption" color="text.secondary">
+                                Ready to discuss your project?
+                            </Typography>
+                            <br />
+                            <Typography variant="caption" color="text.secondary">
+                                Let's create something amazing together
+                            </Typography>
+                        </Box>
                     </Box>
                 </Box>
             </Drawer>

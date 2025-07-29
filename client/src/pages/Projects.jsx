@@ -29,16 +29,19 @@ const Projects = () => {
     const [filters, setFilters] = useState({
         category: 'all',
         technology: 'all',
-        status: 'published'
+        
     })
     const [viewMode, setViewMode] = useState('grid')
 
+    
+
     // Build query parameters for API
     const queryParams = useMemo(() => {
-        const params = {}
+        const params = {
+            status: 'published'  // Always show published projects on public page
+        }
         if (filters.category !== 'all') params.category = filters.category
         if (filters.technology !== 'all') params.technology = filters.technology
-        if (filters.status !== 'all') params.status = filters.status
         return params
     }, [filters])
 
@@ -92,7 +95,7 @@ const Projects = () => {
             whileHover={{ y: -8 }}
             className="group cursor-pointer"
         >
-            <Link to={`/projects/${project.slug || project.id}`} className="no-underline">
+            <Link to={`/projects/${ project.id}`} className="no-underline">
                 <Box className="relative overflow-hidden bg-gray-50 aspect-[4/3] rounded-lg">
                     {/* Project Image - Handle multiple image sources */}
                     <img

@@ -1,3 +1,4 @@
+// client/src/components/Admin/ServicesManager.jsx - Updated to use ServiceForm
 import React, { useState, useEffect } from 'react';
 import {
     Box,
@@ -7,16 +8,6 @@ import {
     CardActions,
     Typography,
     Grid,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Chip,
     IconButton,
     Menu,
     MenuItem as MenuOption,
@@ -27,18 +18,23 @@ import {
     Alert,
     Snackbar,
     Checkbox,
-    ListItemText,
     OutlinedInput,
     Divider,
     Tooltip,
     Badge,
     Paper,
     Skeleton,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText as MuiListItemText,
-    Avatar
+    Avatar,
+    TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Chip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from '@mui/material';
 import {
     Add,
@@ -46,158 +42,29 @@ import {
     Delete,
     MoreVert,
     Visibility,
-    Business,
-    Code,
-    Design,
-    Cloud,
     Search,
     GridView,
     ViewList,
-    Build,
     Upload,
-    Close,
     SelectAll,
     DeleteSweep,
-    Publish,
-    Archive,
+    CheckCircle,
+    Cancel,
     FilterList,
-    Sort,
-    CloudUpload,
-    Check,
-    Warning,
-    Error as ErrorIcon,
-    Star,
-    StarBorder,
     AttachMoney,
     Schedule,
-    CheckCircle,
-    Featured,
-    DragHandle,
-    Apps,
-    Devices,
+    Star,
     Web,
     PhoneAndroid,
     Computer,
     Palette,
     Engineering,
-    Launch
+    Warning
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useDropzone } from 'react-dropzone';
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import { servicesAPI } from '../../services/servicesAPI';
 import { usePermissions } from './AuthGuard';
-
-// Validation Schema
-const serviceSchema = yup.object({
-    name: yup.string().required('Service name is required').min(3, 'Name must be at least 3 characters'),
-    short_description: yup.string().required('Short description is required').max(500, 'Short description must be less than 500 characters'),
-    description: yup.string().required('Description is required').min(50, 'Description must be at least 50 characters'),
-    category: yup.string().required('Category is required'),
-    features: yup.array().min(1, 'At least one feature is required'),
-    technologies: yup.array().min(1, 'At least one technology is required'),
-    pricing_model: yup.string().nullable(),
-    starting_price: yup.number().min(0, 'Price cannot be negative').nullable(),
-    estimated_timeline: yup.string().nullable()
-});
-
-// Image Upload Component
-const ServiceImageUpload = ({ onImageChange, existingImage = null }) => {
-    const [image, setImage] = useState(existingImage);
-    const [uploading, setUploading] = useState(false);
-
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        accept: {
-            'image/*': ['.jpeg', '.jpg', '.png', '.webp']
-        },
-        multiple: false,
-        maxSize: 5 * 1024 * 1024, // 5MB
-        onDrop: async (acceptedFiles) => {
-            setUploading(true);
-            try {
-                const file = acceptedFiles[0];
-                const imageUrl = URL.createObjectURL(file);
-                setImage(imageUrl);
-                onImageChange(file);
-            } catch (error) {
-                console.error('Upload failed:', error);
-            } finally {
-                setUploading(false);
-            }
-        }
-    });
-
-    const removeImage = () => {
-        setImage(null);
-        onImageChange(null);
-    };
-
-    return (
-        <Box>
-            <Paper
-                {...getRootProps()}
-                sx={{
-                    p: 3,
-                    border: '2px dashed',
-                    borderColor: isDragActive ? 'primary.main' : 'grey.300',
-                    bgcolor: isDragActive ? 'primary.50' : 'grey.50',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                        borderColor: 'primary.main',
-                        bgcolor: 'primary.50'
-                    }
-                }}
-            >
-                <input {...getInputProps()} />
-                {image ? (
-                    <Box sx={{ position: 'relative', display: 'inline-block' }}>
-                        <img
-                            src={image}
-                            alt="Service"
-                            style={{
-                                width: 200,
-                                height: 120,
-                                objectFit: 'cover',
-                                borderRadius: 8
-                            }}
-                        />
-                        <IconButton
-                            size="small"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                removeImage();
-                            }}
-                            sx={{
-                                position: 'absolute',
-                                top: -8,
-                                right: -8,
-                                bgcolor: 'rgba(255,255,255,0.8)',
-                                '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
-                            }}
-                        >
-                            <Close fontSize="small" />
-                        </IconButton>
-                    </Box>
-                ) : (
-                    <>
-                        <CloudUpload sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
-                        <Typography variant="h6" gutterBottom>
-                            {isDragActive ? 'Drop service image here' : 'Upload service image'}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            or click to select file (max 5MB)
-                        </Typography>
-                    </>
-                )}
-                {uploading && <CircularProgress sx={{ mt: 2 }} />}
-            </Paper>
-        </Box>
-    );
-};
+import ServiceForm from '../Forms/ServiceForm';
 
 const ServicesManager = () => {
     // State management
@@ -215,41 +82,9 @@ const ServicesManager = () => {
     const [bulkActionAnchor, setBulkActionAnchor] = useState(null);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
     const [confirmDialog, setConfirmDialog] = useState({ open: false, title: '', message: '', action: null });
-    const [uploadedImage, setUploadedImage] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
 
     const { canWrite, canDelete } = usePermissions();
-
-    // Form setup with React Hook Form
-    const { control, handleSubmit, formState: { errors, isSubmitting }, reset, watch, setValue } = useForm({
-        resolver: yupResolver(serviceSchema),
-        defaultValues: {
-            name: '',
-            short_description: '',
-            description: '',
-            category: '',
-            features: [],
-            technologies: [],
-            pricing_model: '',
-            starting_price: '',
-            price_currency: 'USD',
-            estimated_timeline: '',
-            is_featured: false,
-            is_active: true,
-            show_in_homepage: true,
-            process_steps: []
-        }
-    });
-
-    // Field arrays for dynamic lists
-    const { fields: featureFields, append: appendFeature, remove: removeFeature } = useFieldArray({
-        control,
-        name: 'features'
-    });
-
-    const { fields: processFields, append: appendProcess, remove: removeProcess } = useFieldArray({
-        control,
-        name: 'process_steps'
-    });
 
     useEffect(() => {
         loadServices();
@@ -261,15 +96,14 @@ const ServicesManager = () => {
             const response = await servicesAPI.getAllServices();
 
             let servicesData = [];
-            if (Array.isArray(response)) {
+            if (response.success && Array.isArray(response.data)) {
+                servicesData = response.data;
+            } else if (Array.isArray(response)) {
                 servicesData = response;
             } else if (response.data && Array.isArray(response.data)) {
                 servicesData = response.data;
             } else if (response.services && Array.isArray(response.services)) {
                 servicesData = response.services;
-            } else {
-                console.error('Unexpected response structure:', response);
-                servicesData = [];
             }
 
             setServices(servicesData);
@@ -292,60 +126,37 @@ const ServicesManager = () => {
 
     // Handlers
     const handleOpenDialog = (service = null) => {
-        if (service) {
-            setEditingService(service);
-            reset({
-                ...service,
-                features: service.features || [],
-                technologies: service.technologies || [],
-                process_steps: service.process_steps || []
-            });
-        } else {
-            setEditingService(null);
-            reset({
-                name: '',
-                short_description: '',
-                description: '',
-                category: '',
-                features: [],
-                technologies: [],
-                pricing_model: '',
-                starting_price: '',
-                price_currency: 'USD',
-                estimated_timeline: '',
-                is_featured: false,
-                is_active: true,
-                show_in_homepage: true,
-                process_steps: []
-            });
-        }
-        setUploadedImage(null);
+        setEditingService(service);
         setOpenDialog(true);
     };
 
     const handleCloseDialog = () => {
         setOpenDialog(false);
         setEditingService(null);
-        setUploadedImage(null);
     };
 
-    const onSubmit = async (data) => {
+    const handleSubmitService = async (formData) => {
         try {
+            setSubmitting(true);
+
             if (editingService) {
-                await servicesAPI.updateService(editingService.id, data);
+                const response = await servicesAPI.updateService(editingService.id, formData);
                 setServices(services.map(s =>
-                    s.id === editingService.id ? { ...data, id: editingService.id } : s
+                    s.id === editingService.id ? { ...response.data, id: editingService.id } : s
                 ));
                 showSnackbar('Service updated successfully');
             } else {
-                const response = await servicesAPI.createService(data);
-                setServices([response.service || { ...data, id: Date.now() }, ...services]);
+                const response = await servicesAPI.createService(formData);
+                const newService = response.data || response.service || { ...Object.fromEntries(formData.entries()), id: Date.now() };
+                setServices([newService, ...services]);
                 showSnackbar('Service created successfully');
             }
             handleCloseDialog();
         } catch (error) {
             console.error('Error saving service:', error);
-            showSnackbar('Failed to save service', 'error');
+            showSnackbar(error.message || 'Failed to save service', 'error');
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -376,19 +187,17 @@ const ServicesManager = () => {
             async () => {
                 try {
                     if (action === 'Delete') {
-                        await Promise.all(selectedServices.map(id => servicesAPI.deleteService(id)));
+                        await servicesAPI.bulkDeleteServices(selectedServices);
                         setServices(services.filter(s => !selectedServices.includes(s.id)));
                     } else if (action === 'Activate') {
-                        await Promise.all(selectedServices.map(id =>
-                            servicesAPI.updateService(id, { is_active: true })
-                        ));
+                        const updates = selectedServices.map(id => ({ id, data: { is_active: true } }));
+                        await servicesAPI.bulkUpdateServices(updates);
                         setServices(services.map(s =>
                             selectedServices.includes(s.id) ? { ...s, is_active: true } : s
                         ));
                     } else if (action === 'Deactivate') {
-                        await Promise.all(selectedServices.map(id =>
-                            servicesAPI.updateService(id, { is_active: false })
-                        ));
+                        const updates = selectedServices.map(id => ({ id, data: { is_active: false } }));
+                        await servicesAPI.bulkUpdateServices(updates);
                         setServices(services.map(s =>
                             selectedServices.includes(s.id) ? { ...s, is_active: false } : s
                         ));
@@ -424,7 +233,7 @@ const ServicesManager = () => {
     // Filter and search logic
     const filteredServices = Array.isArray(services) ? services.filter(service => {
         const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (service.technologies && service.technologies.some(tech =>
                 tech.toLowerCase().includes(searchTerm.toLowerCase())
             ));
@@ -446,29 +255,13 @@ const ServicesManager = () => {
 
     const getCategoryIcon = (category) => {
         const categoryData = serviceCategories.find(cat => cat.value === category);
-        return categoryData ? categoryData.icon : <Build />;
+        return categoryData ? categoryData.icon : <Web />;
     };
 
     const getCategoryLabel = (category) => {
         const categoryData = serviceCategories.find(cat => cat.value === category);
         return categoryData ? categoryData.label : category;
     };
-
-    const availableTechnologies = [
-        'React', 'Vue.js', 'Angular', 'Node.js', 'Python', 'Java', 'C#', 'PHP',
-        'JavaScript', 'TypeScript', 'HTML', 'CSS', 'MongoDB', 'PostgreSQL',
-        'MySQL', 'Docker', 'Kubernetes', 'AWS', 'Azure', 'Firebase',
-        'Flutter', 'React Native', 'Swift', 'Kotlin', 'Figma', 'Adobe XD',
-        'Sketch', 'Photoshop', 'Illustrator'
-    ];
-
-    const pricingModels = [
-        { value: 'fixed', label: 'Fixed Price' },
-        { value: 'hourly', label: 'Hourly Rate' },
-        { value: 'project_based', label: 'Project Based' },
-        { value: 'monthly', label: 'Monthly Retainer' },
-        { value: 'custom', label: 'Custom Quote' }
-    ];
 
     if (loading) {
         return (
@@ -613,7 +406,10 @@ const ServicesManager = () => {
                                 <MenuItem value="all">All</MenuItem>
                                 {serviceCategories.map((category) => (
                                     <MenuItem key={category.value} value={category.value}>
-                                        {category.label}
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            {React.cloneElement(category.icon, { sx: { fontSize: 20 } })}
+                                            {category.label}
+                                        </Box>
                                     </MenuItem>
                                 ))}
                             </Select>
@@ -718,9 +514,9 @@ const ServicesManager = () => {
                                                 style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
                                             />
                                         ) : (
-                                            <Avatar sx={{ width: 80, height: 80, bgcolor: 'primary.main', mx: 'auto' }}>
-                                                {getCategoryIcon(service.category)}
-                                            </Avatar>
+                                                <Avatar sx={{ width: 80, height: 80, bgcolor: 'primary.main', mx: 'auto' }}>
+                                                    {React.cloneElement(getCategoryIcon(service.category), { sx: { fontSize: 40 } })}
+                                                </Avatar>
                                         )}
                                     </Box>
 
@@ -837,7 +633,7 @@ const ServicesManager = () => {
             {/* Empty State */}
             {filteredServices.length === 0 && (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
-                    <Build sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                    <Web sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                     <Typography variant="h6" color="text.secondary" gutterBottom>
                         No services found
                     </Typography>
@@ -918,406 +714,14 @@ const ServicesManager = () => {
                 </MenuOption>
             </Menu>
 
-            {/* Add/Edit Dialog */}
-            <Dialog
+            {/* Service Form Dialog */}
+            <ServiceForm
                 open={openDialog}
                 onClose={handleCloseDialog}
-                maxWidth="lg"
-                fullWidth
-                PaperProps={{
-                    sx: { minHeight: '80vh' }
-                }}
-            >
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <DialogTitle>
-                        {editingService ? 'Edit Service' : 'Add New Service'}
-                    </DialogTitle>
-                    <DialogContent>
-                        <Grid container spacing={3} sx={{ mt: 1 }}>
-                            {/* Service Image */}
-                            <Grid item xs={12} md={4}>
-                                <Typography variant="h6" gutterBottom>
-                                    Service Image
-                                </Typography>
-                                <ServiceImageUpload
-                                    onImageChange={setUploadedImage}
-                                    existingImage={editingService?.featured_image}
-                                />
-                            </Grid>
-
-                            {/* Basic Information */}
-                            <Grid item xs={12} md={8}>
-                                <Typography variant="h6" gutterBottom>
-                                    Basic Information
-                                </Typography>
-
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12} md={8}>
-                                        <Controller
-                                            name="name"
-                                            control={control}
-                                            render={({ field }) => (
-                                                <TextField
-                                                    {...field}
-                                                    fullWidth
-                                                    label="Service Name"
-                                                    error={!!errors.name}
-                                                    helperText={errors.name?.message}
-                                                    required
-                                                />
-                                            )}
-                                        />
-                                    </Grid>
-
-                                    <Grid item xs={12} md={4}>
-                                        <Controller
-                                            name="category"
-                                            control={control}
-                                            render={({ field }) => (
-                                                <FormControl fullWidth error={!!errors.category}>
-                                                    <InputLabel>Category</InputLabel>
-                                                    <Select
-                                                        {...field}
-                                                        label="Category"
-                                                    >
-                                                        {serviceCategories.map((category) => (
-                                                            <MenuItem key={category.value} value={category.value}>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                    {category.icon}
-                                                                    {category.label}
-                                                                </Box>
-                                                            </MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                    {errors.category && (
-                                                        <Typography variant="caption" color="error" sx={{ ml: 2 }}>
-                                                            {errors.category.message}
-                                                        </Typography>
-                                                    )}
-                                                </FormControl>
-                                            )}
-                                        />
-                                    </Grid>
-
-                                    <Grid item xs={12}>
-                                        <Controller
-                                            name="short_description"
-                                            control={control}
-                                            render={({ field }) => (
-                                                <TextField
-                                                    {...field}
-                                                    fullWidth
-                                                    label="Short Description"
-                                                    error={!!errors.short_description}
-                                                    helperText={errors.short_description?.message || 'Brief summary for cards (max 500 characters)'}
-                                                    required
-                                                />
-                                            )}
-                                        />
-                                    </Grid>
-
-                                    <Grid item xs={12}>
-                                        <Controller
-                                            name="description"
-                                            control={control}
-                                            render={({ field }) => (
-                                                <TextField
-                                                    {...field}
-                                                    fullWidth
-                                                    label="Full Description"
-                                                    multiline
-                                                    rows={4}
-                                                    error={!!errors.description}
-                                                    helperText={errors.description?.message}
-                                                    required
-                                                />
-                                            )}
-                                        />
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-
-                            {/* Technologies */}
-                            <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" gutterBottom>
-                                    Technologies & Skills
-                                </Typography>
-                            </Grid>
-
-                            <Grid item xs={12}>
-                                <Controller
-                                    name="technologies"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FormControl fullWidth error={!!errors.technologies}>
-                                            <InputLabel>Technologies</InputLabel>
-                                            <Select
-                                                {...field}
-                                                multiple
-                                                input={<OutlinedInput label="Technologies" />}
-                                                renderValue={(selected) => (
-                                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                        {selected.map((value) => (
-                                                            <Chip key={value} label={value} size="small" />
-                                                        ))}
-                                                    </Box>
-                                                )}
-                                            >
-                                                {availableTechnologies.map((tech) => (
-                                                    <MenuItem key={tech} value={tech}>
-                                                        <Checkbox checked={field.value.indexOf(tech) > -1} />
-                                                        <ListItemText primary={tech} />
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                            {errors.technologies && (
-                                                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
-                                                    {errors.technologies.message}
-                                                </Typography>
-                                            )}
-                                        </FormControl>
-                                    )}
-                                />
-                            </Grid>
-
-                            {/* Features */}
-                            <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" gutterBottom>
-                                    Service Features
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                    Add key features and benefits of this service
-                                </Typography>
-
-                                {featureFields.map((field, index) => (
-                                    <Box key={field.id} sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                                        <TextField
-                                            fullWidth
-                                            label={`Feature ${index + 1}`}
-                                            {...register(`features.${index}`)}
-                                            error={!!errors.features?.[index]}
-                                            helperText={errors.features?.[index]?.message}
-                                        />
-                                        <IconButton
-                                            onClick={() => removeFeature(index)}
-                                            color="error"
-                                        >
-                                            <Delete />
-                                        </IconButton>
-                                    </Box>
-                                ))}
-
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => appendFeature('')}
-                                    startIcon={<Add />}
-                                >
-                                    Add Feature
-                                </Button>
-                            </Grid>
-
-                            {/* Process Steps */}
-                            <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" gutterBottom>
-                                    Process Steps
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                    Outline your service delivery process
-                                </Typography>
-
-                                {processFields.map((field, index) => (
-                                    <Box key={field.id} sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                                        <TextField
-                                            fullWidth
-                                            label={`Step ${index + 1}`}
-                                            {...register(`process_steps.${index}`)}
-                                        />
-                                        <IconButton
-                                            onClick={() => removeProcess(index)}
-                                            color="error"
-                                        >
-                                            <Delete />
-                                        </IconButton>
-                                    </Box>
-                                ))}
-
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => appendProcess('')}
-                                    startIcon={<Add />}
-                                >
-                                    Add Step
-                                </Button>
-                            </Grid>
-
-                            {/* Pricing */}
-                            <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" gutterBottom>
-                                    Pricing Information
-                                </Typography>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Controller
-                                    name="pricing_model"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FormControl fullWidth>
-                                            <InputLabel>Pricing Model</InputLabel>
-                                            <Select
-                                                {...field}
-                                                label="Pricing Model"
-                                            >
-                                                {pricingModels.map((model) => (
-                                                    <MenuItem key={model.value} value={model.value}>
-                                                        {model.label}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Controller
-                                    name="starting_price"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="Starting Price"
-                                            type="number"
-                                            error={!!errors.starting_price}
-                                            helperText={errors.starting_price?.message}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <AttachMoney />
-                                                    </InputAdornment>
-                                                )
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12}>
-                                <Controller
-                                    name="estimated_timeline"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="Estimated Timeline"
-                                            placeholder="e.g., 2-4 weeks, 1-3 months"
-                                            error={!!errors.estimated_timeline}
-                                            helperText={errors.estimated_timeline?.message}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <Schedule />
-                                                    </InputAdornment>
-                                                )
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            {/* Settings */}
-                            <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" gutterBottom>
-                                    Display Settings
-                                </Typography>
-                            </Grid>
-
-                            <Grid item xs={12} md={4}>
-                                <Controller
-                                    name="is_featured"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FormControlLabel
-                                            control={
-                                                <Switch
-                                                    checked={field.value}
-                                                    onChange={field.onChange}
-                                                />
-                                            }
-                                            label="Featured Service"
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} md={4}>
-                                <Controller
-                                    name="is_active"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FormControlLabel
-                                            control={
-                                                <Switch
-                                                    checked={field.value}
-                                                    onChange={field.onChange}
-                                                />
-                                            }
-                                            label="Active Service"
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} md={4}>
-                                <Controller
-                                    name="show_in_homepage"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FormControlLabel
-                                            control={
-                                                <Switch
-                                                    checked={field.value}
-                                                    onChange={field.onChange}
-                                                />
-                                            }
-                                            label="Show in Homepage"
-                                        />
-                                    )}
-                                />
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                    <DialogActions sx={{ p: 3 }}>
-                        <Button onClick={handleCloseDialog} disabled={isSubmitting}>
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            disabled={isSubmitting}
-                            sx={{
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                '&:hover': {
-                                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b46a1 100%)',
-                                }
-                            }}
-                        >
-                            {isSubmitting ? (
-                                <CircularProgress size={20} />
-                            ) : (
-                                editingService ? 'Update Service' : 'Add Service'
-                            )}
-                        </Button>
-                    </DialogActions>
-                </form>
-            </Dialog>
+                onSubmit={handleSubmitService}
+                editingService={editingService}
+                loading={submitting}
+            />
 
             {/* Confirmation Dialog */}
             <Dialog

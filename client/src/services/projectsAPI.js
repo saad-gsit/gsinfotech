@@ -78,7 +78,11 @@ export const projectsAPI = {
                 if (cachedData) return cachedData;
             }
 
-            const response = await apiClient.get(`/projects/${id}`);
+            // Check if it's a numeric ID or slug
+            const isNumeric = /^\d+$/.test(id);
+            const endpoint = isNumeric ? `/projects/${id}` : `/projects/slug/${id}`;
+
+            const response = await apiClient.get(endpoint);
             const data = response.data;
 
             if (useCache) {
@@ -90,7 +94,6 @@ export const projectsAPI = {
             throw handleApiError(error, `Failed to fetch project with ID: ${id}`);
         }
     },
-
     // Get featured projects with caching
     getFeaturedProjects: async (limit = 6, useCache = true) => {
         try {
