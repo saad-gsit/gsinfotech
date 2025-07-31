@@ -22,7 +22,8 @@ import {
     Phone,
     Category,
     Message,
-    Send
+    Send,
+    CheckCircle
 } from '@mui/icons-material'
 import { useAnimation } from '@/hooks/useAnimation'
 import { useSubmitContactForm } from '@/hooks/useApi'
@@ -84,13 +85,13 @@ const ContactForm = ({ onSuccess, onError }) => {
     const watchedFields = watch()
 
     const services = [
-        { value: 'Custom Software Development', label: 'Custom Software Development', color: '#6366f1' },
-        { value: 'Mobile App Development', label: 'Mobile App Development', color: '#8b5cf6' },
-        { value: 'Web Development', label: 'Web Development', color: '#3b82f6' },
-        { value: 'UI/UX Design', label: 'UI/UX Design', color: '#ec4899' },
-        { value: 'Enterprise Solutions', label: 'Enterprise Solutions', color: '#10b981' },
-        { value: 'Consulting', label: 'Consulting', color: '#f59e0b' },
-        { value: 'Other', label: 'Other', color: '#6b7280' },
+        { value: 'Custom Software Development', label: 'Custom Software Development', color: 'var(--sage-400)' },
+        { value: 'Mobile App Development', label: 'Mobile App Development', color: 'var(--coral-400)' },
+        { value: 'Web Development', label: 'Web Development', color: 'var(--sand-600)' },
+        { value: 'UI/UX Design', label: 'UI/UX Design', color: 'var(--coral-500)' },
+        { value: 'Enterprise Solutions', label: 'Enterprise Solutions', color: 'var(--sage-500)' },
+        { value: 'Consulting', label: 'Consulting', color: 'var(--stone-600)' },
+        { value: 'Other', label: 'Other', color: 'var(--stone-500)' },
     ]
 
     const onSubmit = async (data) => {
@@ -175,54 +176,99 @@ const ContactForm = ({ onSuccess, onError }) => {
             y: 0,
             transition: {
                 delay: i * 0.1,
-                duration: 0.5,
-                ease: "easeOut"
+                duration: 0.6,
+                ease: [0.4, 0, 0.2, 1]
             }
         })
     }
 
     const getFieldStyle = (fieldName) => ({
         '& .MuiInput-underline:before': {
-            borderBottomColor: '#e5e7eb',
+            borderBottomColor: 'var(--stone-200)',
             borderBottomWidth: 2,
         },
         '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-            borderBottomColor: focusedField === fieldName ? '#6366f1' : '#9ca3af',
+            borderBottomColor: focusedField === fieldName ? 'var(--sage-400)' : 'var(--stone-300)',
         },
         '& .MuiInput-underline:after': {
-            borderBottomColor: '#6366f1',
+            borderBottomColor: 'var(--sage-400)',
             borderBottomWidth: 2,
         },
         '& .MuiInputLabel-root': {
-            color: '#6b7280',
+            color: 'var(--stone-600)',
             fontWeight: 500,
+            fontSize: '1rem',
             '&.Mui-focused': {
-                color: '#6366f1',
+                color: 'var(--sage-400)',
+            },
+            '&.Mui-error': {
+                color: 'var(--coral-500)',
             }
         },
         '& .MuiInput-root': {
             fontSize: '1rem',
-            color: '#1f2937',
+            color: 'var(--stone-800)',
             fontWeight: 400,
+            transition: 'all 0.3s ease',
         },
         '& .MuiFormHelperText-root': {
             marginTop: '8px',
             fontSize: '0.75rem',
+            '&.Mui-error': {
+                color: 'var(--coral-500)',
+            }
+        },
+        '& .MuiInputAdornment-root': {
+            marginRight: '12px',
         }
     })
+
+    const getProgressColor = () => {
+        const requiredFields = ['name', 'email', 'service', 'message']
+        const completedFields = requiredFields.filter(field => watchedFields[field]?.trim())
+        const progress = completedFields.length / requiredFields.length
+
+        if (progress >= 1) return 'var(--sage-400)'
+        if (progress >= 0.5) return 'var(--sand-500)'
+        return 'var(--stone-300)'
+    }
 
     return (
         <motion.div
             variants={getVariants('fadeInUp')}
             initial="hidden"
             animate="visible"
-            className="relative"
+            style={{ position: 'relative' }}
         >
-            {/* Background decoration */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-purple-400/20 to-blue-400/20 rounded-full blur-3xl" />
-            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl" />
+            {/* Enhanced background decoration with theme colors */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: -20,
+                    right: -20,
+                    width: 140,
+                    height: 140,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, var(--sage-100) 0%, transparent 70%)',
+                    opacity: 0.6,
+                    filter: 'blur(30px)',
+                }}
+            />
+            <Box
+                sx={{
+                    position: 'absolute',
+                    bottom: -20,
+                    left: -20,
+                    width: 100,
+                    height: 100,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, var(--coral-100) 0%, transparent 70%)',
+                    opacity: 0.4,
+                    filter: 'blur(25px)',
+                }}
+            />
 
-            <form onSubmit={handleSubmit(onSubmit)} className="relative space-y-8">
+            <form onSubmit={handleSubmit(onSubmit)} style={{ position: 'relative', zIndex: 2 }}>
                 <Grid container spacing={4}>
                     <Grid item xs={12} md={6}>
                         <motion.div
@@ -244,7 +290,12 @@ const ContactForm = ({ onSuccess, onError }) => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Person style={{ color: focusedField === 'name' ? '#6366f1' : '#9ca3af' }} />
+                                            <Person
+                                                sx={{
+                                                    color: focusedField === 'name' ? 'var(--sage-400)' : 'var(--stone-400)',
+                                                    transition: 'color 0.3s ease'
+                                                }}
+                                            />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -274,7 +325,12 @@ const ContactForm = ({ onSuccess, onError }) => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Email style={{ color: focusedField === 'email' ? '#6366f1' : '#9ca3af' }} />
+                                            <Email
+                                                sx={{
+                                                    color: focusedField === 'email' ? 'var(--sage-400)' : 'var(--stone-400)',
+                                                    transition: 'color 0.3s ease'
+                                                }}
+                                            />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -300,7 +356,12 @@ const ContactForm = ({ onSuccess, onError }) => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Business style={{ color: focusedField === 'company' ? '#6366f1' : '#9ca3af' }} />
+                                            <Business
+                                                sx={{
+                                                    color: focusedField === 'company' ? 'var(--sage-400)' : 'var(--stone-400)',
+                                                    transition: 'color 0.3s ease'
+                                                }}
+                                            />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -327,7 +388,12 @@ const ContactForm = ({ onSuccess, onError }) => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Phone style={{ color: focusedField === 'phone' ? '#6366f1' : '#9ca3af' }} />
+                                            <Phone
+                                                sx={{
+                                                    color: focusedField === 'phone' ? 'var(--sage-400)' : 'var(--stone-400)',
+                                                    transition: 'color 0.3s ease'
+                                                }}
+                                            />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -357,7 +423,12 @@ const ContactForm = ({ onSuccess, onError }) => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Category style={{ color: focusedField === 'service' ? '#6366f1' : '#9ca3af' }} />
+                                            <Category
+                                                sx={{
+                                                    color: focusedField === 'service' ? 'var(--sage-400)' : 'var(--stone-400)',
+                                                    transition: 'color 0.3s ease'
+                                                }}
+                                            />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -372,28 +443,38 @@ const ContactForm = ({ onSuccess, onError }) => {
                                 defaultValue=""
                             >
                                 <MenuItem value="" disabled>
-                                    <em style={{ color: '#9ca3af' }}>Choose a service</em>
+                                    <em style={{ color: 'var(--stone-400)' }}>Choose a service</em>
                                 </MenuItem>
                                 {services.map((service) => (
                                     <MenuItem
                                         key={service.value}
                                         value={service.value}
                                         sx={{
+                                            py: 1.5,
                                             '&:hover': {
-                                                backgroundColor: `${service.color}10`,
+                                                backgroundColor: `${service.color}15`,
+                                            },
+                                            '&.Mui-selected': {
+                                                backgroundColor: `${service.color}20`,
+                                                '&:hover': {
+                                                    backgroundColor: `${service.color}25`,
+                                                }
                                             }
                                         }}
                                     >
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                             <Box
                                                 sx={{
-                                                    width: 8,
-                                                    height: 8,
+                                                    width: 12,
+                                                    height: 12,
                                                     borderRadius: '50%',
                                                     backgroundColor: service.color,
+                                                    flexShrink: 0,
                                                 }}
                                             />
-                                            {service.label}
+                                            <Typography variant="body1" sx={{ color: 'var(--stone-800)' }}>
+                                                {service.label}
+                                            </Typography>
                                         </Box>
                                     </MenuItem>
                                 ))}
@@ -416,14 +497,20 @@ const ContactForm = ({ onSuccess, onError }) => {
                                 fullWidth
                                 required
                                 error={!!errors.message}
-                                helperText={errors.message?.message || `${watchedFields.message?.length || 0} characters`}
+                                helperText={errors.message?.message ||
+                                    `${watchedFields.message?.length || 0}/1000 characters`}
                                 variant="standard"
                                 onFocus={() => setFocusedField('message')}
                                 onBlur={() => setFocusedField(null)}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1 }}>
-                                            <Message style={{ color: focusedField === 'message' ? '#6366f1' : '#9ca3af' }} />
+                                            <Message
+                                                sx={{
+                                                    color: focusedField === 'message' ? 'var(--sage-400)' : 'var(--stone-400)',
+                                                    transition: 'color 0.3s ease'
+                                                }}
+                                            />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -431,141 +518,282 @@ const ContactForm = ({ onSuccess, onError }) => {
                                     ...getFieldStyle('message'),
                                     '& .MuiInputBase-root': {
                                         alignItems: 'flex-start',
+                                    },
+                                    '& .MuiFormHelperText-root': {
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        color: errors.message ? 'var(--coral-500)' : 'var(--stone-500)',
                                     }
                                 }}
                             />
                         </motion.div>
                     </Grid>
                 </Grid>
-
                 <motion.div
                     custom={6}
                     variants={inputAnimation}
                     initial="hidden"
                     animate="visible"
-                    className="flex flex-col sm:flex-row gap-4 items-center justify-between mt-12"
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2rem',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: '3rem'
+                    }}
                 >
-                    {/* Form Progress Indicator */}
-                    <Box className="flex items-center gap-2">
-                        <Typography variant="caption" color="text.secondary">
-                            Form Progress
+                    {/* Enhanced Form Progress Indicator */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, width: '100%', justifyContent: 'center' }}>
+                        <Typography
+                            variant="caption"
+                            sx={{
+                                color: 'var(--stone-600)',
+                                fontWeight: 500,
+                                letterSpacing: '0.05em',
+                                textTransform: 'uppercase',
+                                fontSize: '0.75rem'
+                            }}
+                        >
+                            Progress
                         </Typography>
-                        <Box className="flex gap-1">
-                            {['name', 'email', 'service', 'message'].map((field) => (
-                                <Box
-                                    key={field}
-                                    sx={{
-                                        width: 8,
-                                        height: 8,
-                                        borderRadius: '50%',
-                                        backgroundColor: watchedFields[field] ? '#6366f1' : '#e5e7eb',
-                                        transition: 'all 0.3s ease',
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {['name', 'email', 'service', 'message'].map((field, index) => {
+                                const isCompleted = watchedFields[field]?.trim()
+                                const isCurrent = focusedField === field
+
+                                return (
+                                    <motion.div
+                                        key={field}
+                                        animate={{
+                                            scale: isCurrent ? 1.3 : 1,
+                                            backgroundColor: isCompleted ? 'var(--sage-400)' :
+                                                isCurrent ? 'var(--sand-400)' : 'var(--stone-200)'
+                                        }}
+                                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                                        style={{
+                                            width: 12,
+                                            height: 12,
+                                            borderRadius: '50%',
+                                            position: 'relative',
+                                        }}
+                                    >
+                                        {isCompleted && (
+                                            <motion.div
+                                                initial={{ scale: 0, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                transition={{ delay: 0.2, duration: 0.3 }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    inset: 0,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                }}
+                                            >
+                                                <CheckCircle
+                                                    sx={{
+                                                        fontSize: 12,
+                                                        color: 'white',
+                                                    }}
+                                                />
+                                            </motion.div>
+                                        )}
+                                    </motion.div>
+                                )
+                            })}
+                        </Box>
+                        <Typography
+                            variant="caption"
+                            sx={{
+                                color: getProgressColor(),
+                                fontWeight: 500,
+                                fontSize: '0.75rem'
+                            }}
+                        >
+                            {(() => {
+                                const completed = ['name', 'email', 'service', 'message']
+                                    .filter(field => watchedFields[field]?.trim()).length
+                                return `${completed}/4 Complete`
+                            })()}
+                        </Typography>
+                    </Box>
+
+                    {/* Enhanced Submit Button */}
+                    <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                        <Button
+                            type="submit"
+                            disabled={isLoading}
+                            size="large"
+                            sx={{
+                                background: isLoading
+                                    ? 'linear-gradient(135deg, var(--stone-400) 0%, var(--stone-500) 100%)'
+                                    : 'linear-gradient(135deg, var(--sage-400) 0%, var(--sage-500) 100%)',
+                                color: '#fff',
+                                padding: '16px 48px',
+                                borderRadius: '50px',
+                                fontSize: '1rem',
+                                letterSpacing: '0.025em',
+                                fontWeight: 500,
+                                minWidth: 200,
+                                boxShadow: isLoading
+                                    ? 'none'
+                                    : '0 12px 32px -8px rgba(139, 148, 113, 0.4)',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                border: 'none',
+                                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                                '&:hover:not(:disabled)': {
+                                    transform: 'translateY(-3px)',
+                                    boxShadow: '0 16px 40px -8px rgba(139, 148, 113, 0.5)',
+                                    background: 'linear-gradient(135deg, var(--sage-500) 0%, var(--sage-600) 100%)',
+                                },
+                                '&:active:not(:disabled)': {
+                                    transform: 'translateY(-1px)',
+                                },
+                                '&:disabled': {
+                                    transform: 'none',
+                                    cursor: 'not-allowed',
+                                },
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: '-100%',
+                                    width: '100%',
+                                    height: '100%',
+                                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+                                    transition: 'left 0.6s ease',
+                                },
+                                '&:hover:not(:disabled)::before': {
+                                    left: '100%',
+                                },
+                            }}
+                        >
+                            {isLoading ? (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <CircularProgress
+                                        size={20}
+                                        sx={{ color: 'white' }}
+                                        thickness={4}
+                                    />
+                                    <span>Sending Message...</span>
+                                </Box>
+                            ) : (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <span>Send Message</span>
+                                    <motion.div
+                                        animate={{ x: [0, 4, 0] }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                            ease: "easeInOut"
+                                        }}
+                                    >
+                                        <Send sx={{ fontSize: 18 }} />
+                                    </motion.div>
+                                </Box>
+                            )}
+                        </Button>
+
+                        {/* Success Animation Overlay */}
+                        {isLoading && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                    borderRadius: '50px',
+                                    zIndex: 10,
+                                    backdropFilter: 'blur(4px)',
+                                }}
+                            >
+                                <motion.div
+                                    animate={{
+                                        scale: [1, 1.1, 1],
+                                        rotate: [0, 180, 360],
                                     }}
-                                />
+                                    transition={{
+                                        duration: 3,
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: 56,
+                                            height: 56,
+                                            borderRadius: '50%',
+                                            background: 'linear-gradient(135deg, var(--sage-400) 0%, var(--sage-500) 100%)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: '0 8px 25px -8px rgba(139, 148, 113, 0.4)',
+                                        }}
+                                    >
+                                        <Send sx={{ color: 'white', fontSize: 24 }} />
+                                    </Box>
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </Box>
+
+                    {/* Form Footer */}
+                    <Box sx={{ textAlign: 'center', mt: 3 }}>
+                        <Typography
+                            variant="caption"
+                            sx={{
+                                color: 'var(--stone-500)',
+                                fontSize: '0.75rem',
+                                lineHeight: 1.6,
+                                maxWidth: 400,
+                                mx: 'auto',
+                                display: 'block'
+                            }}
+                        >
+                            By submitting this form, you agree to our privacy policy and
+                            consent to being contacted about your project.
+                        </Typography>
+
+                        {/* Trust Indicators */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, mt: 2 }}>
+                            {[
+                                { icon: '🔒', text: 'Secure & Private' },
+                                { icon: '⚡', text: '24h Response' },
+                                { icon: '💬', text: 'Free Consultation' }
+                            ].map((item, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.8 + index * 0.1 }}
+                                >
+                                    <Chip
+                                        icon={<span style={{ fontSize: '0.75rem' }}>{item.icon}</span>}
+                                        label={item.text}
+                                        size="small"
+                                        sx={{
+                                            backgroundColor: 'var(--stone-50)',
+                                            color: 'var(--stone-600)',
+                                            fontSize: '0.7rem',
+                                            height: 28,
+                                            borderRadius: '14px',
+                                            border: '1px solid var(--stone-100)',
+                                            '& .MuiChip-icon': {
+                                                fontSize: '0.75rem',
+                                                marginLeft: '8px',
+                                            }
+                                        }}
+                                    />
+                                </motion.div>
                             ))}
                         </Box>
                     </Box>
-
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        disabled={isLoading}
-                        size="large"
-                        sx={{
-                            background: isLoading
-                                ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)'
-                                : 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                            color: '#fff',
-                            padding: '14px 40px',
-                            borderRadius: '50px',
-                            fontSize: '0.95rem',
-                            letterSpacing: '0.5px',
-                            fontWeight: 500,
-                            boxShadow: isLoading
-                                ? 'none'
-                                : '0 10px 30px -10px rgba(99, 102, 241, 0.5)',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 15px 35px -10px rgba(99, 102, 241, 0.6)',
-                            },
-                            '&:active': {
-                                transform: 'translateY(0)',
-                            },
-                            '&:disabled': {
-                                transform: 'none',
-                            },
-                            transition: 'all 0.3s ease',
-                            '&::before': {
-                                content: '""',
-                                position: 'absolute',
-                                top: 0,
-                                left: '-100%',
-                                width: '100%',
-                                height: '100%',
-                                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-                                transition: 'left 0.5s ease',
-                            },
-                            '&:hover::before': {
-                                left: '100%',
-                            },
-                        }}
-                    >
-                        {isLoading ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <CircularProgress size={20} color="inherit" />
-                                <span>Sending...</span>
-                            </Box>
-                        ) : (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <span>Send Message</span>
-                                <Send fontSize="small" />
-                            </Box>
-                        )}
-                    </Button>
-
-                    {/* Success Animation Overlay */}
-                    {isLoading && (
-                        <Box
-                            sx={{
-                                position: 'absolute',
-                                inset: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                borderRadius: 2,
-                                zIndex: 10,
-                            }}
-                        >
-                            <motion.div
-                                animate={{
-                                    scale: [1, 1.2, 1],
-                                    rotate: [0, 180, 360],
-                                }}
-                                transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        width: 60,
-                                        height: 60,
-                                        borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                    }}
-                                >
-                                    <Send sx={{ color: 'white', fontSize: 28 }} />
-                                </Box>
-                            </motion.div>
-                        </Box>
-                    )}
                 </motion.div>
             </form>
         </motion.div>

@@ -14,13 +14,11 @@ import {
     IconButton,
     Avatar,
     AvatarGroup,
-    Rating,
-    Fab,
     Stack,
     Skeleton
 } from '@mui/material'
 import {
-    ArrowForward,
+    ArrowOutward,
     EastOutlined,
     AutoAwesomeOutlined,
     RocketLaunchOutlined,
@@ -31,12 +29,15 @@ import {
     Groups,
     WorkspacePremium,
     SupportAgent,
-    KeyboardArrowUp
+    KeyboardArrowUp,
+    PlayArrow,
+    CheckCircleOutline,
+    StarRounded
 } from '@mui/icons-material'
 import CountUp from 'react-countup'
 import { useInView } from 'react-intersection-observer'
 
-// Updated imports - using our new API hooks
+// API hooks
 import {
     useFeaturedProjects,
     useLeadershipTeam,
@@ -47,10 +48,11 @@ import {
 const Home = () => {
     const { scrollY } = useScroll()
     const y1 = useTransform(scrollY, [0, 300], [0, 50])
+    const y2 = useTransform(scrollY, [0, 300], [0, -30])
     const [showScrollTop, setShowScrollTop] = useState(false)
     const [stats, setStats] = useState(null)
 
-    // Fetch data using our new API hooks
+    // Fetch data using API hooks
     const { data: featuredProjects, isLoading: projectsLoading } = useFeaturedProjects(3)
     const { data: leadershipTeam, isLoading: teamLoading } = useLeadershipTeam()
     const { data: projectStats, isLoading: projectStatsLoading } = useProjectStats()
@@ -68,13 +70,12 @@ const Home = () => {
     useEffect(() => {
         if (projectStats || teamStats || featuredProjects || leadershipTeam) {
             setStats({
-                projects: projectStats?.total || featuredProjects?.length * 83 || 250, // Extrapolate from featured
+                projects: projectStats?.total || featuredProjects?.length * 83 || 250,
                 clients: projectStats?.clientRetention || 95,
-                teamMembers: teamStats?.total || leadershipTeam?.length * 5 || 50, // Extrapolate from leadership
+                teamMembers: teamStats?.total || leadershipTeam?.length * 5 || 50,
                 support: 24
             })
         } else {
-            // Fallback to default values while loading
             setStats({
                 projects: 250,
                 clients: 95,
@@ -88,39 +89,43 @@ const Home = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
-    // Static services for now - you can create a services API later
+    // Services with new color palette
     const services = [
         {
-            icon: <RocketLaunchOutlined sx={{ fontSize: 28 }} />,
+            icon: <RocketLaunchOutlined sx={{ fontSize: 32 }} />,
             title: 'Strategy & Consulting',
-            description: 'Transform your vision into actionable digital strategies',
-            color: '#000'
+            description: 'Transform your vision into actionable digital strategies that drive real business growth.',
+            color: 'var(--sage-400)',
+            bgColor: 'var(--sage-50)'
         },
         {
-            icon: <DesignServicesOutlined sx={{ fontSize: 28 }} />,
+            icon: <DesignServicesOutlined sx={{ fontSize: 32 }} />,
             title: 'Product Design',
-            description: 'Crafting experiences that users love and remember',
-            color: '#000'
+            description: 'Crafting beautiful, intuitive experiences that users love and remember.',
+            color: 'var(--coral-400)',
+            bgColor: 'var(--coral-50)'
         },
         {
-            icon: <PhoneIphoneOutlined sx={{ fontSize: 28 }} />,
+            icon: <PhoneIphoneOutlined sx={{ fontSize: 32 }} />,
             title: 'Development',
-            description: 'Building scalable solutions with modern technology',
-            color: '#000'
+            description: 'Building scalable, high-performance solutions with modern technology.',
+            color: 'var(--sand-600)',
+            bgColor: 'var(--sand-50)'
         },
         {
-            icon: <CloudOutlined sx={{ fontSize: 28 }} />,
+            icon: <CloudOutlined sx={{ fontSize: 32 }} />,
             title: 'Cloud & DevOps',
-            description: 'Optimize performance with cloud-native architecture',
-            color: '#000'
+            description: 'Optimize performance and scalability with cloud-native architecture.',
+            color: 'var(--sage-600)',
+            bgColor: 'var(--sage-50)'
         }
     ]
 
     const dynamicStats = stats ? [
-        { value: stats.projects, suffix: '+', label: 'Projects Completed', icon: <WorkspacePremium /> },
-        { value: stats.clients, suffix: '%', label: 'Client Retention', icon: <Groups /> },
-        { value: stats.teamMembers, suffix: '+', label: 'Team Members', icon: <TrendingUp /> },
-        { value: stats.support, suffix: '/7', label: 'Support', icon: <SupportAgent /> }
+        { value: stats.projects, suffix: '+', label: 'Projects Completed', icon: <WorkspacePremium />, color: 'var(--sage-400)' },
+        { value: stats.clients, suffix: '%', label: 'Client Satisfaction', icon: <Groups />, color: 'var(--coral-400)' },
+        { value: stats.teamMembers, suffix: '+', label: 'Team Members', icon: <TrendingUp />, color: 'var(--sand-400)' },
+        { value: stats.support, suffix: '/7', label: 'Support Available', icon: <SupportAgent />, color: 'var(--sage-600)' }
     ] : []
 
     const [ref, inView] = useInView({
@@ -131,31 +136,85 @@ const Home = () => {
     // Featured Project Card Component
     const FeaturedProjectCard = ({ project, index }) => (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
+            transition={{ duration: 0.8, delay: index * 0.2 }}
             viewport={{ once: true }}
-            whileHover={{ y: -8 }}
-            className="cursor-pointer"
+            whileHover={{ y: -12 }}
+            className="cursor-pointer group"
         >
             <Link to={`/projects/${project.slug || project.id}`} className="no-underline">
-                <Box className="relative overflow-hidden group">
-                    <img
-                        src={project.featured_image || project.thumbnail || project.images?.[0] || `https://images.unsplash.com/photo-${index === 0 ? '1551288049-bebda4e38f71' : index === 1 ? '1556742049-0cfed4f6a45d' : '1576091160399-112ba8d25d1d'}?w=600&h=400&fit=crop`}
-                        alt={project.title}
-                        className="w-full h-80 object-cover transition-transform duration-700 group-hover:scale-105"
-                        onError={(e) => {
-                            e.target.src = `https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop`
-                        }}
-                    />
-                    <Box className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
-                        <Box>
-                            <Typography variant="h5" className="text-white font-medium mb-1">
-                                {project.title}
+                <Box
+                    sx={{
+                        position: 'relative',
+                        overflow: 'hidden',
+                        borderRadius: '24px',
+                        backgroundColor: 'white',
+                        boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
+                        transition: 'all 0.4s ease',
+                        '&:hover': {
+                            boxShadow: '0 20px 40px -8px rgba(0, 0, 0, 0.15)',
+                        }
+                    }}
+                >
+                    <Box sx={{ position: 'relative', height: 280, overflow: 'hidden' }}>
+                        <img
+                            src={project.featured_image || project.thumbnail || project.images?.[0] || `https://images.unsplash.com/photo-${index === 0 ? '1551288049-bebda4e38f71' : index === 1 ? '1556742049-0cfed4f6a45d' : '1576091160399-112ba8d25d1d'}?w=600&h=400&fit=crop`}
+                            alt={project.title}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                transition: 'transform 0.6s ease',
+                            }}
+                            onError={(e) => {
+                                e.target.src = `https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop`
+                            }}
+                        />
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                inset: 0,
+                                background: 'linear-gradient(135deg, rgba(157, 176, 130, 0.8) 0%, rgba(247, 161, 136, 0.8) 100%)',
+                                opacity: 0,
+                                transition: 'opacity 0.4s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                '.group:hover &': {
+                                    opacity: 1,
+                                }
+                            }}
+                        >
+                            <IconButton
+                                sx={{
+                                    backgroundColor: 'white',
+                                    color: 'var(--sage-600)',
+                                    width: 56,
+                                    height: 56,
+                                    '&:hover': {
+                                        backgroundColor: 'white',
+                                        transform: 'scale(1.1)',
+                                    }
+                                }}
+                            >
+                                <ArrowOutward />
+                            </IconButton>
+                        </Box>
+                    </Box>
+
+                    <Box sx={{ p: 3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'var(--stone-800)' }}>
+                            {project.title}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'var(--stone-600)', mb: 2 }}>
+                            {project.category_display || project.category?.replace('_', ' ') || 'Web Application'}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', color: 'var(--sage-600)' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>
+                                View Project
                             </Typography>
-                            <Typography variant="body2" className="text-white/80">
-                                {project.category_display || project.category?.replace('_', ' ') || 'Web Application'}
-                            </Typography>
+                            <EastOutlined sx={{ fontSize: 16 }} />
                         </Box>
                     </Box>
                 </Box>
@@ -163,47 +222,16 @@ const Home = () => {
         </motion.div>
     )
 
-
     const getProjectsArray = () => {
         if (projectsLoading) return [];
+        if (Array.isArray(featuredProjects)) return featuredProjects;
+        if (featuredProjects?.projects && Array.isArray(featuredProjects.projects)) return featuredProjects.projects;
+        if (featuredProjects?.data && Array.isArray(featuredProjects.data)) return featuredProjects.data;
 
-        // Debug: Log what we're getting from the API
-        console.log('🔍 Featured Projects Raw Data:', featuredProjects);
-
-        if (Array.isArray(featuredProjects)) {
-            return featuredProjects;
-        }
-
-        // Handle different response structures from your backend
-        if (featuredProjects?.projects && Array.isArray(featuredProjects.projects)) {
-            return featuredProjects.projects;
-        }
-
-        if (featuredProjects?.data && Array.isArray(featuredProjects.data)) {
-            return featuredProjects.data;
-        }
-
-        // If backend returns error or unexpected structure, use fallback
-        console.warn('⚠️ Using fallback projects data. API returned:', featuredProjects);
         return [
-            {
-                id: 1,
-                title: 'Financial Dashboard',
-                category: 'web_application',
-                slug: 'financial-dashboard'
-            },
-            {
-                id: 2,
-                title: 'E-Commerce Platform',
-                category: 'e_commerce',
-                slug: 'ecommerce-platform'
-            },
-            {
-                id: 3,
-                title: 'Healthcare App',
-                category: 'mobile_application',
-                slug: 'healthcare-app'
-            }
+            { id: 1, title: 'Financial Dashboard', category: 'web_application', slug: 'financial-dashboard' },
+            { id: 2, title: 'E-Commerce Platform', category: 'e_commerce', slug: 'ecommerce-platform' },
+            { id: 3, title: 'Healthcare App', category: 'mobile_application', slug: 'healthcare-app' }
         ];
     };
 
@@ -214,122 +242,200 @@ const Home = () => {
                 <meta name="description" content="We create digital experiences that matter. Strategy, Design, Development." />
             </Helmet>
 
-            <Box className="bg-white">
-                {/* Hero Section - Minimal & Clean */}
-                <section className="min-h-screen flex items-center relative overflow-hidden bg-gray-50">
-                    {/* Subtle geometric pattern */}
-                    <div className="absolute inset-0 opacity-[0.02]">
-                        <div className="absolute h-full w-full" style={{
-                            backgroundImage: `repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 1px, transparent 15px),
-                               repeating-linear-gradient(-45deg, #000 0, #000 1px, transparent 1px, transparent 15px)`
-                        }} />
-                    </div>
-
-                    {/* Minimal floating accent */}
-                    <motion.div
-                        style={{ y: y1 }}
-                        className="absolute top-1/4 right-0 w-72 h-72 bg-black/5 rounded-full blur-3xl"
+            <Box sx={{ backgroundColor: 'white' }}>
+                {/* Hero Section - Inspired by u-mts.com */}
+                <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+                    {/* Background Elements */}
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            inset: 0,
+                            background: 'linear-gradient(135deg, var(--sand-50) 0%, var(--sage-50) 50%, var(--coral-50) 100%)',
+                            opacity: 0.7,
+                        }}
                     />
 
-                    <Container maxWidth="lg" className="relative z-10">
+                    {/* Floating Elements */}
+                    <motion.div
+                        style={{ y: y1 }}
+                        className="absolute top-1/4 right-0 w-96 h-96 rounded-full opacity-20"
+                        sx={{
+                            background: 'radial-gradient(circle, var(--sage-400) 0%, transparent 70%)',
+                            filter: 'blur(40px)',
+                        }}
+                    />
+                    <motion.div
+                        style={{ y: y2 }}
+                        className="absolute bottom-1/4 left-0 w-72 h-72 rounded-full opacity-20"
+                        sx={{
+                            background: 'radial-gradient(circle, var(--coral-400) 0%, transparent 70%)',
+                            filter: 'blur(40px)',
+                        }}
+                    />
+
+                    <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10 }}>
                         <Grid container spacing={8} alignItems="center">
                             <Grid item xs={12} lg={7}>
                                 <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
+                                    initial={{ opacity: 0, y: 30 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.8, ease: "easeOut" }}
+                                    transition={{ duration: 1, ease: "easeOut" }}
                                 >
-                                    {/* Minimal pill */}
+                                    {/* Badge */}
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: 0.2 }}
-                                        className="inline-block"
+                                        transition={{ delay: 0.3 }}
+                                        style={{ marginBottom: '2rem' }}
                                     >
                                         <Chip
-                                            icon={<AutoAwesomeOutlined className="text-xs" />}
+                                            icon={<AutoAwesomeOutlined sx={{ fontSize: 16, color: 'white' }} />}
                                             label="Digital Innovation Studio"
-                                            className="mb-8 bg-black text-white font-medium px-4 py-1"
-                                            size="small"
+                                            sx={{
+                                                backgroundColor: 'var(--sage-400)',
+                                                color: 'white',
+                                                fontWeight: 500,
+                                                px: 2,
+                                                py: 0.5,
+                                                borderRadius: '50px',
+                                                fontSize: '0.875rem',
+                                                letterSpacing: '0.025em',
+                                            }}
                                         />
                                     </motion.div>
 
                                     <Typography
                                         variant="h1"
-                                        className="text-6xl md:text-7xl lg:text-8xl font-light mb-6 leading-[0.9] tracking-tight"
+                                        sx={{
+                                            fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5.5rem' },
+                                            fontWeight: 300,
+                                            lineHeight: 0.9,
+                                            letterSpacing: '-0.02em',
+                                            mb: 4,
+                                            color: 'var(--stone-800)',
+                                        }}
                                     >
-                                        We craft
+                                        Crafting digital
                                         <br />
-                                        <span className="font-semibold">digital</span>
+                                        experiences that
                                         <br />
-                                        experiences
+                                        <span style={{ fontWeight: 600, color: 'var(--sage-600)' }}>inspire</span>
                                     </Typography>
 
                                     <Typography
                                         variant="h5"
-                                        className="text-gray-600 mb-10 font-light max-w-xl leading-relaxed"
+                                        sx={{
+                                            color: 'var(--stone-600)',
+                                            fontWeight: 300,
+                                            lineHeight: 1.6,
+                                            mb: 6,
+                                            maxWidth: '600px',
+                                            fontSize: { xs: '1.1rem', md: '1.25rem' }
+                                        }}
                                     >
-                                        Strategy-driven design and development for ambitious brands
-                                        looking to make an impact.
+                                        We partner with ambitious brands to create exceptional digital products
+                                        through strategy, design, and cutting-edge development.
                                     </Typography>
 
-                                    <Stack direction="row" spacing={3} alignItems="center">
+                                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ mb: 8 }}>
                                         <Link to="/contact" className="no-underline">
                                             <Button
                                                 variant="contained"
                                                 size="large"
-                                                endIcon={<EastOutlined />}
-                                                className="bg-black hover:bg-gray-900 text-white rounded-none px-8 py-4 text-base font-light tracking-wide normal-case shadow-none"
+                                                endIcon={<ArrowOutward />}
                                                 sx={{
+                                                    backgroundColor: 'var(--sage-400)',
+                                                    color: 'white',
+                                                    borderRadius: '50px',
+                                                    px: 5,
+                                                    py: 2,
+                                                    fontSize: '1rem',
+                                                    fontWeight: 500,
+                                                    letterSpacing: '0.025em',
+                                                    textTransform: 'none',
+                                                    boxShadow: '0 8px 25px -8px rgba(157, 176, 130, 0.4)',
+                                                    transition: 'all 0.4s ease',
                                                     '&:hover': {
-                                                        transform: 'translateX(4px)',
-                                                    },
-                                                    transition: 'all 0.3s ease'
+                                                        backgroundColor: 'var(--sage-500)',
+                                                        transform: 'translateY(-3px)',
+                                                        boxShadow: '0 12px 35px -8px rgba(157, 176, 130, 0.5)'
+                                                    }
                                                 }}
                                             >
-                                                Start a Project
+                                                Start Your Project
                                             </Button>
                                         </Link>
 
                                         <Link to="/projects" className="no-underline">
                                             <Button
-                                                variant="text"
+                                                variant="outlined"
                                                 size="large"
-                                                className="text-black hover:text-gray-700 font-light tracking-wide normal-case"
+                                                startIcon={<PlayArrow />}
+                                                sx={{
+                                                    borderColor: 'var(--stone-300)',
+                                                    color: 'var(--stone-700)',
+                                                    borderRadius: '50px',
+                                                    px: 5,
+                                                    py: 2,
+                                                    fontSize: '1rem',
+                                                    fontWeight: 500,
+                                                    letterSpacing: '0.025em',
+                                                    textTransform: 'none',
+                                                    transition: 'all 0.4s ease',
+                                                    '&:hover': {
+                                                        borderColor: 'var(--sage-400)',
+                                                        backgroundColor: 'var(--sage-50)',
+                                                        color: 'var(--sage-600)',
+                                                        transform: 'translateY(-2px)',
+                                                    }
+                                                }}
                                             >
-                                                View Work
+                                                View Our Work
                                             </Button>
                                         </Link>
                                     </Stack>
 
-                                    {/* Dynamic social proof */}
-                                    <Box className="mt-16 flex items-center gap-8">
+                                    {/* Social Proof */}
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                                         <Box>
-                                            <Typography variant="h3" className="font-light">
+                                            <Typography variant="h3" sx={{ fontWeight: 300, color: 'var(--stone-800)', mb: 0.5 }}>
                                                 {stats?.projects && !projectStatsLoading ? (
-                                                    <CountUp end={stats.projects} duration={2} />
+                                                    <CountUp end={stats.projects} duration={2.5} />
                                                 ) : (
                                                     <Skeleton width={60} />
                                                 )}
                                                 +
                                             </Typography>
-                                            <Typography variant="body2" className="text-gray-500 uppercase tracking-wider text-xs">
+                                            <Typography variant="caption" sx={{ color: 'var(--stone-500)', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.75rem' }}>
                                                 Projects Delivered
                                             </Typography>
                                         </Box>
-                                        <Box className="h-12 w-px bg-gray-300" />
+                                        <Box sx={{ height: 48, width: 1, backgroundColor: 'var(--stone-200)' }} />
                                         <Box>
-                                            <Typography variant="h3" className="font-light">
+                                            <Typography variant="h3" sx={{ fontWeight: 300, color: 'var(--stone-800)', mb: 0.5 }}>
                                                 {stats?.clients && !projectStatsLoading ? (
-                                                    <CountUp end={stats.clients} duration={2} />
+                                                    <CountUp end={stats.clients} duration={2.5} />
                                                 ) : (
                                                     <Skeleton width={50} />
                                                 )}
                                                 %
                                             </Typography>
-                                            <Typography variant="body2" className="text-gray-500 uppercase tracking-wider text-xs">
+                                            <Typography variant="caption" sx={{ color: 'var(--stone-500)', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.75rem' }}>
                                                 Client Satisfaction
                                             </Typography>
+                                        </Box>
+                                        <Box sx={{ height: 48, width: 1, backgroundColor: 'var(--stone-200)' }} />
+                                        <Box>
+                                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                                                <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: 24, height: 24, fontSize: '0.75rem' } }}>
+                                                    <Avatar sx={{ backgroundColor: 'var(--sage-400)' }}>A</Avatar>
+                                                    <Avatar sx={{ backgroundColor: 'var(--coral-400)' }}>B</Avatar>
+                                                    <Avatar sx={{ backgroundColor: 'var(--sand-400)' }}>C</Avatar>
+                                                </AvatarGroup>
+                                                <Typography variant="body2" sx={{ color: 'var(--stone-600)', fontWeight: 500 }}>
+                                                    Trusted by 50+ clients
+                                                </Typography>
+                                            </Stack>
                                         </Box>
                                     </Box>
                                 </motion.div>
@@ -337,33 +443,99 @@ const Home = () => {
 
                             <Grid item xs={12} lg={5}>
                                 <motion.div
-                                    initial={{ opacity: 0, x: 20 }}
+                                    initial={{ opacity: 0, x: 30 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.8, delay: 0.2 }}
-                                    className="relative"
+                                    transition={{ duration: 1, delay: 0.3 }}
                                 >
-                                    {/* Minimal image composition */}
-                                    <Box className="relative">
-                                        <Box className="absolute -inset-4 bg-gray-100 rounded-lg transform rotate-3" />
-                                        <img
-                                            src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&h=700&fit=crop"
-                                            alt="Team collaboration"
-                                            className="relative rounded-lg w-full shadow-2xl"
-                                        />
+                                    <Box sx={{ position: 'relative' }}>
+                                        {/* Main Hero Image */}
+                                        <Box
+                                            sx={{
+                                                position: 'relative',
+                                                borderRadius: '32px',
+                                                overflow: 'hidden',
+                                                boxShadow: '0 20px 60px -10px rgba(0, 0, 0, 0.2)',
+                                                transform: 'rotate(2deg)',
+                                            }}
+                                        >
+                                            <img
+                                                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=700&fit=crop&auto=format"
+                                                alt="Creative team collaboration"
+                                                style={{
+                                                    width: '100%',
+                                                    height: '500px',
+                                                    objectFit: 'cover',
+                                                }}
+                                            />
+                                            <Box
+                                                sx={{
+                                                    position: 'absolute',
+                                                    inset: 0,
+                                                    background: 'linear-gradient(135deg, rgba(157, 176, 130, 0.1) 0%, rgba(247, 161, 136, 0.1) 100%)',
+                                                }}
+                                            />
+                                        </Box>
 
-                                        {/* Floating accent card with dynamic data */}
+                                        {/* Floating Stats Card */}
                                         <motion.div
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.5 }}
-                                            className="absolute -bottom-6 -left-6 bg-white p-6 rounded-lg shadow-xl"
+                                            transition={{ delay: 0.8 }}
+                                            style={{
+                                                position: 'absolute',
+                                                bottom: -20,
+                                                left: -20,
+                                                backgroundColor: 'white',
+                                                padding: '1.5rem',
+                                                borderRadius: '20px',
+                                                boxShadow: '0 15px 35px -5px rgba(0, 0, 0, 0.15)',
+                                                border: '1px solid var(--stone-100)',
+                                            }}
                                         >
-                                            <Typography variant="h4" className="font-semibold mb-1">
-                                                10+ Years
-                                            </Typography>
-                                            <Typography variant="body2" className="text-gray-600">
-                                                of Excellence
-                                            </Typography>
+                                            <Stack direction="row" spacing={2} alignItems="center">
+                                                <Box
+                                                    sx={{
+                                                        width: 48,
+                                                        height: 48,
+                                                        backgroundColor: 'var(--sage-50)',
+                                                        borderRadius: '12px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                    }}
+                                                >
+                                                    <StarRounded sx={{ color: 'var(--sage-400)', fontSize: 24 }} />
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="h5" sx={{ fontWeight: 600, color: 'var(--stone-800)', mb: 0.5 }}>
+                                                        10+ Years
+                                                    </Typography>
+                                                    <Typography variant="body2" sx={{ color: 'var(--stone-600)' }}>
+                                                        of Excellence
+                                                    </Typography>
+                                                </Box>
+                                            </Stack>
+                                        </motion.div>
+
+                                        {/* Floating Badge */}
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.8 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: 1, type: "spring" }}
+                                            style={{
+                                                position: 'absolute',
+                                                top: -10,
+                                                right: -10,
+                                                backgroundColor: 'var(--coral-400)',
+                                                color: 'white',
+                                                padding: '0.75rem 1.5rem',
+                                                borderRadius: '50px',
+                                                fontSize: '0.875rem',
+                                                fontWeight: 500,
+                                                boxShadow: '0 8px 25px -8px rgba(247, 161, 136, 0.4)',
+                                            }}
+                                        >
+                                            ✨ Award Winning
                                         </motion.div>
                                     </Box>
                                 </motion.div>
@@ -372,64 +544,112 @@ const Home = () => {
                     </Container>
                 </section>
 
-                {/* Services Section - Clean Grid */}
-                <section className="py-24 bg-white">
+                {/* Services Section - Clean & Professional */}
+                <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
                     <Container maxWidth="lg">
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
+                            transition={{ duration: 0.8 }}
                             viewport={{ once: true }}
-                            className="mb-16"
+                            style={{ marginBottom: '4rem', textAlign: 'center' }}
                         >
-                            <Typography variant="overline" className="text-gray-500 tracking-widest mb-4">
+                            <Typography
+                                variant="overline"
+                                sx={{
+                                    color: 'var(--stone-500)',
+                                    letterSpacing: '0.15em',
+                                    mb: 2,
+                                    display: 'block',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                }}
+                            >
                                 WHAT WE DO
                             </Typography>
-                            <Typography variant="h2" className="text-5xl font-light mb-6">
-                                Services & Expertise
+                            <Typography
+                                variant="h2"
+                                sx={{
+                                    fontSize: { xs: '2.5rem', md: '3.5rem' },
+                                    fontWeight: 300,
+                                    mb: 3,
+                                    color: 'var(--stone-800)',
+                                    letterSpacing: '-0.02em',
+                                }}
+                            >
+                                Our Expertise
                             </Typography>
-                            <Typography variant="h6" className="text-gray-600 font-light max-w-2xl">
-                                We combine strategy, creativity, and technology to deliver exceptional digital products.
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    color: 'var(--stone-600)',
+                                    fontWeight: 300,
+                                    maxWidth: '600px',
+                                    mx: 'auto',
+                                    lineHeight: 1.6,
+                                }}
+                            >
+                                We combine strategic thinking, creative design, and technical excellence
+                                to deliver digital solutions that drive results.
                             </Typography>
                         </motion.div>
 
-                        <Grid container spacing={0}>
-                            {services.slice(0, 4).map((service, index) => (
+                        <Grid container spacing={4}>
+                            {services.map((service, index) => (
                                 <Grid item xs={12} md={6} key={index}>
                                     <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
+                                        initial={{ opacity: 0, y: 30 }}
                                         whileInView={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.6, delay: index * 0.1 }}
                                         viewport={{ once: true }}
+                                        whileHover={{ y: -8 }}
                                     >
-                                        <Box
-                                            className="p-8 border-b border-r border-gray-200 hover:bg-gray-50 transition-all duration-300 group cursor-pointer"
+                                        <Card
                                             sx={{
-                                                borderRight: index % 2 === 1 ? 'none' : '1px solid #e5e7eb',
-                                                borderBottom: index >= 2 ? 'none' : '1px solid #e5e7eb',
-                                                '@media (max-width: 900px)': {
-                                                    borderRight: 'none',
-                                                    borderBottom: index === 3 ? 'none' : '1px solid #e5e7eb'
+                                                p: 4,
+                                                height: '100%',
+                                                border: '1px solid var(--stone-100)',
+                                                borderRadius: '24px',
+                                                backgroundColor: 'white',
+                                                transition: 'all 0.4s ease',
+                                                cursor: 'pointer',
+                                                '&:hover': {
+                                                    boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.1)',
+                                                    borderColor: service.color,
                                                 }
                                             }}
                                         >
-                                            <Box className="mb-6 group-hover:transform group-hover:translate-x-2 transition-transform duration-300">
+                                            <Box
+                                                sx={{
+                                                    width: 64,
+                                                    height: 64,
+                                                    backgroundColor: service.bgColor,
+                                                    borderRadius: '16px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    mb: 3,
+                                                    color: service.color,
+                                                }}
+                                            >
                                                 {service.icon}
                                             </Box>
 
-                                            <Typography variant="h5" className="font-medium mb-3">
+                                            <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: 'var(--stone-800)' }}>
                                                 {service.title}
                                             </Typography>
 
-                                            <Typography variant="body1" className="text-gray-600 mb-4 leading-relaxed">
+                                            <Typography variant="body1" sx={{ color: 'var(--stone-600)', mb: 3, lineHeight: 1.6 }}>
                                                 {service.description}
                                             </Typography>
 
-                                            <Box className="flex items-center text-sm font-medium">
-                                                Learn more
-                                                <EastOutlined className="ml-2 text-base group-hover:translate-x-2 transition-transform duration-300" />
+                                            <Box sx={{ display: 'flex', alignItems: 'center', color: service.color }}>
+                                                <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>
+                                                    Learn more
+                                                </Typography>
+                                                <EastOutlined sx={{ fontSize: 16 }} />
                                             </Box>
-                                        </Box>
+                                        </Card>
                                     </motion.div>
                                 </Grid>
                             ))}
@@ -437,33 +657,71 @@ const Home = () => {
                     </Container>
                 </section>
 
-                {/* Stats Section - Dynamic */}
-                <section className="py-24 bg-gray-50">
+                {/* Stats Section - Dynamic with Beautiful Colors */}
+                <section style={{ padding: '6rem 0', background: 'linear-gradient(135deg, var(--sage-50) 0%, var(--sand-50) 100%)' }}>
                     <Container maxWidth="lg">
-                        <Grid container spacing={8} ref={ref}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8 }}
+                            viewport={{ once: true }}
+                            style={{ marginBottom: '4rem', textAlign: 'center' }}
+                        >
+                            <Typography
+                                variant="h2"
+                                sx={{
+                                    fontSize: { xs: '2.5rem', md: '3.5rem' },
+                                    fontWeight: 300,
+                                    mb: 3,
+                                    color: 'var(--stone-800)',
+                                    letterSpacing: '-0.02em',
+                                }}
+                            >
+                                Trusted by Industry Leaders
+                            </Typography>
+                        </motion.div>
+
+                        <Grid container spacing={6} ref={ref}>
                             {dynamicStats.map((stat, index) => (
                                 <Grid item xs={6} md={3} key={index}>
                                     <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
+                                        initial={{ opacity: 0, y: 30 }}
                                         animate={inView ? { opacity: 1, y: 0 } : {}}
-                                        transition={{ duration: 0.6, delay: index * 0.1 }}
+                                        transition={{ duration: 0.8, delay: index * 0.2 }}
                                     >
-                                        <Box className="text-center">
-                                            <Typography variant="h2" className="font-light mb-2">
+                                        <Box sx={{ textAlign: 'center' }}>
+                                            <Box
+                                                sx={{
+                                                    width: 64,
+                                                    height: 64,
+                                                    backgroundColor: 'white',
+                                                    borderRadius: '16px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    mx: 'auto',
+                                                    mb: 3,
+                                                    color: stat.color,
+                                                    boxShadow: '0 8px 25px -8px rgba(0, 0, 0, 0.1)',
+                                                }}
+                                            >
+                                                {stat.icon}
+                                            </Box>
+                                            <Typography variant="h2" sx={{ fontWeight: 300, mb: 1, color: 'var(--stone-800)' }}>
                                                 {inView && stats && !projectStatsLoading && !teamStatsLoading && (
                                                     <CountUp
                                                         start={0}
                                                         end={stat.value}
-                                                        duration={2}
+                                                        duration={2.5}
                                                         separator=","
                                                         suffix={stat.suffix}
                                                     />
                                                 )}
                                                 {(projectStatsLoading || teamStatsLoading || !stats) && (
-                                                    <Skeleton width={80} height={60} className="mx-auto" />
+                                                    <Skeleton width={80} height={60} sx={{ mx: 'auto' }} />
                                                 )}
                                             </Typography>
-                                            <Typography variant="body2" className="text-gray-600 uppercase tracking-wider text-xs">
+                                            <Typography variant="body2" sx={{ color: 'var(--stone-600)', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.75rem', fontWeight: 500 }}>
                                                 {stat.label}
                                             </Typography>
                                         </Box>
@@ -474,30 +732,90 @@ const Home = () => {
                     </Container>
                 </section>
 
-                {/* Featured Work - Dynamic Gallery */}
-                <section className="py-24 bg-white">
+                {/* Featured Work - Beautiful Gallery */}
+                <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
                     <Container maxWidth="lg">
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
+                            transition={{ duration: 0.8 }}
                             viewport={{ once: true }}
-                            className="mb-16"
+                            style={{ marginBottom: '4rem' }}
                         >
-                            <Typography variant="overline" className="text-gray-500 tracking-widest mb-4">
-                                FEATURED WORK
-                            </Typography>
-                            <Typography variant="h2" className="text-5xl font-light mb-6">
-                                Recent Projects
-                            </Typography>
+                            <Grid container spacing={4} alignItems="center">
+                                <Grid item xs={12} md={8}>
+                                    <Typography
+                                        variant="overline"
+                                        sx={{
+                                            color: 'var(--stone-500)',
+                                            letterSpacing: '0.15em',
+                                            mb: 2,
+                                            display: 'block',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        FEATURED WORK
+                                    </Typography>
+                                    <Typography
+                                        variant="h2"
+                                        sx={{
+                                            fontSize: { xs: '2.5rem', md: '3.5rem' },
+                                            fontWeight: 300,
+                                            mb: 2,
+                                            color: 'var(--stone-800)',
+                                            letterSpacing: '-0.02em',
+                                        }}
+                                    >
+                                        Recent Projects
+                                    </Typography>
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            color: 'var(--stone-600)',
+                                            fontWeight: 300,
+                                            lineHeight: 1.6,
+                                        }}
+                                    >
+                                        Explore our latest work and see how we've helped brands achieve their digital goals.
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+                                    <Link to="/projects" className="no-underline">
+                                        <Button
+                                            variant="outlined"
+                                            endIcon={<ArrowOutward />}
+                                            sx={{
+                                                borderColor: 'var(--sage-400)',
+                                                color: 'var(--sage-600)',
+                                                borderRadius: '50px',
+                                                px: 4,
+                                                py: 1.5,
+                                                fontSize: '0.875rem',
+                                                fontWeight: 500,
+                                                letterSpacing: '0.025em',
+                                                textTransform: 'none',
+                                                transition: 'all 0.4s ease',
+                                                '&:hover': {
+                                                    backgroundColor: 'var(--sage-400)',
+                                                    color: 'white',
+                                                    transform: 'translateY(-2px)',
+                                                }
+                                            }}
+                                        >
+                                            View All Projects
+                                        </Button>
+                                    </Link>
+                                </Grid>
+                            </Grid>
                         </motion.div>
 
                         {projectsLoading ? (
                             <Grid container spacing={4}>
                                 {[...Array(3)].map((_, index) => (
                                     <Grid item xs={12} md={4} key={index}>
-                                        <Skeleton variant="rectangular" height={320} className="rounded-lg" />
-                                        <Box className="pt-4">
+                                        <Skeleton variant="rectangular" height={320} sx={{ borderRadius: '24px' }} />
+                                        <Box sx={{ pt: 3 }}>
                                             <Skeleton variant="text" width="70%" />
                                             <Skeleton variant="text" width="50%" />
                                         </Box>
@@ -506,95 +824,303 @@ const Home = () => {
                             </Grid>
                         ) : (
                             <Grid container spacing={4}>
-                                    {getProjectsArray().slice(0, 3).map((project, index) => (
+                                {getProjectsArray().slice(0, 3).map((project, index) => (
                                     <Grid item xs={12} md={4} key={project.id}>
                                         <FeaturedProjectCard project={project} index={index} />
                                     </Grid>
                                 ))}
                             </Grid>
                         )}
-
-                        <Box className="text-center mt-12">
-                            <Link to="/projects" className="no-underline">
-                                <Button
-                                    variant="outlined"
-                                    size="large"
-                                    endIcon={<EastOutlined />}
-                                    className="border-black text-black hover:bg-black hover:text-white rounded-none px-8 py-3 font-light tracking-wide normal-case"
-                                >
-                                    View All Projects
-                                </Button>
-                            </Link>
-                        </Box>
                     </Container>
                 </section>
 
-                {/* CTA Section - Bold & Minimal */}
-                <section className="py-32 bg-black text-white relative overflow-hidden">
-                    <Container maxWidth="md" className="relative z-10 text-center">
+                {/* CTA Section - Elegant & Compelling */}
+                <section
+                    style={{
+                        padding: '8rem 0',
+                        background: 'linear-gradient(135deg, var(--stone-800) 0%, var(--stone-900) 100%)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                    }}
+                >
+                    {/* Background Pattern */}
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            inset: 0,
+                            opacity: 0.05,
+                            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,0.1) 35px, rgba(255,255,255,0.1) 70px)`,
+                        }}
+                    />
+
+                    <Container maxWidth="md" sx={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
+                            transition={{ duration: 0.8 }}
                             viewport={{ once: true }}
                         >
-                            <Typography variant="h2" className="text-5xl md:text-6xl font-light mb-8 leading-tight">
-                                Ready to start your
+                            <Typography
+                                variant="h2"
+                                sx={{
+                                    fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' },
+                                    fontWeight: 300,
+                                    lineHeight: 1.1,
+                                    letterSpacing: '-0.02em',
+                                    mb: 4,
+                                    color: 'white',
+                                }}
+                            >
+                                Ready to bring your
                                 <br />
-                                <span className="font-semibold">next project?</span>
+                                <span style={{ fontWeight: 600, background: 'linear-gradient(135deg, var(--sage-400) 0%, var(--coral-400) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                                    vision to life?
+                                </span>
                             </Typography>
 
-                            <Typography variant="h6" className="text-gray-400 mb-12 font-light max-w-2xl mx-auto">
-                                Let's collaborate to create something extraordinary together.
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    fontWeight: 300,
+                                    mb: 6,
+                                    maxWidth: '600px',
+                                    mx: 'auto',
+                                    lineHeight: 1.6,
+                                }}
+                            >
+                                Let's collaborate to create something extraordinary that makes a lasting impact
+                                on your audience and drives your business forward.
                             </Typography>
 
-                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} justifyContent="center">
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} justifyContent="center" sx={{ mb: 6 }}>
                                 <Link to="/contact" className="no-underline">
                                     <Button
                                         variant="contained"
                                         size="large"
-                                        endIcon={<EastOutlined />}
-                                        className="bg-white text-black hover:bg-gray-100 rounded-none px-10 py-4 text-base font-light tracking-wide normal-case"
+                                        endIcon={<ArrowOutward />}
+                                        sx={{
+                                            backgroundColor: 'white',
+                                            color: 'var(--stone-800)',
+                                            borderRadius: '50px',
+                                            px: 6,
+                                            py: 2.5,
+                                            fontSize: '1rem',
+                                            fontWeight: 500,
+                                            letterSpacing: '0.025em',
+                                            textTransform: 'none',
+                                            boxShadow: '0 8px 25px -8px rgba(255, 255, 255, 0.3)',
+                                            transition: 'all 0.4s ease',
+                                            '&:hover': {
+                                                backgroundColor: 'var(--sage-50)',
+                                                transform: 'translateY(-3px)',
+                                                boxShadow: '0 12px 35px -8px rgba(255, 255, 255, 0.4)'
+                                            }
+                                        }}
                                     >
-                                        Get in Touch
+                                        Start Your Project
                                     </Button>
                                 </Link>
                                 <Link to="/about" className="no-underline">
                                     <Button
                                         variant="outlined"
                                         size="large"
-                                        className="border-white text-white hover:bg-white hover:text-black rounded-none px-10 py-4 text-base font-light tracking-wide normal-case"
+                                        sx={{
+                                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                                            color: 'white',
+                                            borderRadius: '50px',
+                                            px: 6,
+                                            py: 2.5,
+                                            fontSize: '1rem',
+                                            fontWeight: 500,
+                                            letterSpacing: '0.025em',
+                                            textTransform: 'none',
+                                            transition: 'all 0.4s ease',
+                                            '&:hover': {
+                                                borderColor: 'white',
+                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                transform: 'translateY(-2px)',
+                                            }
+                                        }}
                                     >
                                         Learn About Us
                                     </Button>
                                 </Link>
                             </Stack>
+
+                            {/* Trust Indicators */}
+                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <CheckCircleOutline sx={{ color: 'var(--sage-400)', fontSize: 20 }} />
+                                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+                                        Free Consultation
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <CheckCircleOutline sx={{ color: 'var(--sage-400)', fontSize: 20 }} />
+                                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+                                        24/7 Support
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <CheckCircleOutline sx={{ color: 'var(--sage-400)', fontSize: 20 }} />
+                                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+                                        Money-back Guarantee
+                                    </Typography>
+                                </Box>
+                            </Box>
                         </motion.div>
                     </Container>
-
-                    {/* Subtle decoration */}
-                    <Box className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                 </section>
 
-                {/* Scroll to Top - Minimal */}
+                {/* Client Testimonials - New Section */}
+                <section style={{ padding: '6rem 0', backgroundColor: 'var(--sage-50)' }}>
+                    <Container maxWidth="lg">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8 }}
+                            viewport={{ once: true }}
+                            style={{ marginBottom: '4rem', textAlign: 'center' }}
+                        >
+                            <Typography
+                                variant="overline"
+                                sx={{
+                                    color: 'var(--stone-500)',
+                                    letterSpacing: '0.15em',
+                                    mb: 2,
+                                    display: 'block',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                }}
+                            >
+                                CLIENT TESTIMONIALS
+                            </Typography>
+                            <Typography
+                                variant="h2"
+                                sx={{
+                                    fontSize: { xs: '2.5rem', md: '3.5rem' },
+                                    fontWeight: 300,
+                                    mb: 3,
+                                    color: 'var(--stone-800)',
+                                    letterSpacing: '-0.02em',
+                                }}
+                            >
+                                What Our Clients Say
+                            </Typography>
+                        </motion.div>
+
+                        <Grid container spacing={4}>
+                            {[
+                                {
+                                    name: "Sarah Johnson",
+                                    role: "CEO, TechFlow",
+                                    content: "GS Infotech transformed our digital presence completely. Their strategic approach and attention to detail exceeded our expectations.",
+                                    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b789?w=150&h=150&fit=crop&crop=face"
+                                },
+                                {
+                                    name: "Michael Chen",
+                                    role: "Founder, InnovateLab",
+                                    content: "The team's expertise in both design and development made our project seamless. Highly recommended for any serious business.",
+                                    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+                                },
+                                {
+                                    name: "Emily Rodriguez",
+                                    role: "Marketing Director, GrowthCo",
+                                    content: "Professional, reliable, and creative. They delivered exactly what we needed and more. Our ROI has increased by 150%.",
+                                    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
+                                }
+                            ].map((testimonial, index) => (
+                                <Grid item xs={12} md={4} key={index}>
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 30 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.6, delay: index * 0.2 }}
+                                        viewport={{ once: true }}
+                                    >
+                                        <Card
+                                            sx={{
+                                                p: 4,
+                                                height: '100%',
+                                                border: '1px solid var(--stone-100)',
+                                                borderRadius: '24px',
+                                                backgroundColor: 'white',
+                                                boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
+                                                transition: 'all 0.4s ease',
+                                                '&:hover': {
+                                                    transform: 'translateY(-8px)',
+                                                    boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
+                                                }
+                                            }}
+                                        >
+                                            <Box sx={{ display: 'flex', mb: 2 }}>
+                                                {[...Array(5)].map((_, i) => (
+                                                    <StarRounded key={i} sx={{ color: 'var(--sand-400)', fontSize: 20 }} />
+                                                ))}
+                                            </Box>
+
+                                            <Typography
+                                                variant="body1"
+                                                sx={{
+                                                    color: 'var(--stone-700)',
+                                                    mb: 3,
+                                                    lineHeight: 1.6,
+                                                    fontStyle: 'italic',
+                                                }}
+                                            >
+                                                "{testimonial.content}"
+                                            </Typography>
+
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                <Avatar
+                                                    src={testimonial.avatar}
+                                                    sx={{ width: 48, height: 48 }}
+                                                />
+                                                <Box>
+                                                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--stone-800)' }}>
+                                                        {testimonial.name}
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ color: 'var(--stone-500)' }}>
+                                                        {testimonial.role}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </Card>
+                                    </motion.div>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Container>
+                </section>
+
+                {/* Scroll to Top Button */}
                 <AnimatePresence>
                     {showScrollTop && (
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                            className="fixed bottom-8 right-8 z-50"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            style={{
+                                position: 'fixed',
+                                bottom: '2rem',
+                                right: '2rem',
+                                zIndex: 1000,
+                            }}
                         >
                             <IconButton
                                 onClick={scrollToTop}
-                                className="bg-black text-white hover:bg-gray-900 shadow-lg"
                                 sx={{
-                                    width: 48,
-                                    height: 48,
+                                    width: 56,
+                                    height: 56,
+                                    backgroundColor: 'var(--sage-400)',
+                                    color: 'white',
+                                    boxShadow: '0 8px 25px -8px rgba(157, 176, 130, 0.4)',
+                                    transition: 'all 0.3s ease',
                                     '&:hover': {
-                                        transform: 'translateY(-2px)',
-                                    },
-                                    transition: 'all 0.3s ease'
+                                        backgroundColor: 'var(--sage-500)',
+                                        transform: 'translateY(-3px)',
+                                        boxShadow: '0 12px 35px -8px rgba(157, 176, 130, 0.5)',
+                                    }
                                 }}
                             >
                                 <KeyboardArrowUp />

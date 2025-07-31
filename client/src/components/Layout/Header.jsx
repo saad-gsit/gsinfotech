@@ -10,11 +10,13 @@ import {
     Box,
     Button,
     useScrollTrigger,
-    Typography
+    Typography,
+    Stack
 } from '@mui/material'
 import {
     Menu as MenuIcon,
-    Close as CloseIcon
+    Close as CloseIcon,
+    ArrowOutward
 } from '@mui/icons-material'
 import { toggleMobileMenu } from '@/store/slices/uiSlice'
 
@@ -26,7 +28,7 @@ const Header = () => {
 
     const trigger = useScrollTrigger({
         disableHysteresis: true,
-        threshold: 50,
+        threshold: 30,
     })
 
     useEffect(() => {
@@ -34,12 +36,10 @@ const Header = () => {
     }, [trigger])
 
     const navigation = [
-        { name: 'Home', href: '/' },
+        { name: 'Work', href: '/projects' },
+        { name: 'Services', href: '/services' },
         { name: 'About', href: '/about' },
-        { name: 'Services', href: '/services' }, // Simple services link
-        { name: 'Projects', href: '/projects' },
-        { name: 'Team', href: '/team' },
-        { name: 'Blog', href: '/blog' },
+        { name: 'Journal', href: '/blog' },
         { name: 'Contact', href: '/contact' },
     ]
 
@@ -49,25 +49,40 @@ const Header = () => {
                 position="fixed"
                 elevation={0}
                 sx={{
-                    backgroundColor: scrolled ? 'rgba(255, 255, 255, 0.98)' : 'transparent',
-                    backdropFilter: scrolled ? 'blur(10px)' : 'none',
-                    borderBottom: scrolled ? '1px solid rgba(0, 0, 0, 0.08)' : 'none',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    color: scrolled ? '#000' : '#000',
+                    backgroundColor: scrolled
+                        ? 'var(--sand-100)'
+                        : 'transparent',
+                    backdropFilter: scrolled ? 'blur(20px)' : 'none',
+                    borderBottom: scrolled ? '1px solid var(--sage-100)' : 'none',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}
             >
-                <Toolbar className="max-w-7xl mx-auto w-full px-6 lg:px-8 py-4">
+                <Toolbar className="max-w-7xl mx-auto w-full px-6 lg:px-12 py-6">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center no-underline">
-                        <Typography variant="h5" className="font-medium tracking-tight text-black">
-                            GS<span className="font-light">infotech</span>
-                        </Typography>
+                    <Link to="/" className="flex items-center no-underline group">
+                        <motion.div
+                            className="flex items-center"
+                            whileHover={{ scale: 1.02 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <div className="w-8 h-8 bg-sage-400 rounded-full mr-3 flex items-center justify-center">
+                                <Typography variant="body2" className="text-white font-semibold text-sm">
+                                    GS
+                                </Typography>
+                            </div>
+                            <Typography
+                                variant="h6"
+                                className="font-medium tracking-tight text-stone-800 group-hover:text-sage-600 transition-colors duration-300"
+                            >
+                                GS Infotech
+                            </Typography>
+                        </motion.div>
                     </Link>
 
                     <Box sx={{ flexGrow: 1 }} />
 
                     {/* Desktop Navigation */}
-                    <Box sx={{ display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 4 }}>
+                    <Box sx={{ display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 1 }}>
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
@@ -75,18 +90,26 @@ const Header = () => {
                                 className="no-underline"
                             >
                                 <Button
-                                    className={`text-sm font-light tracking-wide normal-case ${location.pathname === item.href ||
-                                        (item.href === '/services' && location.pathname.startsWith('/services'))
-                                        ? 'text-black font-medium'
-                                        : 'text-gray-600 hover:text-black'
-                                        }`}
                                     sx={{
-                                        minWidth: 'auto',
-                                        padding: '4px 8px',
-                                        transition: 'all 0.2s ease',
+                                        px: 3,
+                                        py: 1.5,
+                                        fontSize: '0.875rem',
+                                        fontWeight: 500,
+                                        letterSpacing: '0.025em',
+                                        textTransform: 'none',
+                                        borderRadius: '50px',
+                                        transition: 'all 0.3s ease',
+                                        color: location.pathname === item.href ||
+                                            (item.href === '/services' && location.pathname.startsWith('/services'))
+                                            ? 'var(--sage-600)'
+                                            : 'var(--stone-600)',
+                                        backgroundColor: location.pathname === item.href ||
+                                            (item.href === '/services' && location.pathname.startsWith('/services'))
+                                            ? 'var(--sage-50)'
+                                            : 'transparent',
                                         '&:hover': {
-                                            backgroundColor: 'transparent',
-                                            transform: 'translateY(-1px)',
+                                            color: 'var(--stone-800)',
+                                            backgroundColor: 'var(--stone-50)',
                                         }
                                     }}
                                 >
@@ -95,20 +118,31 @@ const Header = () => {
                             </Link>
                         ))}
 
-                        <Box className="ml-4">
+                        <Box className="ml-6 pl-6" sx={{ borderLeft: '1px solid var(--stone-200)' }}>
                             <Link to="/contact" className="no-underline">
                                 <Button
                                     variant="contained"
-                                    className="bg-black hover:bg-gray-900 text-white rounded-none px-6 py-2 text-sm font-light tracking-wide normal-case shadow-none"
+                                    endIcon={<ArrowOutward className="text-sm" />}
                                     sx={{
-                                        transition: 'all 0.2s ease',
+                                        backgroundColor: 'var(--sage-400)',
+                                        color: 'white',
+                                        borderRadius: '50px',
+                                        px: 4,
+                                        py: 1.5,
+                                        fontSize: '0.875rem',
+                                        fontWeight: 500,
+                                        letterSpacing: '0.025em',
+                                        textTransform: 'none',
+                                        boxShadow: 'none',
+                                        transition: 'all 0.3s ease',
                                         '&:hover': {
-                                            transform: 'translateY(-1px)',
-                                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                                            backgroundColor: 'var(--sage-500)',
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 8px 25px -8px rgba(157, 176, 130, 0.5)'
                                         }
                                     }}
                                 >
-                                    Start a Project
+                                    Let's Talk
                                 </Button>
                             </Link>
                         </Box>
@@ -117,7 +151,13 @@ const Header = () => {
                     {/* Mobile menu button */}
                     <IconButton
                         onClick={() => dispatch(toggleMobileMenu())}
-                        sx={{ display: { lg: 'none' }, color: 'black' }}
+                        sx={{
+                            display: { lg: 'none' },
+                            color: 'var(--stone-800)',
+                            '&:hover': {
+                                backgroundColor: 'var(--stone-50)'
+                            }
+                        }}
                     >
                         {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
                     </IconButton>
@@ -133,102 +173,71 @@ const Header = () => {
                     sx: {
                         width: '100%',
                         maxWidth: 400,
-                        backgroundColor: '#fff',
+                        background: `linear-gradient(135deg, var(--sand-100) 0%, var(--sage-50) 100%)`,
                     }
                 }}
             >
                 <Box className="h-full flex flex-col">
-                    <Box className="flex justify-between items-center p-6 border-b">
-                        <Typography variant="h6" className="font-medium">
-                            Menu
+                    {/* Header */}
+                    <Box className="flex justify-between items-center p-8" sx={{ borderBottom: '1px solid var(--stone-200)' }}>
+                        <Typography variant="h6" className="font-medium text-stone-800">
+                            Navigation
                         </Typography>
-                        <IconButton onClick={() => dispatch(toggleMobileMenu())}>
+                        <IconButton
+                            onClick={() => dispatch(toggleMobileMenu())}
+                            sx={{ color: 'var(--stone-600)', '&:hover': { color: 'var(--stone-800)' } }}
+                        >
                             <CloseIcon />
                         </IconButton>
                     </Box>
 
-                    <Box className="flex-1 p-6 overflow-y-auto">
-                        {/* Main Navigation */}
-                        {navigation.map((item, index) => (
-                            <motion.div
-                                key={item.name}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.05 }}
-                            >
-                                <Link
-                                    to={item.href}
-                                    onClick={() => dispatch(toggleMobileMenu())}
-                                    className="no-underline"
+                    {/* Navigation Links */}
+                    <Box className="flex-1 p-8 overflow-y-auto">
+                        <Stack spacing={1}>
+                            {navigation.map((item, index) => (
+                                <motion.div
+                                    key={item.name}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.1 }}
                                 >
-                                    <Box
-                                        className={`py-4 border-b text-lg font-light transition-colors ${location.pathname === item.href ||
-                                                (item.href === '/services' && location.pathname.startsWith('/services'))
-                                                ? 'text-black font-medium'
-                                                : 'text-gray-600 hover:text-black'
-                                            }`}
+                                    <Link
+                                        to={item.href}
+                                        onClick={() => dispatch(toggleMobileMenu())}
+                                        className="no-underline"
                                     >
-                                        {item.name}
-                                    </Box>
-                                </Link>
-                            </motion.div>
-                        ))}
-
-                        {/* Mobile Quick Links */}
-                        <Box className="mt-8 pt-6 border-t">
-                            <Typography variant="overline" className="text-gray-400 text-xs mb-4 block">
-                                Quick Links
-                            </Typography>
-                            <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: (navigation.length + 1) * 0.05 }}
-                            >
-                                <Link
-                                    to="/projects"
-                                    onClick={() => dispatch(toggleMobileMenu())}
-                                    className="no-underline"
-                                >
-                                    <Box className="py-2 text-gray-600 font-light hover:text-black transition-colors">
-                                        View Our Work
-                                    </Box>
-                                </Link>
-                            </motion.div>
-                            <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: (navigation.length + 2) * 0.05 }}
-                            >
-                                <Link
-                                    to="/about"
-                                    onClick={() => dispatch(toggleMobileMenu())}
-                                    className="no-underline"
-                                >
-                                    <Box className="py-2 text-gray-600 font-light hover:text-black transition-colors">
-                                        About Our Team
-                                    </Box>
-                                </Link>
-                            </motion.div>
-                            <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: (navigation.length + 3) * 0.05 }}
-                            >
-                                <Link
-                                    to="/services"
-                                    onClick={() => dispatch(toggleMobileMenu())}
-                                    className="no-underline"
-                                >
-                                    <Box className="py-2 text-gray-600 font-light hover:text-black transition-colors">
-                                        Our Services
-                                    </Box>
-                                </Link>
-                            </motion.div>
-                        </Box>
+                                        <Box
+                                            sx={{
+                                                py: 2,
+                                                px: 3,
+                                                borderRadius: '16px',
+                                                fontSize: '1.25rem',
+                                                fontWeight: 500,
+                                                transition: 'all 0.3s ease',
+                                                color: location.pathname === item.href ||
+                                                    (item.href === '/services' && location.pathname.startsWith('/services'))
+                                                    ? 'var(--sage-600)'
+                                                    : 'var(--stone-700)',
+                                                backgroundColor: location.pathname === item.href ||
+                                                    (item.href === '/services' && location.pathname.startsWith('/services'))
+                                                    ? 'rgba(255, 255, 255, 0.7)'
+                                                    : 'transparent',
+                                                '&:hover': {
+                                                    color: 'var(--stone-900)',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                                }
+                                            }}
+                                        >
+                                            {item.name}
+                                        </Box>
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </Stack>
                     </Box>
 
-                    {/* Mobile CTA Button */}
-                    <Box className="p-6 border-t bg-gray-50">
+                    {/* Mobile CTA */}
+                    <Box className="p-8" sx={{ borderTop: '1px solid var(--stone-200)' }}>
                         <Link
                             to="/contact"
                             onClick={() => dispatch(toggleMobileMenu())}
@@ -237,28 +246,31 @@ const Header = () => {
                             <Button
                                 variant="contained"
                                 fullWidth
-                                className="bg-black hover:bg-gray-900 text-white rounded-none py-3 text-base font-light tracking-wide normal-case"
+                                endIcon={<ArrowOutward />}
                                 sx={{
+                                    backgroundColor: 'var(--sage-400)',
+                                    color: 'white',
+                                    borderRadius: '16px',
+                                    py: 2,
+                                    fontSize: '1.125rem',
+                                    fontWeight: 500,
+                                    letterSpacing: '0.025em',
+                                    textTransform: 'none',
                                     boxShadow: 'none',
-                                    transition: 'all 0.2s ease',
                                     '&:hover': {
-                                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                                        transform: 'translateY(-1px)'
+                                        backgroundColor: 'var(--sage-500)',
                                     }
                                 }}
                             >
-                                Start a Project
+                                Let's Talk
                             </Button>
                         </Link>
 
-                        {/* Mobile Contact Info */}
-                        <Box className="mt-4 text-center">
-                            <Typography variant="caption" color="text.secondary">
-                                Ready to discuss your project?
-                            </Typography>
-                            <br />
-                            <Typography variant="caption" color="text.secondary">
-                                Let's create something amazing together
+                        <Box className="mt-6 text-center">
+                            <Typography variant="body2" sx={{ color: 'var(--stone-600)', lineHeight: 1.6 }}>
+                                Ready to bring your vision to life?
+                                <br />
+                                Let's create something beautiful together.
                             </Typography>
                         </Box>
                     </Box>
@@ -266,7 +278,7 @@ const Header = () => {
             </Drawer>
 
             {/* Spacer */}
-            <Toolbar sx={{ minHeight: { xs: 80, md: 96 } }} />
+            <Toolbar sx={{ minHeight: { xs: 88, md: 104 } }} />
         </>
     )
 }

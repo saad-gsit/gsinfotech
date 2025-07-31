@@ -1,1 +1,218 @@
 @import "tailwindcss";
+
+/* Custom Color Palette - Olive Green, Beige, Grey, Peach */
+:root {
+    /* Sage (Olive Green) */
+    --sage-50: #f6f7f4;
+    --sage-100: #e8ebdf;
+    --sage-200: #d1d8c1;
+    --sage-300: #b4c298;
+    --sage-400: #9db082;
+    --sage-500: #7d9461;
+    --sage-600: #62754c;
+    --sage-700: #4d5c3c;
+    --sage-800: #404d33;
+    --sage-900: #37422d;
+
+    /* Sand (Beige) */
+    --sand-50: #fefcf9;
+    --sand-100: #fdf7ed;
+    --sand-200: #f9ead5;
+    --sand-300: #f4d6b0;
+    --sand-400: #edbd83;
+    --sand-500: #e5a05f;
+    --sand-600: #d88544;
+
+    /* Stone (Grey) */
+    --stone-50: #fafaf9;
+    --stone-100: #f5f5f4;
+    --stone-200: #e7e5e4;
+    --stone-300: #d6d3d1;
+    --stone-400: #a8a29e;
+    --stone-500: #78716c;
+    --stone-600: #57534e;
+    --stone-700: #44403c;
+    --stone-800: #292524;
+    --stone-900: #1c1917;
+
+    /* Coral (Peach) */
+    --coral-50: #fef7f5;
+    --coral-100: #feeceb;
+    --coral-200: #fdddd7;
+    --coral-300: #fbc4b8;
+    --coral-400: #f7a188;
+    --coral-500: #f0815c;
+    --coral-600: #de5f3a;
+}
+
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+    line-height: 1.6;
+    color: var(--stone-800);
+    background-color: #ffffff;
+}
+
+/* Selection */
+::selection {
+    background: var(--sage-400);
+    color: white;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--sage-50);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--sage-400);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--sage-600);
+}
+
+/* Custom Utility Classes for Your Color Palette */
+.bg-sage-50 {
+    background-color: var(--sage-50);
+}
+
+.bg-sage-100 {
+    background-color: var(--sage-100);
+}
+
+.bg-sage-400 {
+    background-color: var(--sage-400);
+}
+
+.bg-sage-500 {
+    background-color: var(--sage-500);
+}
+
+.bg-sage-600 {
+    background-color: var(--sage-600);
+}
+
+.bg-sand-50 {
+    background-color: var(--sand-50);
+}
+
+.bg-sand-100 {
+    background-color: var(--sand-100);
+}
+
+.bg-sand-400 {
+    background-color: var(--sand-400);
+}
+
+.bg-stone-50 {
+    background-color: var(--stone-50);
+}
+
+.bg-stone-100 {
+    background-color: var(--stone-100);
+}
+
+.bg-stone-200 {
+    background-color: var(--stone-200);
+}
+
+.bg-stone-800 {
+    background-color: var(--stone-800);
+}
+
+.bg-coral-50 {
+    background-color: var(--coral-50);
+}
+
+.bg-coral-400 {
+    background-color: var(--coral-400);
+}
+
+.text-sage-400 {
+    color: var(--sage-400);
+}
+
+.text-sage-600 {
+    color: var(--sage-600);
+}
+
+.text-sand-400 {
+    color: var(--sand-400);
+}
+
+.text-stone-400 {
+    color: var(--stone-400);
+}
+
+.text-stone-600 {
+    color: var(--stone-600);
+}
+
+.text-stone-700 {
+    color: var(--stone-700);
+}
+
+.text-stone-800 {
+    color: var(--stone-800);
+}
+
+.text-coral-400 {
+    color: var(--coral-400);
+}
+
+.border-sage-100 {
+    border-color: var(--sage-100);
+}
+
+.border-stone-200 {
+    border-color: var(--stone-200);
+}
+
+.hover\:bg-sage-500:hover {
+    background-color: var(--sage-500);
+}
+
+.hover\:bg-stone-50:hover {
+    background-color: var(--stone-50);
+}
+
+.hover\:text-sage-600:hover {
+    color: var(--sage-600);
+}
+
+.hover\:text-stone-800:hover {
+    color: var(--stone-800);
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(135deg, var(--sage-600) 0%, var(--coral-400) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Custom Shadows */
+.shadow-sage {
+    box-shadow: 0 8px 25px -8px rgba(157, 176, 130, 0.3);
+}
+
+.shadow-sage-hover {
+    box-shadow: 0 12px 35px -8px rgba(157, 176, 130, 0.4);
+}
