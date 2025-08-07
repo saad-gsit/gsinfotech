@@ -1,4 +1,4 @@
-// server/middleware/validation.js
+// server/middleware/validation.js - FIXED VERSION
 const { body, param, query, validationResult } = require('express-validator');
 const { logger } = require('../utils/logger');
 const xss = require('xss');
@@ -316,15 +316,220 @@ const sanitizeObject = (obj) => {
 
 // Pre-defined validation schemas
 const validationSchemas = {
-    // Project validation
+    // Updated validation schema for projects with structured content
     project: [
-        validationHelper.createValidationChain('title', 'title'),
-        validationHelper.createValidationChain('description', 'description'),
-        validationHelper.createValidationChain('content', 'content', { optional: true }),
-        validationHelper.createValidationChain('technologies', 'array', { optional: true }),
-        validationHelper.createValidationChain('projectUrl', 'url', { optional: true }),
-        validationHelper.createValidationChain('status', 'string', { optional: true }),
-        body('status').optional().isIn(['draft', 'published', 'archived']).withMessage('Status must be draft, published, or archived'),
+        // Title validation
+        body('title')
+            .trim()
+            .isLength({ min: 3, max: 255 })
+            .withMessage('Title must be between 3 and 255 characters')
+            .matches(/^[a-zA-Z0-9\s\-_.,!?()&]+$/)
+            .withMessage('Title contains invalid characters'),
+
+        // Description validation
+        body('description')
+            .trim()
+            .isLength({ min: 10, max: 2000 })
+            .withMessage('Description must be between 10 and 2000 characters'),
+
+        // Short description - optional
+        body('shortDescription')
+            .optional({ nullable: true, checkFalsy: true })
+            .trim()
+            .isLength({ max: 500 })
+            .withMessage('Short description must be less than 500 characters'),
+
+        // NEW: Overview validation
+        body('overview')
+            .optional({ nullable: true, checkFalsy: true })
+            .trim()
+            .isLength({ min: 50, max: 1000 })
+            .withMessage('Overview must be between 50 and 1000 characters'),
+
+        // NEW: Key features validation
+        body('keyFeatures')
+            .optional({ nullable: true, checkFalsy: true })
+            .custom((value) => {
+                if (!value) return true;
+
+                // Handle JSON string
+                let features = value;
+                if (typeof value === 'string') {
+                    try {
+                        features = JSON.parse(value);
+                    } catch {
+                        throw new Error('Key features must be a valid array');
+                    }
+                }
+
+                // Must be array
+                if (!Array.isArray(features)) {
+                    throw new Error('Key features must be an array');
+                }
+
+                // Check array length
+                if (features.length < 1) {
+                    throw new Error('At least one key feature is required');
+                }
+
+                if (features.length > 10) {
+                    throw new Error('Maximum 10 key features allowed');
+                }
+
+                // Validate each feature
+                features.forEach((feature, index) => {
+                    if (typeof feature !== 'string' || feature.trim().length < 5) {
+                        throw new Error(`Feature ${index + 1} must be at least 5 characters long`);
+                    }
+                    if (feature.length > 200) {
+                        throw new Error(`Feature ${index + 1} must be less than 200 characters`);
+                    }
+                });
+
+                return true;
+            }),
+
+        // NEW: Technical implementation validation
+        body('technicalImplementation')
+            .optional({ nullable: true, checkFalsy: true })
+            .trim()
+            .isLength({ min: 50, max: 2000 })
+            .withMessage('Technical implementation must be between 50 and 2000 characters'),
+
+        // Legacy content field - optional for backward compatibility
+        body('content')
+            .optional({ nullable: true, checkFalsy: true })
+            .trim(),
+
+        // Category validation
+        body('category')
+            .isIn(['web_application', 'mobile_application', 'desktop_application', 'e_commerce', 'cms', 'api'])
+            .withMessage('Invalid category'),
+
+        // Status validation
+        body('status')
+            .optional({ nullable: true, checkFalsy: true })
+            .isIn(['draft', 'published', 'archived'])
+            .withMessage('Status must be draft, published, or archived'),
+
+        // Featured validation
+        body('featured')
+            .optional({ nullable: true, checkFalsy: true })
+            .custom((value) => {
+                if (value === undefined || value === null || value === '') return true;
+                return typeof value === 'boolean' || value === 'true' || value === 'false';
+            })
+            .withMessage('Featured must be a boolean'),
+
+        // Technologies validation
+        body('technologies')
+            .optional({ nullable: true, checkFalsy: true })
+            .custom((value) => {
+                if (!value) return true;
+
+                let techs = value;
+                if (typeof value === 'string') {
+                    try {
+                        techs = JSON.parse(value);
+                    } catch {
+                        return false;
+                    }
+                }
+
+                if (!Array.isArray(techs)) {
+                    return false;
+                }
+
+                if (techs.length > 15) {
+                    throw new Error('Maximum 15 technologies allowed');
+                }
+
+                return true;
+            })
+            .withMessage('Technologies must be an array with maximum 15 items'),
+
+        // Project URL validation
+        body('projectUrl')
+            .optional({ nullable: true, checkFalsy: true })
+            .custom((value) => {
+                if (!value || value === '') return true;
+                return validator.isURL(value, { require_protocol: true });
+            })
+            .withMessage('Project URL must be a valid URL with protocol'),
+
+        // GitHub URL validation
+        body('githubUrl')
+            .optional({ nullable: true, checkFalsy: true })
+            .custom((value) => {
+                if (!value || value === '') return true;
+                return validator.isURL(value, { require_protocol: true });
+            })
+            .withMessage('GitHub URL must be a valid URL with protocol'),
+
+        // Client name validation
+        body('client')
+            .optional({ nullable: true, checkFalsy: true })
+            .trim()
+            .isLength({ max: 255 })
+            .withMessage('Client name must be less than 255 characters'),
+
+        // Date validations
+        body('startDate')
+            .optional({ nullable: true, checkFalsy: true })
+            .custom((value) => {
+                if (!value || value === '') return true;
+                return validator.isISO8601(value) || validator.isDate(value);
+            })
+            .withMessage('Start date must be a valid date'),
+
+        body('endDate')
+            .optional({ nullable: true, checkFalsy: true })
+            .custom((value) => {
+                if (!value || value === '') return true;
+                return validator.isISO8601(value) || validator.isDate(value);
+            })
+            .withMessage('End date must be a valid date'),
+
+        // SEO validations
+        body('seoTitle')
+            .optional({ nullable: true, checkFalsy: true })
+            .trim()
+            .isLength({ max: 60 })
+            .withMessage('SEO title must be less than 60 characters'),
+
+        body('seoDescription')
+            .optional({ nullable: true, checkFalsy: true })
+            .trim()
+            .isLength({ max: 160 })
+            .withMessage('SEO description must be less than 160 characters'),
+
+        body('seoKeywords')
+            .optional({ nullable: true, checkFalsy: true })
+            .custom((value) => {
+                if (!value) return true;
+
+                let keywords = value;
+                if (typeof value === 'string') {
+                    try {
+                        keywords = JSON.parse(value);
+                    } catch {
+                        // Try splitting by comma
+                        keywords = value.split(',').map(k => k.trim()).filter(k => k);
+                    }
+                }
+
+                if (!Array.isArray(keywords)) {
+                    return false;
+                }
+
+                if (keywords.length > 10) {
+                    throw new Error('Maximum 10 SEO keywords allowed');
+                }
+
+                return true;
+            })
+            .withMessage('SEO keywords must be an array with maximum 10 items'),
+
         handleValidationErrors
     ],
 
@@ -392,9 +597,16 @@ const validationSchemas = {
         handleValidationErrors
     ],
 
-    // ID parameter validation
+    // ID parameter validation - handle both numeric IDs and slugs
     idParam: [
-        param('id').isInt({ min: 1 }).withMessage('ID must be a positive integer').toInt(),
+        param('id')
+            .custom((value) => {
+                // Allow numeric IDs or valid slugs
+                const isNumeric = /^\d+$/.test(value);
+                const isValidSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+                return isNumeric || isValidSlug;
+            })
+            .withMessage('Invalid project identifier. Must be a numeric ID or valid slug.'),
         handleValidationErrors
     ],
 
@@ -421,15 +633,11 @@ const validationSchemas = {
     queryParams: [
         query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer').toInt(),
         query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100').toInt(),
-        // Updated to match actual database column names (snake_case)
         query('sort').optional().isIn([
             'created_at', 'updated_at', 'name', 'email', 'subject', 'status', 'company', 'phone'
         ]).withMessage('Invalid sort field'),
-        // Accept both cases for order
         query('order').optional().isIn(['ASC', 'DESC', 'asc', 'desc']).withMessage('Order must be ASC or DESC'),
-        // Updated status values to match your contact submission statuses
         query('status').optional().isIn(['new', 'in_progress', 'responded', 'closed']).withMessage('Invalid status'),
-        // Add other query parameters
         query('search').optional().isString().trim(),
         query('service_interest').optional().isString(),
         query('priority').optional().isIn(['low', 'medium', 'high']).withMessage('Invalid priority'),

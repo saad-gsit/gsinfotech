@@ -1,3 +1,4 @@
+// server/models/Project.js - Updated with structured content fields
 module.exports = (sequelize, DataTypes) => {
     const Project = sequelize.define('Project', {
         id: {
@@ -29,10 +30,32 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(500),
             allowNull: true
         },
+
+        // NEW: Structured content fields
+        overview: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            comment: 'Project overview section'
+        },
+        key_features: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: [],
+            comment: 'Array of key project features'
+        },
+        technical_implementation: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            comment: 'Technical implementation details'
+        },
+
+        // Legacy content field (keep for backward compatibility)
         content: {
             type: DataTypes.TEXT('long'),
-            allowNull: true
+            allowNull: true,
+            comment: 'Legacy rich content field'
         },
+
         featured_image: {
             type: DataTypes.STRING(500),
             allowNull: true
@@ -41,6 +64,12 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.JSON,
             allowNull: true,
             defaultValue: []
+        },
+        images: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: [],
+            comment: 'Project images array'
         },
         technologies: {
             type: DataTypes.JSON,
@@ -69,19 +98,29 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(500),
             allowNull: true,
             validate: {
-                isUrl: true
+                isUrl: {
+                    msg: 'Project URL must be a valid URL'
+                }
             }
         },
         github_url: {
             type: DataTypes.STRING(500),
             allowNull: true,
             validate: {
-                isUrl: true
+                isUrl: {
+                    msg: 'GitHub URL must be a valid URL'
+                }
             }
+        },
+        start_date: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            comment: 'Project start date'
         },
         completion_date: {
             type: DataTypes.DATE,
-            allowNull: true
+            allowNull: true,
+            comment: 'Project completion date'
         },
         view_count: {
             type: DataTypes.INTEGER,
@@ -149,12 +188,68 @@ module.exports = (sequelize, DataTypes) => {
                         ? project.title.substring(0, 57) + '...'
                         : project.title;
                 }
+
+                // Parse JSON strings if they come as strings (from form data)
+                const jsonFields = ['technologies', 'key_features', 'seo_keywords', 'images', 'gallery'];
+                jsonFields.forEach(field => {
+                    if (project[field] && typeof project[field] === 'string') {
+                        try {
+                            project[field] = JSON.parse(project[field]);
+                        } catch (e) {
+                            // If parsing fails, keep as is or set default
+                            if (field === 'technologies' || field === 'key_features' || field === 'seo_keywords') {
+                                project[field] = [];
+                            }
+                        }
+                    }
+                });
+
+                // Ensure arrays are actually arrays
+                if (project.technologies && !Array.isArray(project.technologies)) {
+                    project.technologies = [];
+                }
+                if (project.key_features && !Array.isArray(project.key_features)) {
+                    project.key_features = [];
+                }
+                if (project.seo_keywords && !Array.isArray(project.seo_keywords)) {
+                    project.seo_keywords = [];
+                }
+            },
+
+            beforeCreate: (project) => {
+                // Set default values for new structured content
+                if (!project.key_features) {
+                    project.key_features = [];
+                }
+                if (!project.technologies) {
+                    project.technologies = [];
+                }
+                if (!project.seo_keywords) {
+                    project.seo_keywords = [];
+                }
+            },
+
+            beforeUpdate: (project) => {
+                // Update slug if title changed
+                if (project.changed('title') && project.title) {
+                    const newSlug = project.title
+                        .toLowerCase()
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-')
+                        .trim('-');
+
+                    // Only update slug if it's different
+                    if (newSlug !== project.slug) {
+                        project.slug = newSlug;
+                    }
+                }
             }
         }
     });
 
     Project.associate = (models) => {
-        // Simple association - we'll handle the path matching in controllers
+        // Association with SEO metadata
         Project.hasOne(models.SEOMetadata, {
             foreignKey: 'page_path',
             sourceKey: 'slug',

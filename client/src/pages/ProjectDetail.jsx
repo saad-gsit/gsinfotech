@@ -1,3 +1,4 @@
+// Updated ProjectDetail.jsx - Structured Content Display
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
@@ -13,7 +14,11 @@ import {
     Grid,
     Card,
     Avatar,
-    Divider
+    Divider,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText
 } from '@mui/material'
 import {
     ArrowBackOutlined,
@@ -27,7 +32,11 @@ import {
     ArrowOutward,
     ShareOutlined,
     BookmarkBorderOutlined,
-    VerifiedOutlined
+    VerifiedOutlined,
+    BuildOutlined,
+    VisibilityOutlined,
+    IntegrationInstructionsOutlined,
+    StarOutlined
 } from '@mui/icons-material'
 
 // Updated import - using React Query hook
@@ -82,9 +91,11 @@ const ProjectDetail = () => {
                     </Container>
                 </Box>
 
-                {/* Image Skeleton */}
+                {/* Content Skeleton */}
                 <Container maxWidth="xl" sx={{ py: 8 }}>
-                    <Skeleton variant="rectangular" width="100%" height={600} sx={{ borderRadius: '24px' }} />
+                    {[...Array(3)].map((_, i) => (
+                        <Skeleton key={i} variant="rectangular" width="100%" height={200} sx={{ borderRadius: '24px', mb: 4 }} />
+                    ))}
                 </Container>
             </Box>
         )
@@ -498,7 +509,7 @@ const ProjectDetail = () => {
                                                 </Typography>
 
                                                 <Stack spacing={4}>
-                                                    {project.client && (
+                                                    {(project.client_name || project.client) && (
                                                         <Box>
                                                             <Typography
                                                                 variant="caption"
@@ -520,37 +531,7 @@ const ProjectDetail = () => {
                                                                     color: 'var(--stone-800)'
                                                                 }}
                                                             >
-                                                                {project.client}
-                                                            </Typography>
-                                                        </Box>
-                                                    )}
-
-                                                    {project.duration && (
-                                                        <Box>
-                                                            <Typography
-                                                                variant="caption"
-                                                                sx={{
-                                                                    color: 'var(--stone-500)',
-                                                                    textTransform: 'uppercase',
-                                                                    letterSpacing: '0.1em',
-                                                                    fontWeight: 600,
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: 0.5,
-                                                                    mb: 1
-                                                                }}
-                                                            >
-                                                                <AccessTimeOutlined sx={{ fontSize: 14 }} />
-                                                                Duration
-                                                            </Typography>
-                                                            <Typography
-                                                                variant="body1"
-                                                                sx={{
-                                                                    fontWeight: 500,
-                                                                    color: 'var(--stone-800)'
-                                                                }}
-                                                            >
-                                                                {project.duration}
+                                                                {project.client_name || project.client}
                                                             </Typography>
                                                         </Box>
                                                     )}
@@ -594,36 +575,6 @@ const ProjectDetail = () => {
                                                         </Box>
                                                     )}
 
-                                                    {project.team_size && (
-                                                        <Box>
-                                                            <Typography
-                                                                variant="caption"
-                                                                sx={{
-                                                                    color: 'var(--stone-500)',
-                                                                    textTransform: 'uppercase',
-                                                                    letterSpacing: '0.1em',
-                                                                    fontWeight: 600,
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: 0.5,
-                                                                    mb: 1
-                                                                }}
-                                                            >
-                                                                <GroupOutlined sx={{ fontSize: 14 }} />
-                                                                Team Size
-                                                            </Typography>
-                                                            <Typography
-                                                                variant="body1"
-                                                                sx={{
-                                                                    fontWeight: 500,
-                                                                    color: 'var(--stone-800)'
-                                                                }}
-                                                            >
-                                                                {project.team_size} {project.team_size === 1 ? 'developer' : 'developers'}
-                                                            </Typography>
-                                                        </Box>
-                                                    )}
-
                                                     {/* Project Status */}
                                                     <Box>
                                                         <Typography
@@ -641,10 +592,10 @@ const ProjectDetail = () => {
                                                         </Typography>
                                                         <Chip
                                                             icon={<CheckCircleOutlined sx={{ fontSize: 16 }} />}
-                                                            label={project.status === 'completed' ? 'Successfully Delivered' : 'In Progress'}
+                                                            label={project.status === 'published' ? 'Successfully Delivered' : 'In Progress'}
                                                             sx={{
-                                                                backgroundColor: project.status === 'completed' ? 'var(--sage-100)' : 'var(--sand-100)',
-                                                                color: project.status === 'completed' ? 'var(--sage-700)' : 'var(--sand-700)',
+                                                                backgroundColor: project.status === 'published' ? 'var(--sage-100)' : 'var(--sand-100)',
+                                                                color: project.status === 'published' ? 'var(--sage-700)' : 'var(--sand-700)',
                                                                 fontWeight: 500,
                                                                 fontSize: '0.75rem',
                                                                 borderRadius: '12px',
@@ -838,8 +789,250 @@ const ProjectDetail = () => {
                     </section>
                 )}
 
-                {/* Enhanced Project Content */}
-                {project.content && (
+                {/* NEW: Project Overview Section */}
+                {project.overview && (
+                    <section style={{ padding: '6rem 0', backgroundColor: '#fafafa' }}>
+                        <Container maxWidth="lg">
+                            <motion.div
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8 }}
+                                viewport={{ once: true }}
+                                style={{ maxWidth: '900px', margin: '0 auto' }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 4 }}>
+                                    <VisibilityOutlined sx={{ fontSize: 32, color: 'var(--sage-500)', mr: 2 }} />
+                                    <Typography
+                                        variant="h3"
+                                        sx={{
+                                            fontSize: { xs: '2rem', md: '2.5rem' },
+                                            fontWeight: 300,
+                                            color: 'var(--stone-800)',
+                                            letterSpacing: '-0.02em',
+                                        }}
+                                    >
+                                        Project Overview
+                                    </Typography>
+                                </Box>
+
+                                <Card
+                                    sx={{
+                                        p: { xs: 4, md: 6 },
+                                        borderRadius: '24px',
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 16px 40px -12px rgba(139, 148, 113, 0.15)',
+                                        border: '1px solid var(--stone-100)',
+                                    }}
+                                >
+                                    <Typography
+                                        variant="body1"
+                                        sx={{
+                                            fontSize: '1.1rem',
+                                            lineHeight: 1.8,
+                                            color: 'var(--stone-600)',
+                                            textAlign: 'justify'
+                                        }}
+                                    >
+                                        {project.overview}
+                                    </Typography>
+                                </Card>
+                            </motion.div>
+                        </Container>
+                    </section>
+                )}
+
+                {/* NEW: Key Features Section */}
+                {project.key_features && project.key_features.length > 0 && (
+                    <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
+                        <Container maxWidth="lg">
+                            <motion.div
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8 }}
+                                viewport={{ once: true }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 6 }}>
+                                    <StarOutlined sx={{ fontSize: 32, color: 'var(--sage-500)', mr: 2 }} />
+                                    <Typography
+                                        variant="h3"
+                                        sx={{
+                                            fontSize: { xs: '2rem', md: '2.5rem' },
+                                            fontWeight: 300,
+                                            color: 'var(--stone-800)',
+                                            letterSpacing: '-0.02em',
+                                        }}
+                                    >
+                                        Key Features
+                                    </Typography>
+                                </Box>
+
+                                <Grid container spacing={4}>
+                                    {project.key_features.map((feature, index) => (
+                                        <Grid item xs={12} md={6} key={index}>
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 20 }}
+                                                whileInView={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.6, delay: index * 0.1 }}
+                                                viewport={{ once: true }}
+                                            >
+                                                <Card
+                                                    sx={{
+                                                        p: 4,
+                                                        borderRadius: '20px',
+                                                        border: '1px solid var(--stone-100)',
+                                                        backgroundColor: 'white',
+                                                        boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.08)',
+                                                        transition: 'all 0.4s ease',
+                                                        height: '100%',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-8px)',
+                                                            boxShadow: '0 16px 40px -8px rgba(139, 148, 113, 0.2)',
+                                                            borderColor: 'var(--sage-200)',
+                                                        }
+                                                    }}
+                                                >
+                                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 3 }}>
+                                                        <Box
+                                                            sx={{
+                                                                width: 48,
+                                                                height: 48,
+                                                                borderRadius: '12px',
+                                                                backgroundColor: 'var(--sage-100)',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                flexShrink: 0,
+                                                                mt: 0.5
+                                                            }}
+                                                        >
+                                                            <CheckCircleOutlined sx={{ fontSize: 24, color: 'var(--sage-500)' }} />
+                                                        </Box>
+                                                        <Box sx={{ flex: 1 }}>
+                                                            <Typography
+                                                                variant="h6"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    mb: 2,
+                                                                    color: 'var(--stone-800)',
+                                                                    fontSize: '1.1rem'
+                                                                }}
+                                                            >
+                                                                Feature {index + 1}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant="body1"
+                                                                sx={{
+                                                                    color: 'var(--stone-600)',
+                                                                    lineHeight: 1.6
+                                                                }}
+                                                            >
+                                                                {feature}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+                                                </Card>
+                                            </motion.div>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </motion.div>
+                        </Container>
+                    </section>
+                )}
+
+                {/* NEW: Technical Implementation Section */}
+                {project.technical_implementation && (
+                    <section style={{ padding: '6rem 0', backgroundColor: '#fafafa' }}>
+                        <Container maxWidth="lg">
+                            <motion.div
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8 }}
+                                viewport={{ once: true }}
+                                style={{ maxWidth: '900px', margin: '0 auto' }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 4 }}>
+                                    <IntegrationInstructionsOutlined sx={{ fontSize: 32, color: 'var(--sage-500)', mr: 2 }} />
+                                    <Typography
+                                        variant="h3"
+                                        sx={{
+                                            fontSize: { xs: '2rem', md: '2.5rem' },
+                                            fontWeight: 300,
+                                            color: 'var(--stone-800)',
+                                            letterSpacing: '-0.02em',
+                                        }}
+                                    >
+                                        Technical Implementation
+                                    </Typography>
+                                </Box>
+
+                                <Card
+                                    sx={{
+                                        p: { xs: 4, md: 6 },
+                                        borderRadius: '24px',
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 16px 40px -12px rgba(139, 148, 113, 0.15)',
+                                        border: '1px solid var(--stone-100)',
+                                    }}
+                                >
+                                    <Typography
+                                        variant="body1"
+                                        sx={{
+                                            fontSize: '1.1rem',
+                                            lineHeight: 1.8,
+                                            color: 'var(--stone-600)',
+                                            textAlign: 'justify',
+                                            whiteSpace: 'pre-line'
+                                        }}
+                                    >
+                                        {project.technical_implementation}
+                                    </Typography>
+
+                                    {/* Technical Highlights */}
+                                    {project.technologies && project.technologies.length > 0 && (
+                                        <Box sx={{ mt: 4, pt: 4, borderTop: '1px solid var(--stone-100)' }}>
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    fontWeight: 500,
+                                                    mb: 3,
+                                                    color: 'var(--stone-800)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1
+                                                }}
+                                            >
+                                                <BuildOutlined sx={{ fontSize: 20, color: 'var(--sage-400)' }} />
+                                                Technology Stack
+                                            </Typography>
+                                            <Grid container spacing={2}>
+                                                {project.technologies.map((tech, index) => (
+                                                    <Grid item key={index}>
+                                                        <Chip
+                                                            label={tech}
+                                                            sx={{
+                                                                backgroundColor: 'var(--stone-100)',
+                                                                color: 'var(--stone-700)',
+                                                                fontWeight: 500,
+                                                                fontSize: '0.85rem',
+                                                                height: 36,
+                                                                borderRadius: '18px',
+                                                                border: '1px solid var(--stone-200)',
+                                                            }}
+                                                        />
+                                                    </Grid>
+                                                ))}
+                                            </Grid>
+                                        </Box>
+                                    )}
+                                </Card>
+                            </motion.div>
+                        </Container>
+                    </section>
+                )}
+
+                {/* FALLBACK: Legacy Content Section (for backward compatibility) */}
+                {project.content && !project.overview && !project.technical_implementation && (
                     <section style={{ padding: '6rem 0', backgroundColor: '#fafafa' }}>
                         <Container maxWidth="lg">
                             <motion.div
@@ -860,7 +1053,7 @@ const ProjectDetail = () => {
                                         letterSpacing: '-0.02em',
                                     }}
                                 >
-                                    Project Deep Dive
+                                    Project Details
                                 </Typography>
 
                                 <Card
@@ -952,102 +1145,6 @@ const ProjectDetail = () => {
                     </section>
                 )}
 
-                {/* Project Highlights/Features Section */}
-                {(project.features || project.highlights) && (
-                    <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
-                        <Container maxWidth="lg">
-                            <motion.div
-                                initial={{ opacity: 0, y: 40 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.8 }}
-                                viewport={{ once: true }}
-                            >
-                                <Typography
-                                    variant="h3"
-                                    sx={{
-                                        fontSize: { xs: '2rem', md: '2.5rem' },
-                                        fontWeight: 300,
-                                        mb: 6,
-                                        color: 'var(--stone-800)',
-                                        textAlign: 'center',
-                                        letterSpacing: '-0.02em',
-                                    }}
-                                >
-                                    Key Features
-                                </Typography>
-
-                                <Grid container spacing={4}>
-                                    {(project.features || project.highlights || []).map((feature, index) => (
-                                        <Grid item xs={12} sm={6} md={4} key={index}>
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 20 }}
-                                                whileInView={{ opacity: 1, y: 0 }}
-                                                transition={{ duration: 0.6, delay: index * 0.1 }}
-                                                viewport={{ once: true }}
-                                            >
-                                                <Card
-                                                    sx={{
-                                                        p: 4,
-                                                        textAlign: 'center',
-                                                        borderRadius: '20px',
-                                                        border: '1px solid var(--stone-100)',
-                                                        backgroundColor: 'white',
-                                                        boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.08)',
-                                                        transition: 'all 0.4s ease',
-                                                        height: '100%',
-                                                        '&:hover': {
-                                                            transform: 'translateY(-8px)',
-                                                            boxShadow: '0 16px 40px -8px rgba(139, 148, 113, 0.2)',
-                                                            borderColor: 'var(--sage-200)',
-                                                        }
-                                                    }}
-                                                >
-                                                    <Box
-                                                        sx={{
-                                                            width: 64,
-                                                            height: 64,
-                                                            borderRadius: '50%',
-                                                            backgroundColor: 'var(--sage-100)',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            mx: 'auto',
-                                                            mb: 3,
-                                                        }}
-                                                    >
-                                                        <CheckCircleOutlined sx={{ fontSize: 28, color: 'var(--sage-500)' }} />
-                                                    </Box>
-                                                    <Typography
-                                                        variant="h6"
-                                                        sx={{
-                                                            fontWeight: 500,
-                                                            mb: 2,
-                                                            color: 'var(--stone-800)'
-                                                        }}
-                                                    >
-                                                        {typeof feature === 'string' ? feature : feature.title || feature.name}
-                                                    </Typography>
-                                                    {typeof feature === 'object' && feature.description && (
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{
-                                                                color: 'var(--stone-600)',
-                                                                lineHeight: 1.6
-                                                            }}
-                                                        >
-                                                            {feature.description}
-                                                        </Typography>
-                                                    )}
-                                                </Card>
-                                            </motion.div>
-                                        </Grid>
-                                    ))}
-                                </Grid>
-                            </motion.div>
-                        </Container>
-                    </section>
-                )}
-
                 {/* Enhanced CTA Section */}
                 <section
                     style={{
@@ -1082,22 +1179,6 @@ const ProjectDetail = () => {
                             background: 'radial-gradient(circle, var(--coral-400) 0%, transparent 70%)',
                             opacity: 0.08,
                             filter: 'blur(60px)',
-                        }}
-                    />
-
-                    {/* Geometric Pattern Overlay */}
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            inset: 0,
-                            opacity: 0.03,
-                            backgroundImage: `repeating-linear-gradient(
-                                45deg,
-                                transparent,
-                                transparent 50px,
-                                rgba(255,255,255,0.1) 50px,
-                                rgba(255,255,255,0.1) 52px
-                            )`,
                         }}
                     />
 
@@ -1210,152 +1291,6 @@ const ProjectDetail = () => {
                                     </motion.button>
                                 </Link>
                             </Stack>
-
-                            {/* Project Stats/Impact */}
-                            <Grid container spacing={4} justifyContent="center" sx={{ maxWidth: 800, mx: 'auto' }}>
-                                <Grid item xs={6} md={3}>
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.6, delay: 0.1 }}
-                                        viewport={{ once: true }}
-                                        style={{ textAlign: 'center' }}
-                                    >
-                                        <Typography
-                                            variant="h3"
-                                            sx={{
-                                                color: 'white',
-                                                fontWeight: 600,
-                                                mb: 1,
-                                                fontSize: { xs: '1.5rem', md: '2rem' }
-                                            }}
-                                        >
-                                            100%
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: 'rgba(255, 255, 255, 0.7)',
-                                                fontSize: '0.875rem',
-                                                fontWeight: 400
-                                            }}
-                                        >
-                                            On Time
-                                        </Typography>
-                                    </motion.div>
-                                </Grid>
-                                <Grid item xs={6} md={3}>
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.6, delay: 0.2 }}
-                                        viewport={{ once: true }}
-                                        style={{ textAlign: 'center' }}
-                                    >
-                                        <Typography
-                                            variant="h3"
-                                            sx={{
-                                                color: 'white',
-                                                fontWeight: 600,
-                                                mb: 1,
-                                                fontSize: { xs: '1.5rem', md: '2rem' }
-                                            }}
-                                        >
-                                            {project.technologies?.length || '5+'}
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: 'rgba(255, 255, 255, 0.7)',
-                                                fontSize: '0.875rem',
-                                                fontWeight: 400
-                                            }}
-                                        >
-                                            Technologies
-                                        </Typography>
-                                    </motion.div>
-                                </Grid>
-                                <Grid item xs={6} md={3}>
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.6, delay: 0.3 }}
-                                        viewport={{ once: true }}
-                                        style={{ textAlign: 'center' }}
-                                    >
-                                        <Typography
-                                            variant="h3"
-                                            sx={{
-                                                color: 'white',
-                                                fontWeight: 600,
-                                                mb: 1,
-                                                fontSize: { xs: '1.5rem', md: '2rem' }
-                                            }}
-                                        >
-                                            24/7
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: 'rgba(255, 255, 255, 0.7)',
-                                                fontSize: '0.875rem',
-                                                fontWeight: 400
-                                            }}
-                                        >
-                                            Support
-                                        </Typography>
-                                    </motion.div>
-                                </Grid>
-                                <Grid item xs={6} md={3}>
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.6, delay: 0.4 }}
-                                        viewport={{ once: true }}
-                                        style={{ textAlign: 'center' }}
-                                    >
-                                        <Typography
-                                            variant="h3"
-                                            sx={{
-                                                color: 'white',
-                                                fontWeight: 600,
-                                                mb: 1,
-                                                fontSize: { xs: '1.5rem', md: '2rem' }
-                                            }}
-                                        >
-                                            5★
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: 'rgba(255, 255, 255, 0.7)',
-                                                fontSize: '0.875rem',
-                                                fontWeight: 400
-                                            }}
-                                        >
-                                            Client Rating
-                                        </Typography>
-                                    </motion.div>
-                                </Grid>
-                            </Grid>
-
-                            {/* Trust Statement */}
-                            <Box sx={{ mt: 8, pt: 6, borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                                <Typography
-                                    variant="body1"
-                                    sx={{
-                                        color: 'rgba(255, 255, 255, 0.6)',
-                                        fontSize: '1rem',
-                                        lineHeight: 1.6,
-                                        fontStyle: 'italic',
-                                        maxWidth: 600,
-                                        mx: 'auto'
-                                    }}
-                                >
-                                    "Quality is never an accident; it is always the result of intelligent effort.
-                                    Every project we deliver reflects our commitment to excellence and innovation."
-                                </Typography>
-                            </Box>
                         </motion.div>
                     </Container>
                 </section>

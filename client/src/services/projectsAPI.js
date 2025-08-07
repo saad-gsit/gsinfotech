@@ -1,5 +1,5 @@
-// client/src/services/projectsAPI.js
-import { apiClient, uploadFile, handleApiError } from './api.js';
+// client/src/services/projectsAPI.js - UPDATED WITH NEW STRUCTURED FIELDS
+import { apiClient, handleApiError } from './api.js';
 
 // Cache for frequently accessed data
 const cache = new Map();
@@ -66,7 +66,7 @@ export const projectsAPI = {
         }
     },
 
-    // Get project by ID with caching
+    // Get project by ID with caching - FIXED to handle both ID and slug
     getProjectById: async (id, useCache = true) => {
         try {
             if (!id) throw new Error('Project ID is required');
@@ -78,11 +78,8 @@ export const projectsAPI = {
                 if (cachedData) return cachedData;
             }
 
-            // Check if it's a numeric ID or slug
-            const isNumeric = /^\d+$/.test(id);
-            const endpoint = isNumeric ? `/projects/${id}` : `/projects/slug/${id}`;
-
-            const response = await apiClient.get(endpoint);
+            // Use the same endpoint for both ID and slug - backend handles this
+            const response = await apiClient.get(`/projects/${id}`);
             const data = response.data;
 
             if (useCache) {
@@ -94,10 +91,11 @@ export const projectsAPI = {
             throw handleApiError(error, `Failed to fetch project with ID: ${id}`);
         }
     },
+
     // Get featured projects with caching
     getFeaturedProjects: async (limit = 6, useCache = true) => {
         try {
-            const params = { featured: true, limit };
+            const params = { featured: true, limit, status: 'published' };
             const cacheKey = `featured-projects-${limit}`;
 
             if (useCache) {
@@ -144,26 +142,70 @@ export const projectsAPI = {
         }
     },
 
-    // Create new project with enhanced validation and progress tracking
+    // UPDATED: Create new project with proper field mapping and new structured fields
     createProject: async (projectData, images = [], onProgress = null) => {
         try {
-            // Validate required fields
-            if (!projectData.title) throw new Error('Project title is required');
-            if (!projectData.description) throw new Error('Project description is required');
+            console.log('Creating project with data:', projectData);
 
             // Clear relevant cache entries
             cache.clear();
 
-            if (images.length > 0) {
+            // Map frontend form fields to backend expected fields with NEW STRUCTURED FIELDS
+            const mappedData = {
+                // Basic fields
+                title: projectData.title,
+                description: projectData.description,
+                shortDescription: projectData.shortDescription || projectData.short_description,
+
+                // NEW STRUCTURED CONTENT FIELDS
+                overview: projectData.overview || null,
+                keyFeatures: Array.isArray(projectData.keyFeatures)
+                    ? projectData.keyFeatures.filter(f => f && f.trim() !== '')
+                    : [],
+                technicalImplementation: projectData.technicalImplementation || null,
+
+                // Technical details
+                category: projectData.category,
+                status: projectData.status || 'draft',
+                featured: projectData.featured || false,
+                technologies: Array.isArray(projectData.technologies) ? projectData.technologies : [],
+
+                // URLs and client info
+                project_url: projectData.projectUrl || projectData.project_url,
+                github_url: projectData.githubUrl || projectData.github_url,
+                client_name: projectData.client || projectData.client_name,
+
+                // Dates
+                start_date: projectData.startDate || null,
+                completion_date: projectData.endDate || projectData.completion_date,
+
+                // SEO fields
+                seo_title: projectData.seoTitle || projectData.seo_title,
+                seo_description: projectData.seoDescription || projectData.seo_description,
+                seo_keywords: Array.isArray(projectData.seoKeywords) ? projectData.seoKeywords : []
+            };
+
+            // Remove undefined/null values except for arrays
+            Object.keys(mappedData).forEach(key => {
+                if (mappedData[key] === undefined || mappedData[key] === '' || mappedData[key] === 'null' || mappedData[key] === 'undefined') {
+                    if (!Array.isArray(mappedData[key])) {
+                        mappedData[key] = null;
+                    }
+                }
+            });
+
+            console.log('Mapped data being sent to backend:', mappedData);
+
+            if (images && images.length > 0) {
                 const formData = new FormData();
 
                 // Add project data
-                Object.keys(projectData).forEach(key => {
-                    if (projectData[key] !== null && projectData[key] !== undefined) {
-                        if (typeof projectData[key] === 'object') {
-                            formData.append(key, JSON.stringify(projectData[key]));
+                Object.keys(mappedData).forEach(key => {
+                    if (mappedData[key] !== null && mappedData[key] !== undefined) {
+                        if (typeof mappedData[key] === 'object') {
+                            formData.append(key, JSON.stringify(mappedData[key]));
                         } else {
-                            formData.append(key, projectData[key]);
+                            formData.append(key, mappedData[key]);
                         }
                     }
                 });
@@ -191,34 +233,90 @@ export const projectsAPI = {
                 }
 
                 const response = await apiClient.post('/projects', formData, config);
+                console.log('API Response:', response.data);
                 return response.data;
             } else {
-                const response = await apiClient.post('/projects', projectData);
+                const response = await apiClient.post('/projects', mappedData, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                console.log('API Response:', response.data);
                 return response.data;
             }
         } catch (error) {
+            console.error('Create project error:', error);
+            console.error('Error response:', error.response?.data);
             throw handleApiError(error, 'Failed to create project');
         }
     },
 
-    // Update existing project with enhanced validation
+    // UPDATED: Update existing project with proper field mapping and new structured fields
     updateProject: async (id, projectData, images = [], onProgress = null) => {
         try {
             if (!id) throw new Error('Project ID is required');
+
+            console.log('Updating project with data:', projectData);
 
             // Clear relevant cache entries
             cache.delete(`project-${id}`);
             cache.clear(); // Clear all cache for consistency
 
-            if (images.length > 0) {
+            // Map frontend form fields to backend expected fields with NEW STRUCTURED FIELDS
+            const mappedData = {
+                // Basic fields
+                title: projectData.title,
+                description: projectData.description,
+                shortDescription: projectData.shortDescription || projectData.short_description,
+
+                // NEW STRUCTURED CONTENT FIELDS
+                overview: projectData.overview || null,
+                keyFeatures: Array.isArray(projectData.keyFeatures)
+                    ? projectData.keyFeatures.filter(f => f && f.trim() !== '')
+                    : [],
+                technicalImplementation: projectData.technicalImplementation || null,
+
+                // Technical details
+                category: projectData.category,
+                status: projectData.status || 'draft',
+                featured: projectData.featured || false,
+                technologies: Array.isArray(projectData.technologies) ? projectData.technologies : [],
+
+                // URLs and client info
+                project_url: projectData.projectUrl || projectData.project_url,
+                github_url: projectData.githubUrl || projectData.github_url,
+                client_name: projectData.client || projectData.client_name,
+
+                // Dates
+                start_date: projectData.startDate || null,
+                completion_date: projectData.endDate || projectData.completion_date,
+
+                // SEO fields
+                seo_title: projectData.seoTitle || projectData.seo_title,
+                seo_description: projectData.seoDescription || projectData.seo_description,
+                seo_keywords: Array.isArray(projectData.seoKeywords) ? projectData.seoKeywords : []
+            };
+
+            // Remove undefined/null values except for arrays
+            Object.keys(mappedData).forEach(key => {
+                if (mappedData[key] === undefined || mappedData[key] === '' || mappedData[key] === 'null' || mappedData[key] === 'undefined') {
+                    if (!Array.isArray(mappedData[key])) {
+                        mappedData[key] = null;
+                    }
+                }
+            });
+
+            console.log('Mapped update data:', mappedData);
+
+            if (images && images.length > 0) {
                 const formData = new FormData();
 
-                Object.keys(projectData).forEach(key => {
-                    if (projectData[key] !== null && projectData[key] !== undefined) {
-                        if (typeof projectData[key] === 'object') {
-                            formData.append(key, JSON.stringify(projectData[key]));
+                Object.keys(mappedData).forEach(key => {
+                    if (mappedData[key] !== null && mappedData[key] !== undefined) {
+                        if (typeof mappedData[key] === 'object') {
+                            formData.append(key, JSON.stringify(mappedData[key]));
                         } else {
-                            formData.append(key, projectData[key]);
+                            formData.append(key, mappedData[key]);
                         }
                     }
                 });
@@ -247,10 +345,16 @@ export const projectsAPI = {
                 const response = await apiClient.put(`/projects/${id}`, formData, config);
                 return response.data;
             } else {
-                const response = await apiClient.put(`/projects/${id}`, projectData);
+                const response = await apiClient.put(`/projects/${id}`, mappedData, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
                 return response.data;
             }
         } catch (error) {
+            console.error('Update project error:', error);
+            console.error('Error response:', error.response?.data);
             throw handleApiError(error, `Failed to update project with ID: ${id}`);
         }
     },
@@ -269,30 +373,6 @@ export const projectsAPI = {
             return response.data;
         } catch (error) {
             throw handleApiError(error, `Failed to delete project with ID: ${id}`);
-        }
-    },
-
-    // Upload project images with progress tracking
-    uploadProjectImages: async (projectId, images, onProgress) => {
-        try {
-            if (!projectId) throw new Error('Project ID is required');
-            if (!images || images.length === 0) throw new Error('At least one image is required');
-
-            const formData = new FormData();
-            images.forEach((image, index) => {
-                if (image.size > 10 * 1024 * 1024) {
-                    throw new Error(`Image ${index + 1} is too large. Maximum size is 10MB.`);
-                }
-                formData.append('images', image);
-            });
-            formData.append('projectId', projectId);
-
-            return uploadFile(images[0], '/projects/upload-images', onProgress, {
-                projectId,
-                additionalImages: images.slice(1),
-            });
-        } catch (error) {
-            throw handleApiError(error, 'Failed to upload project images');
         }
     },
 
@@ -334,37 +414,6 @@ export const projectsAPI = {
             return data;
         } catch (error) {
             throw handleApiError(error, 'Failed to fetch paginated projects');
-        }
-    },
-
-    // Get project categories with caching
-    getProjectCategories: async (useCache = true) => {
-        try {
-            const cacheKey = 'project-categories';
-
-            if (useCache) {
-                const cachedData = getCachedData(cacheKey);
-                if (cachedData) return cachedData;
-            }
-
-            const response = await apiClient.get('/projects/categories');
-            const data = response.data;
-
-            if (useCache) {
-                setCachedData(cacheKey, data);
-            }
-
-            return data;
-        } catch (error) {
-            // Return default categories if endpoint doesn't exist
-            console.warn('Project categories endpoint not available, using defaults');
-            const defaultCategories = [
-                { id: 'web', name: 'Web Development', slug: 'web', count: 0 },
-                { id: 'mobile', name: 'Mobile Apps', slug: 'mobile', count: 0 },
-                { id: 'desktop', name: 'Desktop Applications', slug: 'desktop', count: 0 },
-                { id: 'api', name: 'API Development', slug: 'api', count: 0 },
-            ];
-            return defaultCategories;
         }
     },
 
@@ -425,39 +474,12 @@ export const projectsAPI = {
         cache.clear();
     },
 
-    // Get project technologies/skills
-    getProjectTechnologies: async (useCache = true) => {
-        try {
-            const cacheKey = 'project-technologies';
-
-            if (useCache) {
-                const cachedData = getCachedData(cacheKey);
-                if (cachedData) return cachedData;
-            }
-
-            const response = await apiClient.get('/projects/technologies');
-            const data = response.data;
-
-            if (useCache) {
-                setCachedData(cacheKey, data);
-            }
-
-            return data;
-        } catch (error) {
-            console.warn('Project technologies endpoint not available, using defaults');
-            return [
-                'React', 'Node.js', 'MongoDB', 'Express.js', 'JavaScript', 'TypeScript',
-                'Python', 'Django', 'PostgreSQL', 'MySQL', 'Docker', 'AWS'
-            ];
-        }
-    },
-
     // Toggle project status (active/inactive)
     toggleProjectStatus: async (id, status) => {
         try {
             if (!id) throw new Error('Project ID is required');
-            if (!['active', 'inactive', 'archived'].includes(status)) {
-                throw new Error('Invalid status. Must be active, inactive, or archived');
+            if (!['draft', 'published', 'archived'].includes(status)) {
+                throw new Error('Invalid status. Must be draft, published, or archived');
             }
 
             const response = await apiClient.patch(`/projects/${id}/status`, { status });

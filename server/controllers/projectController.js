@@ -168,106 +168,190 @@ class ProjectController {
     // Create new project with image optimization
     static async createProject(req, res) {
         try {
-            const {
-                title,
-                description,
-                content,
-                technologies = [],
-                category,
-                project_url,
-                github_url,
-                featured = false,
-                status = 'draft',
-                metaDescription,
-                metaKeywords
-            } = req.body;
+            console.log('Received project data:', req.body);
+            console.log('Received files:', req.files);
+
+            // Map form data to database fields
+            const formData = req.body;
+
+            // Handle JSON fields that might come as strings
+            const parseJsonField = (field) => {
+                if (!field) return null;
+                if (typeof field === 'string') {
+                    try {
+                        return JSON.parse(field);
+                    } catch (e) {
+                        console.log(`Failed to parse ${field} as JSON:`, e.message);
+                        return null;
+                    }
+                }
+                return field;
+            };
+
+            // Prepare project data with proper field mapping
+            const projectData = {
+                // Basic fields
+                title: formData.title,
+                description: formData.description,
+                short_description: formData.shortDescription || null,
+
+                // NEW: Structured content fields
+                overview: formData.overview || null,
+                key_features: parseJsonField(formData.keyFeatures) || [],
+                technical_implementation: formData.technicalImplementation || null,
+
+                // Technical details
+                category: formData.category,
+                status: formData.status || 'draft',
+                featured: formData.featured === 'true' || formData.featured === true || false,
+                technologies: parseJsonField(formData.technologies) || [],
+
+                // URLs and client info
+                project_url: formData.projectUrl || null,
+                github_url: formData.githubUrl || null,
+                client_name: formData.client || null,
+
+                // Dates
+                start_date: formData.startDate || null,
+                completion_date: formData.endDate || null,
+
+                // SEO fields
+                seo_title: formData.seoTitle || null,
+                seo_description: formData.seoDescription || null,
+                seo_keywords: parseJsonField(formData.seoKeywords) || []
+            };
+
+            // Clean up empty arrays and null values
+            Object.keys(projectData).forEach(key => {
+                if (projectData[key] === '' || projectData[key] === 'null' || projectData[key] === 'undefined') {
+                    projectData[key] = null;
+                }
+            });
+
+            // Ensure arrays are properly formatted
+            if (!Array.isArray(projectData.technologies)) {
+                projectData.technologies = [];
+            }
+            if (!Array.isArray(projectData.key_features)) {
+                projectData.key_features = [];
+            }
+            if (!Array.isArray(projectData.seo_keywords)) {
+                projectData.seo_keywords = [];
+            }
+
+            // Filter out empty key features
+            projectData.key_features = projectData.key_features.filter(feature =>
+                feature && typeof feature === 'string' && feature.trim() !== ''
+            );
+
+            console.log('Processed project data:', projectData);
 
             // Generate slug from title
-            const slug = slugify(title, { lower: true, strict: true });
+            const slug = slugify(projectData.title, { lower: true, strict: true });
+            projectData.slug = slug;
 
             // Check for duplicate slug
             const existingProject = await Project.findOne({ where: { slug } });
             if (existingProject) {
-                return res.status(400).json({
-                    error: 'Slug conflict',
-                    message: 'A project with this title already exists',
-                    suggestion: `Try: ${slug}-${Date.now()}`
-                });
+                const uniqueSlug = `${slug}-${Date.now()}`;
+                projectData.slug = uniqueSlug;
+                console.log(`Slug conflict resolved: ${slug} -> ${uniqueSlug}`);
             }
 
-            // Process uploaded images if any
-            let imageUrls = {};
-            if (req.processedImages) {
-                for (const [fieldName, images] of Object.entries(req.processedImages)) {
-                    imageUrls[fieldName] = images[0]?.responsiveImages || [];
+            // Process uploaded images
+            let processedImages = [];
+            if (req.files && req.files.length > 0) {
+                processedImages = req.files.map(file => ({
+                    url: `/uploads/projects/${file.filename}`,
+                    name: file.originalname,
+                    size: file.size,
+                    type: file.mimetype
+                }));
+                projectData.images = processedImages;
+
+                // Set first image as featured image if none exists
+                if (processedImages.length > 0 && !projectData.featured_image) {
+                    projectData.featured_image = processedImages[0].url;
+                }
+            } else {
+                projectData.images = [];
+            }
+
+            console.log('Final data for database:', projectData);
+
+            // Create project
+            const project = await Project.create(projectData);
+
+            console.log('Project created successfully:', project.id);
+
+            // Create SEO metadata for published projects
+            if (projectData.status === 'published') {
+                try {
+                    const { SEOMetadata } = require('../models');
+                    await SEOMetadata.create({
+                        page_path: `projects/${project.slug}`,
+                        title: projectData.seo_title || `${projectData.title} - Project Showcase`,
+                        description: projectData.seo_description || projectData.description?.substring(0, 160),
+                        keywords: projectData.seo_keywords || [],
+                        canonical_url: `${process.env.SITE_URL || 'https://gsinfotech.com'}/projects/${project.slug}`,
+                        og_title: projectData.title,
+                        og_description: projectData.seo_description || projectData.description?.substring(0, 160),
+                        og_type: 'article'
+                    });
+                    console.log('SEO metadata created for published project');
+                } catch (seoError) {
+                    console.error('Failed to create SEO metadata:', seoError);
+                    // Don't fail the whole request for SEO issues
                 }
             }
 
-            // Auto-generate SEO data
-            const autoMetaDescription = metaDescription ||
-                (seoEnhancer?.generateMetaDescription ? seoEnhancer.generateMetaDescription(description || content) : description?.substring(0, 160));
-            const autoKeywords = metaKeywords ||
-                (seoEnhancer?.extractKeywords ? seoEnhancer.extractKeywords(content || description).join(', ') : '');
-
-            // Create project
-            const project = await Project.create({
-                title,
-                slug,
-                description,
-                content,
-                technologies: Array.isArray(technologies) ? technologies : [technologies],
-                category,
-                project_url,
-                github_url,
-                featured,
-                status,
-                gallery: imageUrls,
-                view_count: 0
-            });
-
-            // Create SEO metadata for published projects
-            if (status === 'published') {
-                await SEOMetadata.create({
-                    page_path: `projects/${project.slug}`,
-                    title: `${title} - Project Showcase | ${process.env.SITE_NAME || 'GS Infotech'}`,
-                    description: autoMetaDescription,
-                    keywords: autoKeywords ? autoKeywords.split(', ') : [],
-                    canonical_url: `${process.env.SITE_URL || 'https://gsinfotech.com'}/projects/${slug}`,
-                    og_title: title,
-                    og_description: autoMetaDescription,
-                    og_type: 'article'
-                });
-            }
-
-            // Invalidate related caches
+            // Invalidate cache
             if (cacheManager?.isConnected) {
                 await cacheManager.invalidateByTags(['projects']);
             }
 
             logger.api('Project created successfully', {
                 projectId: project.id,
-                title,
-                slug,
-                status,
-                imagesProcessed: Object.keys(imageUrls).length
+                title: projectData.title,
+                slug: project.slug,
+                status: projectData.status,
+                hasImages: processedImages.length > 0,
+                hasOverview: !!projectData.overview,
+                featuresCount: projectData.key_features.length,
+                hasTechnicalImpl: !!projectData.technical_implementation
             });
 
             res.status(201).json({
                 message: 'Project created successfully',
-                project,
-                seo: {
-                    metaDescription: autoMetaDescription,
-                    keywords: autoKeywords,
-                    slug
-                },
-                images: imageUrls
+                project: {
+                    id: project.id,
+                    title: project.title,
+                    slug: project.slug,
+                    status: project.status,
+                    featured: project.featured,
+                    overview: project.overview,
+                    key_features: project.key_features,
+                    technical_implementation: project.technical_implementation,
+                    images: processedImages
+                }
             });
 
         } catch (error) {
+            console.error('Error creating project:', error);
+            console.error('Error details:', error.message);
+            if (error.original) {
+                console.error('Database error:', error.original);
+            }
+
             logger.error('Error creating project:', error);
+
             res.status(500).json({
                 error: 'Failed to create project',
-                message: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+                message: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+                details: process.env.NODE_ENV === 'development' ? {
+                    stack: error.stack,
+                    original: error.original?.message
+                } : undefined
             });
         }
     }
@@ -276,7 +360,7 @@ class ProjectController {
     static async updateProject(req, res) {
         try {
             const { id } = req.params;
-            const updates = req.body;
+            console.log('Updating project:', id, 'with data:', req.body);
 
             const project = await Project.findByPk(id);
             if (!project) {
@@ -286,79 +370,173 @@ class ProjectController {
                 });
             }
 
-            // If title is being updated, regenerate slug
+            const formData = req.body;
+
+            // Handle JSON fields that might come as strings
+            const parseJsonField = (field) => {
+                if (!field) return null;
+                if (typeof field === 'string') {
+                    try {
+                        return JSON.parse(field);
+                    } catch (e) {
+                        console.log(`Failed to parse ${field} as JSON:`, e.message);
+                        return null;
+                    }
+                }
+                return field;
+            };
+
+            // Prepare update data with proper field mapping
+            const updates = {};
+
+            // Only include fields that are actually being updated
+            if (formData.title !== undefined) updates.title = formData.title;
+            if (formData.description !== undefined) updates.description = formData.description;
+            if (formData.shortDescription !== undefined) updates.short_description = formData.shortDescription || null;
+
+            // NEW: Structured content fields
+            if (formData.overview !== undefined) updates.overview = formData.overview || null;
+            if (formData.keyFeatures !== undefined) {
+                const keyFeatures = parseJsonField(formData.keyFeatures) || [];
+                updates.key_features = keyFeatures.filter(feature =>
+                    feature && typeof feature === 'string' && feature.trim() !== ''
+                );
+            }
+            if (formData.technicalImplementation !== undefined) {
+                updates.technical_implementation = formData.technicalImplementation || null;
+            }
+
+            // Other fields
+            if (formData.category !== undefined) updates.category = formData.category;
+            if (formData.status !== undefined) updates.status = formData.status;
+            if (formData.featured !== undefined) {
+                updates.featured = formData.featured === 'true' || formData.featured === true;
+            }
+            if (formData.technologies !== undefined) {
+                updates.technologies = parseJsonField(formData.technologies) || [];
+            }
+            if (formData.projectUrl !== undefined) updates.project_url = formData.projectUrl || null;
+            if (formData.githubUrl !== undefined) updates.github_url = formData.githubUrl || null;
+            if (formData.client !== undefined) updates.client_name = formData.client || null;
+            if (formData.startDate !== undefined) updates.start_date = formData.startDate || null;
+            if (formData.endDate !== undefined) updates.completion_date = formData.endDate || null;
+
+            // SEO fields
+            if (formData.seoTitle !== undefined) updates.seo_title = formData.seoTitle || null;
+            if (formData.seoDescription !== undefined) updates.seo_description = formData.seoDescription || null;
+            if (formData.seoKeywords !== undefined) updates.seo_keywords = parseJsonField(formData.seoKeywords) || [];
+
+            // Update slug if title changed
             if (updates.title && updates.title !== project.title) {
-                updates.slug = slugify(updates.title, { lower: true, strict: true });
+                const newSlug = slugify(updates.title, { lower: true, strict: true });
 
                 // Check for slug conflicts
                 const existingProject = await Project.findOne({
                     where: {
-                        slug: updates.slug,
+                        slug: newSlug,
                         id: { [Op.ne]: id }
                     }
                 });
 
                 if (existingProject) {
-                    updates.slug = `${updates.slug}-${Date.now()}`;
+                    updates.slug = `${newSlug}-${Date.now()}`;
+                } else {
+                    updates.slug = newSlug;
                 }
             }
 
             // Process new images if uploaded
-            if (req.processedImages) {
-                const newImages = {};
-                for (const [fieldName, images] of Object.entries(req.processedImages)) {
-                    newImages[fieldName] = images[0]?.responsiveImages || [];
+            if (req.files && req.files.length > 0) {
+                const newImages = req.files.map(file => ({
+                    url: `/uploads/projects/${file.filename}`,
+                    name: file.originalname,
+                    size: file.size,
+                    type: file.mimetype
+                }));
+
+                // Merge with existing images
+                const existingImages = project.images || [];
+                updates.images = [...existingImages, ...newImages];
+
+                // Update featured image if not set
+                if (!project.featured_image && newImages.length > 0) {
+                    updates.featured_image = newImages[0].url;
                 }
-                updates.gallery = { ...project.gallery, ...newImages };
             }
+
+            console.log('Update data:', updates);
 
             // Update project
             await project.update(updates);
 
-            // Update SEO metadata if project is published
+            // Update SEO metadata if needed
             if (updates.status === 'published' || project.status === 'published') {
-                const seoData = await SEOMetadata.findOne({
-                    where: { page_path: `projects/${project.slug}` }
-                });
+                try {
+                    const { SEOMetadata } = require('../models');
+                    const seoData = await SEOMetadata.findOne({
+                        where: { page_path: `projects/${project.slug}` }
+                    });
 
-                const seoUpdates = {
-                    page_path: `projects/${project.slug}`,
-                    title: `${project.title} - Project Showcase | ${process.env.SITE_NAME || 'GS Infotech'}`,
-                    description: updates.metaDescription ||
-                        (seoEnhancer?.generateMetaDescription ? seoEnhancer.generateMetaDescription(project.description) : project.description?.substring(0, 160)),
-                    keywords: updates.metaKeywords ?
-                        updates.metaKeywords.split(', ') :
-                        (seoEnhancer?.extractKeywords ? seoEnhancer.extractKeywords(project.content || project.description) : []),
-                    canonical_url: `${process.env.SITE_URL || 'https://gsinfotech.com'}/projects/${project.slug}`
-                };
+                    const seoUpdates = {
+                        page_path: `projects/${project.slug}`,
+                        title: updates.seo_title || project.seo_title || `${project.title} - Project Showcase`,
+                        description: updates.seo_description || project.seo_description || project.description?.substring(0, 160),
+                        keywords: updates.seo_keywords || project.seo_keywords || [],
+                        canonical_url: `${process.env.SITE_URL || 'https://gsinfotech.com'}/projects/${project.slug}`
+                    };
 
-                if (seoData) {
-                    await seoData.update(seoUpdates);
-                } else {
-                    await SEOMetadata.create(seoUpdates);
+                    if (seoData) {
+                        await seoData.update(seoUpdates);
+                    } else {
+                        await SEOMetadata.create(seoUpdates);
+                    }
+                } catch (seoError) {
+                    console.error('Failed to update SEO metadata:', seoError);
                 }
             }
 
-            // Invalidate caches
+            // Invalidate cache
             if (cacheManager?.isConnected) {
                 await cacheManager.invalidateByTags(['projects']);
             }
 
             logger.api('Project updated successfully', {
                 projectId: project.id,
-                updatedFields: Object.keys(updates)
+                updatedFields: Object.keys(updates),
+                hasOverview: !!project.overview,
+                featuresCount: project.key_features?.length || 0,
+                hasTechnicalImpl: !!project.technical_implementation
             });
 
             res.json({
                 message: 'Project updated successfully',
-                project
+                project: {
+                    id: project.id,
+                    title: project.title,
+                    slug: project.slug,
+                    status: project.status,
+                    overview: project.overview,
+                    key_features: project.key_features,
+                    technical_implementation: project.technical_implementation
+                }
             });
 
         } catch (error) {
+            console.error('Error updating project:', error);
+            console.error('Error details:', error.message);
+            if (error.original) {
+                console.error('Database error:', error.original);
+            }
+
             logger.error('Error updating project:', error);
+
             res.status(500).json({
                 error: 'Failed to update project',
-                message: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+                message: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+                details: process.env.NODE_ENV === 'development' ? {
+                    stack: error.stack,
+                    original: error.original?.message
+                } : undefined
             });
         }
     }
@@ -377,26 +555,32 @@ class ProjectController {
             }
 
             // Delete associated SEO metadata
-            await SEOMetadata.destroy({
-                where: { page_path: `projects/${project.slug}` }
-            });
+            try {
+                await SEOMetadata.destroy({
+                    where: { page_path: `projects/${project.slug}` }
+                });
+            } catch (seoError) {
+                console.error('Failed to delete SEO metadata:', seoError);
+                // Don't fail the whole request for SEO cleanup issues
+            }
 
-            // Delete project
+            // Delete the project
             await project.destroy();
 
-            // Invalidate caches
+            // Invalidate cache
             if (cacheManager?.isConnected) {
                 await cacheManager.invalidateByTags(['projects']);
             }
 
             logger.api('Project deleted successfully', {
-                projectId: id,
-                title: project.title
+                projectId: project.id,
+                title: project.title,
+                slug: project.slug
             });
 
             res.json({
                 message: 'Project deleted successfully',
-                deletedProject: {
+                project: {
                     id: project.id,
                     title: project.title,
                     slug: project.slug

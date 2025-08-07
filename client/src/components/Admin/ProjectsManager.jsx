@@ -1,3 +1,4 @@
+// Updated ProjectsManager.jsx - Clean and Modular
 import React, { useState, useEffect } from 'react';
 import {
     Box,
@@ -8,33 +9,27 @@ import {
     Typography,
     Grid,
     Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
+    IconButton,
+    Menu,
+    MenuItem as MenuOption,
+    CircularProgress,
+    InputAdornment,
+    Alert,
+    Snackbar,
+    Checkbox,
+    Divider,
+    Tooltip,
+    Badge,
+    Paper,
+    Skeleton,
+    Stack,
+    Avatar,
     TextField,
     FormControl,
     InputLabel,
     Select,
     MenuItem,
-    Chip,
-    IconButton,
-    Menu,
-    MenuItem as MenuOption,
-    CircularProgress,
-    Switch,
-    FormControlLabel,
-    InputAdornment,
-    Alert,
-    Snackbar,
-    Checkbox,
-    ListItemText,
-    OutlinedInput,
-    Divider,
-    Tooltip,
-    Fab,
-    Badge,
-    Paper,
-    Skeleton
+    Chip
 } from '@mui/material';
 import {
     Add,
@@ -42,166 +37,26 @@ import {
     Delete,
     MoreVert,
     Visibility,
-    Link,
-    GitHub,
     Launch,
+    GitHub,
     Search,
     GridView,
     ViewList,
     Work,
-    Upload,
-    Image,
-    Close,
     SelectAll,
     DeleteSweep,
     Publish,
     Archive,
-    FilterList,
-    Sort,
-    CloudUpload,
     Check,
     Warning,
-    Error as ErrorIcon
+    Star,
+    Business,
+    DateRange,
+    FilterList
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useDropzone } from 'react-dropzone';
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import { projectsAPI } from '../../services/projectsAPI';
-import { usePermissions } from './AuthGuard';
-
-// Validation Schema
-const projectSchema = yup.object({
-    title: yup.string().required('Title is required').min(3, 'Title must be at least 3 characters'),
-    description: yup.string().required('Description is required').min(10, 'Description must be at least 10 characters'),
-    shortDescription: yup.string().max(500, 'Short description must be less than 500 characters'),
-    category: yup.string().required('Category is required'),
-    status: yup.string().required('Status is required'),
-    technologies: yup.array().min(1, 'At least one technology is required'),
-    projectUrl: yup.string().url('Must be a valid URL').nullable(),
-    githubUrl: yup.string().url('Must be a valid URL').nullable(),
-    client: yup.string(),
-    startDate: yup.date().nullable(),
-    endDate: yup.date().nullable().min(yup.ref('startDate'), 'End date must be after start date')
-});
-
-// Image Upload Component
-const ImageUpload = ({ onImagesChange, existingImages = [] }) => {
-    const [images, setImages] = useState(existingImages);
-    const [uploading, setUploading] = useState(false);
-
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        accept: {
-            'image/*': ['.jpeg', '.jpg', '.png', '.webp']
-        },
-        multiple: true,
-        maxFiles: 10,
-        maxSize: 5 * 1024 * 1024, // 5MB
-        onDrop: async (acceptedFiles) => {
-            setUploading(true);
-            try {
-                const formData = new FormData();
-                acceptedFiles.forEach(file => {
-                    formData.append('images', file);
-                });
-
-                // Simulate upload - replace with actual API call
-                const uploadedImages = acceptedFiles.map(file => ({
-                    id: Date.now() + Math.random(),
-                    url: URL.createObjectURL(file),
-                    name: file.name,
-                    size: file.size
-                }));
-
-                const newImages = [...images, ...uploadedImages];
-                setImages(newImages);
-                onImagesChange(newImages);
-            } catch (error) {
-                console.error('Upload failed:', error);
-            } finally {
-                setUploading(false);
-            }
-        }
-    });
-
-    const removeImage = (imageId) => {
-        const newImages = images.filter(img => img.id !== imageId);
-        setImages(newImages);
-        onImagesChange(newImages);
-    };
-
-    return (
-        <Box>
-            <Paper
-                {...getRootProps()}
-                sx={{
-                    p: 3,
-                    border: '2px dashed',
-                    borderColor: isDragActive ? 'primary.main' : 'grey.300',
-                    bgcolor: isDragActive ? 'primary.50' : 'grey.50',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                        borderColor: 'primary.main',
-                        bgcolor: 'primary.50'
-                    }
-                }}
-            >
-                <input {...getInputProps()} />
-                <CloudUpload sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                    {isDragActive ? 'Drop images here' : 'Drag & drop images here'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    or click to select files (max 5MB each)
-                </Typography>
-                {uploading && <CircularProgress sx={{ mt: 2 }} />}
-            </Paper>
-
-            {images.length > 0 && (
-                <Grid container spacing={2} sx={{ mt: 2 }}>
-                    {images.map((image) => (
-                        <Grid item xs={6} sm={4} md={3} key={image.id}>
-                            <Card>
-                                <Box sx={{ position: 'relative' }}>
-                                    <img
-                                        src={image.url}
-                                        alt={image.name}
-                                        style={{
-                                            width: '100%',
-                                            height: 120,
-                                            objectFit: 'cover'
-                                        }}
-                                    />
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => removeImage(image.id)}
-                                        sx={{
-                                            position: 'absolute',
-                                            top: 4,
-                                            right: 4,
-                                            bgcolor: 'rgba(255,255,255,0.8)',
-                                            '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
-                                        }}
-                                    >
-                                        <Close fontSize="small" />
-                                    </IconButton>
-                                </Box>
-                                <CardContent sx={{ p: 1 }}>
-                                    <Typography variant="caption" noWrap>
-                                        {image.name}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-            )}
-        </Box>
-    );
-};
+import ProjectForm from '../Forms/ProjectForm';
 
 const ProjectsManager = () => {
     // State management
@@ -214,69 +69,69 @@ const ProjectsManager = () => {
     const [viewMode, setViewMode] = useState('grid');
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [filterCategory, setFilterCategory] = useState('all');
     const [selectedProjects, setSelectedProjects] = useState([]);
     const [bulkActionAnchor, setBulkActionAnchor] = useState(null);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
     const [confirmDialog, setConfirmDialog] = useState({ open: false, title: '', message: '', action: null });
-
-    const { canWrite, canDelete } = usePermissions();
-
-    // Form setup with React Hook Form
-    const { control, handleSubmit, formState: { errors, isSubmitting }, reset, watch, setValue } = useForm({
-        resolver: yupResolver(projectSchema),
-        defaultValues: {
-            title: '',
-            description: '',
-            shortDescription: '',
-            technologies: [],
-            status: 'draft',
-            category: '',
-            client: '',
-            projectUrl: '',
-            githubUrl: '',
-            startDate: '',
-            endDate: '',
-            featured: false,
-            images: []
-        }
+    const [formLoading, setFormLoading] = useState(false);
+    const [projectStats, setProjectStats] = useState({
+        total: 0,
+        published: 0,
+        draft: 0,
+        featured: 0
     });
 
-    const watchedImages = watch('images');
+    // Categories for filtering
+    const categories = [
+        { value: 'web_application', label: 'Web Application' },
+        { value: 'mobile_application', label: 'Mobile Application' },
+        { value: 'desktop_application', label: 'Desktop Application' },
+        { value: 'e_commerce', label: 'E-Commerce' },
+        { value: 'cms', label: 'CMS' },
+        { value: 'api', label: 'API Development' }
+    ];
 
     useEffect(() => {
         loadProjects();
     }, []);
 
+    useEffect(() => {
+        updateProjectStats();
+    }, [projects]);
+
     const loadProjects = async () => {
         try {
             setLoading(true);
-            const response = await projectsAPI.getAllProjects();
+            const response = await projectsAPI.getAllProjects({ status: 'all' });
 
-            // Check if response has a data property with projects array
             let projectsData = [];
-
             if (Array.isArray(response)) {
                 projectsData = response;
             } else if (response.data && Array.isArray(response.data)) {
                 projectsData = response.data;
-            } else if (response.data && response.data.projects && Array.isArray(response.data.projects)) {
-                projectsData = response.data.projects;
             } else if (response.projects && Array.isArray(response.projects)) {
                 projectsData = response.projects;
-            } else {
-                console.error('Unexpected response structure:', response);
-                projectsData = [];
             }
 
+            console.log('Loaded projects:', projectsData);
             setProjects(projectsData);
         } catch (error) {
             console.error('Error loading projects:', error);
             showSnackbar('Failed to load projects', 'error');
-            // Fallback to empty array instead of mock data
             setProjects([]);
         } finally {
             setLoading(false);
         }
+    };
+
+    const updateProjectStats = () => {
+        setProjectStats({
+            total: projects.length,
+            published: projects.filter(p => p.status === 'published').length,
+            draft: projects.filter(p => p.status === 'draft').length,
+            featured: projects.filter(p => p.featured).length
+        });
     };
 
     const showSnackbar = (message, severity = 'success') => {
@@ -287,58 +142,66 @@ const ProjectsManager = () => {
         setConfirmDialog({ open: true, title, message, action });
     };
 
-    // Handlers
     const handleOpenDialog = (project = null) => {
-        if (project) {
-            setEditingProject(project);
-            reset({
-                ...project,
-                startDate: project.startDate ? project.startDate.split('T')[0] : '',
-                endDate: project.endDate ? project.endDate.split('T')[0] : ''
-            });
-        } else {
-            setEditingProject(null);
-            reset({
-                title: '',
-                description: '',
-                shortDescription: '',
-                technologies: [],
-                status: 'draft',
-                category: '',
-                client: '',
-                projectUrl: '',
-                githubUrl: '',
-                startDate: '',
-                endDate: '',
-                featured: false,
-                images: []
-            });
-        }
+        setEditingProject(project);
         setOpenDialog(true);
     };
 
     const handleCloseDialog = () => {
         setOpenDialog(false);
         setEditingProject(null);
+        setFormLoading(false);
     };
 
-    const onSubmit = async (data) => {
+    const handleFormSubmit = async (formData, imagesToUpload) => {
         try {
+            setFormLoading(true);
+            console.log('Form data submitted:', formData);
+            console.log('Images to upload:', imagesToUpload);
+
             if (editingProject) {
-                await projectsAPI.updateProject(editingProject.id, data);
+                // Update existing project
+                const response = await projectsAPI.updateProject(
+                    editingProject.id,
+                    formData,
+                    imagesToUpload
+                );
+                console.log('Update response:', response);
+
                 setProjects(projects.map(p =>
-                    p.id === editingProject.id ? { ...data, id: editingProject.id } : p
+                    p.id === editingProject.id
+                        ? { ...response.project || response.data || formData, id: editingProject.id }
+                        : p
                 ));
                 showSnackbar('Project updated successfully');
             } else {
-                const response = await projectsAPI.createProject(data);
-                setProjects([response.data || { ...data, id: Date.now() }, ...projects]);
+                // Create new project
+                const response = await projectsAPI.createProject(formData, imagesToUpload);
+                console.log('Create response:', response);
+
+                const newProject = response.project || response.data || { ...formData, id: Date.now() };
+                setProjects([newProject, ...projects]);
                 showSnackbar('Project created successfully');
             }
+
             handleCloseDialog();
+
+            // Refresh projects list after a short delay
+            setTimeout(() => {
+                loadProjects();
+            }, 1000);
+
         } catch (error) {
             console.error('Error saving project:', error);
-            showSnackbar('Failed to save project', 'error');
+            console.error('Error details:', error.response?.data);
+
+            const errorMessage = error.response?.data?.message ||
+                error.response?.data?.error ||
+                error.message ||
+                'Failed to save project';
+            showSnackbar(errorMessage, 'error');
+        } finally {
+            setFormLoading(false);
         }
     };
 
@@ -397,7 +260,6 @@ const ProjectsManager = () => {
         setBulkActionAnchor(null);
     };
 
-    // Selection handlers
     const handleSelectProject = (projectId) => {
         setSelectedProjects(prev =>
             prev.includes(projectId)
@@ -414,20 +276,19 @@ const ProjectsManager = () => {
         );
     };
 
-    // Filter and search logic
     const filteredProjects = Array.isArray(projects) ? projects.filter(project => {
-        const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            project.technologies.some(tech =>
+        const matchesSearch = project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (project.technologies || []).some(tech =>
                 tech.toLowerCase().includes(searchTerm.toLowerCase())
             );
 
-        const matchesFilter = filterStatus === 'all' || project.status === filterStatus;
+        const matchesStatus = filterStatus === 'all' || project.status === filterStatus;
+        const matchesCategory = filterCategory === 'all' || project.category === filterCategory;
 
-        return matchesSearch && matchesFilter;
+        return matchesSearch && matchesStatus && matchesCategory;
     }) : [];
 
-    // Status color mapping
     const getStatusColor = (status) => {
         switch (status) {
             case 'published': return 'success';
@@ -436,26 +297,6 @@ const ProjectsManager = () => {
             default: return 'default';
         }
     };
-
-    const availableTechnologies = [
-        'React', 'Vue.js', 'Angular', 'Node.js', 'Express', 'MongoDB', 'PostgreSQL',
-        'MySQL', 'Python', 'Django', 'Flask', 'Java', 'Spring Boot', 'C#', '.NET',
-        'PHP', 'Laravel', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'SASS',
-        'Tailwind CSS', 'Bootstrap', 'React Native', 'Flutter', 'Swift', 'Kotlin',
-        'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'Firebase'
-    ];
-
-    const categories = [
-        'Web Development',
-        'Mobile Development',
-        'Desktop Application',
-        'E-Commerce',
-        'CMS',
-        'API Development',
-        'Data Science',
-        'DevOps',
-        'UI/UX Design'
-    ];
 
     if (loading) {
         return (
@@ -501,79 +342,97 @@ const ProjectsManager = () => {
                         </Badge>
                     )}
 
-                    {canWrite('projects') && (
-                        <Button
-                            variant="contained"
-                            startIcon={<Add />}
-                            onClick={() => handleOpenDialog()}
-                            sx={{
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                '&:hover': {
-                                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b46a1 100%)',
-                                }
-                            }}
-                        >
-                            Add Project
-                        </Button>
-                    )}
+                    <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => handleOpenDialog()}
+                        sx={{
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            '&:hover': {
+                                background: 'linear-gradient(135deg, #5a67d8 0%, #6b46a1 100%)',
+                            }
+                        }}
+                    >
+                        Add Project
+                    </Button>
                 </Box>
             </Box>
 
             {/* Stats Cards */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card>
-                        <CardContent>
-                            <Typography color="text.secondary" gutterBottom>
-                                Total Projects
-                            </Typography>
-                            <Typography variant="h4">
-                                {projects.length}
-                            </Typography>
+                    <Card sx={{ bgcolor: 'primary.50' }}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                <Work />
+                            </Avatar>
+                            <Box>
+                                <Typography color="text.secondary" variant="body2">
+                                    Total Projects
+                                </Typography>
+                                <Typography variant="h4">
+                                    {projectStats.total}
+                                </Typography>
+                            </Box>
                         </CardContent>
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card>
-                        <CardContent>
-                            <Typography color="text.secondary" gutterBottom>
-                                Published
-                            </Typography>
-                            <Typography variant="h4" color="success.main">
-                                {projects.filter(p => p.status === 'published').length}
-                            </Typography>
+                    <Card sx={{ bgcolor: 'success.50' }}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar sx={{ bgcolor: 'success.main' }}>
+                                <Check />
+                            </Avatar>
+                            <Box>
+                                <Typography color="text.secondary" variant="body2">
+                                    Published
+                                </Typography>
+                                <Typography variant="h4" color="success.main">
+                                    {projectStats.published}
+                                </Typography>
+                            </Box>
                         </CardContent>
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card>
-                        <CardContent>
-                            <Typography color="text.secondary" gutterBottom>
-                                Draft
-                            </Typography>
-                            <Typography variant="h4" color="warning.main">
-                                {projects.filter(p => p.status === 'draft').length}
-                            </Typography>
+                    <Card sx={{ bgcolor: 'warning.50' }}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar sx={{ bgcolor: 'warning.main' }}>
+                                <Edit />
+                            </Avatar>
+                            <Box>
+                                <Typography color="text.secondary" variant="body2">
+                                    Draft
+                                </Typography>
+                                <Typography variant="h4" color="warning.main">
+                                    {projectStats.draft}
+                                </Typography>
+                            </Box>
                         </CardContent>
                     </Card>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                    <Card>
-                        <CardContent>
-                            <Typography color="text.secondary" gutterBottom>
-                                Featured
-                            </Typography>
-                            <Typography variant="h4" color="primary.main">
-                                {projects.filter(p => p.featured).length}
-                            </Typography>
+                    <Card sx={{ bgcolor: 'info.50' }}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar sx={{ bgcolor: 'info.main' }}>
+                                <Star />
+                            </Avatar>
+                            <Box>
+                                <Typography color="text.secondary" variant="body2">
+                                    Featured
+                                </Typography>
+                                <Typography variant="h4" color="info.main">
+                                    {projectStats.featured}
+                                </Typography>
+                            </Box>
                         </CardContent>
                     </Card>
                 </Grid>
             </Grid>
 
             {/* Filters and Search */}
-            <Card sx={{ p: 2, mb: 3 }}>
-                <Grid container spacing={2} alignItems="center">
+            <Card sx={{ p: 3, mb: 3 }}>
+                <Grid container spacing={3} alignItems="center">
                     <Grid item xs={12} md={4}>
                         <TextField
                             fullWidth
@@ -589,12 +448,12 @@ const ProjectsManager = () => {
                             }}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid item xs={12} sm={6} md={2}>
                         <FormControl fullWidth>
-                            <InputLabel>Filter by Status</InputLabel>
+                            <InputLabel>Status</InputLabel>
                             <Select
                                 value={filterStatus}
-                                label="Filter by Status"
+                                label="Status"
                                 onChange={(e) => setFilterStatus(e.target.value)}
                             >
                                 <MenuItem value="all">All</MenuItem>
@@ -604,7 +463,24 @@ const ProjectsManager = () => {
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid item xs={12} sm={6} md={2}>
+                        <FormControl fullWidth>
+                            <InputLabel>Category</InputLabel>
+                            <Select
+                                value={filterCategory}
+                                label="Category"
+                                onChange={(e) => setFilterCategory(e.target.value)}
+                            >
+                                <MenuItem value="all">All</MenuItem>
+                                {categories.map((category) => (
+                                    <MenuItem key={category.value} value={category.value}>
+                                        {category.label}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
                         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                             <Tooltip title="Select All">
                                 <Checkbox
@@ -627,8 +503,8 @@ const ProjectsManager = () => {
                             </IconButton>
                         </Box>
                     </Grid>
-                    <Grid item xs={12} md={2}>
-                        <Typography variant="body2" color="text.secondary">
+                    <Grid item xs={12} sm={6} md={2}>
+                        <Typography variant="body2" color="text.secondary" textAlign="center">
                             {filteredProjects.length} project(s)
                         </Typography>
                     </Grid>
@@ -653,7 +529,11 @@ const ProjectsManager = () => {
                                         flexDirection: 'column',
                                         border: selectedProjects.includes(project.id) ? 2 : 1,
                                         borderColor: selectedProjects.includes(project.id) ? 'primary.main' : 'divider',
-                                        '&:hover': { transform: 'translateY(-4px)', transition: 'all 0.2s' }
+                                        '&:hover': {
+                                            transform: 'translateY(-4px)',
+                                            transition: 'all 0.2s',
+                                            boxShadow: 4
+                                        }
                                     }}
                                 >
                                     {/* Selection Checkbox */}
@@ -661,14 +541,15 @@ const ProjectsManager = () => {
                                         <Checkbox
                                             checked={selectedProjects.includes(project.id)}
                                             onChange={() => handleSelectProject(project.id)}
-                                            sx={{ bgcolor: 'rgba(255,255,255,0.8)' }}
+                                            sx={{ bgcolor: 'rgba(255,255,255,0.8)', borderRadius: 1 }}
                                         />
                                     </Box>
 
-                                    {project.images && project.images.length > 0 && (
+                                    {/* Project Image */}
+                                    {project.featured_image && (
                                         <Box sx={{ position: 'relative', height: 200, overflow: 'hidden' }}>
                                             <img
-                                                src={project.images[0]}
+                                                src={project.featured_image}
                                                 alt={project.title}
                                                 style={{
                                                     width: '100%',
@@ -678,6 +559,7 @@ const ProjectsManager = () => {
                                             />
                                             {project.featured && (
                                                 <Chip
+                                                    icon={<Star />}
                                                     label="Featured"
                                                     size="small"
                                                     color="primary"
@@ -692,9 +574,9 @@ const ProjectsManager = () => {
                                         </Box>
                                     )}
 
-                                    <CardContent sx={{ flexGrow: 1 }}>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                                            <Typography variant="h6" component="h2" gutterBottom>
+                                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                                            <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
                                                 {project.title}
                                             </Typography>
                                             <IconButton
@@ -708,75 +590,92 @@ const ProjectsManager = () => {
                                             </IconButton>
                                         </Box>
 
-                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                            {project.shortDescription || project.description?.substring(0, 100) + '...'}
+                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 40 }}>
+                                            {project.short_description || project.description?.substring(0, 100) + '...'}
                                         </Typography>
 
                                         <Box sx={{ mb: 2 }}>
-                                            <Chip
-                                                label={project.status.replace('-', ' ')}
-                                                size="small"
-                                                color={getStatusColor(project.status)}
-                                                sx={{ mr: 1, mb: 1 }}
-                                            />
-                                            <Chip
-                                                label={project.category}
-                                                size="small"
-                                                variant="outlined"
-                                                sx={{ mb: 1 }}
-                                            />
+                                            <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                                                <Chip
+                                                    label={project.status?.replace('_', ' ')}
+                                                    size="small"
+                                                    color={getStatusColor(project.status)}
+                                                />
+                                                <Chip
+                                                    label={project.category?.replace('_', ' ')}
+                                                    size="small"
+                                                    variant="outlined"
+                                                />
+                                            </Stack>
                                         </Box>
 
                                         <Box sx={{ mb: 2 }}>
-                                            {project.technologies.slice(0, 3).map((tech, index) => (
-                                                <Chip
-                                                    key={index}
-                                                    label={tech}
-                                                    size="small"
-                                                    variant="outlined"
-                                                    sx={{ mr: 0.5, mb: 0.5, fontSize: '0.75rem' }}
-                                                />
-                                            ))}
-                                            {project.technologies.length > 3 && (
-                                                <Chip
-                                                    label={`+${project.technologies.length - 3}`}
-                                                    size="small"
-                                                    variant="outlined"
-                                                    sx={{ mr: 0.5, mb: 0.5, fontSize: '0.75rem' }}
-                                                />
-                                            )}
+                                            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                                                Technologies:
+                                            </Typography>
+                                            <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                                                {(project.technologies || []).slice(0, 3).map((tech, index) => (
+                                                    <Chip
+                                                        key={index}
+                                                        label={tech}
+                                                        size="small"
+                                                        variant="outlined"
+                                                        sx={{ fontSize: '0.75rem', height: 24 }}
+                                                    />
+                                                ))}
+                                                {(project.technologies || []).length > 3 && (
+                                                    <Chip
+                                                        label={`+${project.technologies.length - 3}`}
+                                                        size="small"
+                                                        variant="outlined"
+                                                        sx={{ fontSize: '0.75rem', height: 24 }}
+                                                    />
+                                                )}
+                                            </Stack>
                                         </Box>
 
-                                        {project.client && (
+                                        {(project.client_name || project.client) && (
+                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                                <Business sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+                                                Client: {project.client_name || project.client}
+                                            </Typography>
+                                        )}
+
+                                        {project.completion_date && (
                                             <Typography variant="body2" color="text.secondary">
-                                                Client: {project.client}
+                                                <DateRange sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+                                                Completed: {new Date(project.completion_date).toLocaleDateString()}
                                             </Typography>
                                         )}
                                     </CardContent>
 
-                                    <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+                                    <CardActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>
                                         <Box>
-                                            {project.projectUrl && (
-                                                <IconButton size="small" href={project.projectUrl} target="_blank">
-                                                    <Launch />
-                                                </IconButton>
+                                            {project.project_url && (
+                                                <Tooltip title="View Live Project">
+                                                    <IconButton size="small" href={project.project_url} target="_blank">
+                                                        <Launch />
+                                                    </IconButton>
+                                                </Tooltip>
                                             )}
-                                            {project.githubUrl && (
-                                                <IconButton size="small" href={project.githubUrl} target="_blank">
-                                                    <GitHub />
-                                                </IconButton>
+                                            {project.github_url && (
+                                                <Tooltip title="View Source Code">
+                                                    <IconButton size="small" href={project.github_url} target="_blank">
+                                                        <GitHub />
+                                                    </IconButton>
+                                                </Tooltip>
                                             )}
                                         </Box>
 
-                                        {canWrite('projects') && (
-                                            <Button
-                                                size="small"
-                                                onClick={() => handleOpenDialog(project)}
-                                                startIcon={<Edit />}
-                                            >
-                                                Edit
-                                            </Button>
-                                        )}
+                                        <Button
+                                            size="small"
+                                            onClick={() => handleOpenDialog(project)}
+                                            startIcon={<Edit />}
+                                            variant="contained"
+                                            sx={{ minWidth: 100 }}
+                                        >
+                                            Edit
+                                        </Button>
                                     </CardActions>
                                 </Card>
                             </motion.div>
@@ -786,23 +685,31 @@ const ProjectsManager = () => {
             </Grid>
 
             {/* Empty State */}
-            {filteredProjects.length === 0 && (
+            {filteredProjects.length === 0 && !loading && (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
-                    <Work sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                    <Avatar sx={{ width: 80, height: 80, mx: 'auto', mb: 3, bgcolor: 'grey.100' }}>
+                        <Work sx={{ fontSize: 40, color: 'grey.400' }} />
+                    </Avatar>
+                    <Typography variant="h5" color="text.secondary" gutterBottom>
                         No projects found
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {searchTerm || filterStatus !== 'all'
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                        {searchTerm || filterStatus !== 'all' || filterCategory !== 'all'
                             ? 'Try adjusting your search or filters'
                             : 'Get started by adding your first project'
                         }
                     </Typography>
-                    {!searchTerm && filterStatus === 'all' && canWrite('projects') && (
+                    {!searchTerm && filterStatus === 'all' && filterCategory === 'all' && (
                         <Button
-                            variant="outlined"
+                            variant="contained"
                             startIcon={<Add />}
                             onClick={() => handleOpenDialog()}
+                            sx={{
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b46a1 100%)',
+                                }
+                            }}
                         >
                             Add Your First Project
                         </Button>
@@ -810,39 +717,67 @@ const ProjectsManager = () => {
                 </Box>
             )}
 
+            {/* Project Form Dialog */}
+            <Dialog
+                open={openDialog}
+                onClose={handleCloseDialog}
+                maxWidth="xl"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        height: '95vh',
+                        maxHeight: '95vh'
+                    }
+                }}
+            >
+                <ProjectForm
+                    project={editingProject}
+                    mode={editingProject ? 'edit' : 'create'}
+                    onSubmit={handleFormSubmit}
+                    onCancel={handleCloseDialog}
+                    isLoading={formLoading}
+                />
+            </Dialog>
+
             {/* Context Menu */}
             <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={() => setAnchorEl(null)}
             >
-                {canWrite('projects') && (
-                    <MenuOption onClick={() => {
-                        handleOpenDialog(selectedProject);
-                        setAnchorEl(null);
-                    }}>
-                        <Edit sx={{ mr: 1 }} />
-                        Edit
-                    </MenuOption>
-                )}
                 <MenuOption onClick={() => {
-                    // View project details - you can implement a view modal
+                    handleOpenDialog(selectedProject);
+                    setAnchorEl(null);
+                }}>
+                    <Edit sx={{ mr: 1 }} />
+                    Edit Project
+                </MenuOption>
+                <MenuOption onClick={() => {
+                    window.open(`/projects/${selectedProject?.id}`, '_blank');
                     setAnchorEl(null);
                 }}>
                     <Visibility sx={{ mr: 1 }} />
                     View Details
                 </MenuOption>
-                {canDelete('projects') && (
-                    <MenuOption
-                        onClick={() => {
-                            handleDeleteProject(selectedProject?.id);
-                        }}
-                        sx={{ color: 'error.main' }}
-                    >
-                        <Delete sx={{ mr: 1 }} />
-                        Delete
-                    </MenuOption>
-                )}
+                <MenuOption onClick={() => {
+                    if (selectedProject?.project_url) {
+                        window.open(selectedProject.project_url, '_blank');
+                    }
+                    setAnchorEl(null);
+                }} disabled={!selectedProject?.project_url}>
+                    <Launch sx={{ mr: 1 }} />
+                    Open Live Site
+                </MenuOption>
+                <Divider />
+                <MenuOption
+                    onClick={() => {
+                        handleDeleteProject(selectedProject?.id);
+                    }}
+                    sx={{ color: 'error.main' }}
+                >
+                    <Delete sx={{ mr: 1 }} />
+                    Delete Project
+                </MenuOption>
             </Menu>
 
             {/* Bulk Actions Menu */}
@@ -853,11 +788,11 @@ const ProjectsManager = () => {
             >
                 <MenuOption onClick={() => handleBulkAction('Publish')}>
                     <Publish sx={{ mr: 1 }} />
-                    Publish Selected
+                    Publish Selected ({selectedProjects.length})
                 </MenuOption>
                 <MenuOption onClick={() => handleBulkAction('Archive')}>
                     <Archive sx={{ mr: 1 }} />
-                    Archive Selected
+                    Archive Selected ({selectedProjects.length})
                 </MenuOption>
                 <Divider />
                 <MenuOption
@@ -865,385 +800,48 @@ const ProjectsManager = () => {
                     sx={{ color: 'error.main' }}
                 >
                     <Delete sx={{ mr: 1 }} />
-                    Delete Selected
+                    Delete Selected ({selectedProjects.length})
                 </MenuOption>
             </Menu>
-
-            {/* Add/Edit Dialog */}
-            <Dialog
-                open={openDialog}
-                onClose={handleCloseDialog}
-                maxWidth="lg"
-                fullWidth
-                PaperProps={{
-                    sx: { minHeight: '80vh' }
-                }}
-            >
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <DialogTitle>
-                        {editingProject ? 'Edit Project' : 'Add New Project'}
-                    </DialogTitle>
-                    <DialogContent>
-                        <Grid container spacing={3} sx={{ mt: 1 }}>
-                            {/* Basic Information */}
-                            <Grid item xs={12}>
-                                <Typography variant="h6" gutterBottom>
-                                    Basic Information
-                                </Typography>
-                            </Grid>
-
-                            <Grid item xs={12} md={8}>
-                                <Controller
-                                    name="title"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="Project Title"
-                                            error={!!errors.title}
-                                            helperText={errors.title?.message}
-                                            required
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} md={4}>
-                                <Controller
-                                    name="client"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="Client"
-                                            error={!!errors.client}
-                                            helperText={errors.client?.message}
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12}>
-                                <Controller
-                                    name="shortDescription"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="Short Description"
-                                            error={!!errors.shortDescription}
-                                            helperText={errors.shortDescription?.message || 'Brief summary for cards'}
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12}>
-                                <Controller
-                                    name="description"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="Full Description"
-                                            multiline
-                                            rows={4}
-                                            error={!!errors.description}
-                                            helperText={errors.description?.message}
-                                            required
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            {/* Project Details */}
-                            <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" gutterBottom>
-                                    Project Details
-                                </Typography>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Controller
-                                    name="category"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FormControl fullWidth error={!!errors.category}>
-                                            <InputLabel>Category</InputLabel>
-                                            <Select
-                                                {...field}
-                                                label="Category"
-                                            >
-                                                {categories.map((category) => (
-                                                    <MenuItem key={category} value={category}>
-                                                        {category}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                            {errors.category && (
-                                                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
-                                                    {errors.category.message}
-                                                </Typography>
-                                            )}
-                                        </FormControl>
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Controller
-                                    name="status"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FormControl fullWidth error={!!errors.status}>
-                                            <InputLabel>Status</InputLabel>
-                                            <Select
-                                                {...field}
-                                                label="Status"
-                                            >
-                                                <MenuItem value="draft">Draft</MenuItem>
-                                                <MenuItem value="published">Published</MenuItem>
-                                                <MenuItem value="archived">Archived</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12}>
-                                <Controller
-                                    name="technologies"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FormControl fullWidth error={!!errors.technologies}>
-                                            <InputLabel>Technologies</InputLabel>
-                                            <Select
-                                                {...field}
-                                                multiple
-                                                input={<OutlinedInput label="Technologies" />}
-                                                renderValue={(selected) => (
-                                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                        {selected.map((value) => (
-                                                            <Chip key={value} label={value} size="small" />
-                                                        ))}
-                                                    </Box>
-                                                )}
-                                            >
-                                                {availableTechnologies.map((tech) => (
-                                                    <MenuItem key={tech} value={tech}>
-                                                        <Checkbox checked={field.value.indexOf(tech) > -1} />
-                                                        <ListItemText primary={tech} />
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                            {errors.technologies && (
-                                                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
-                                                    {errors.technologies.message}
-                                                </Typography>
-                                            )}
-                                        </FormControl>
-                                    )}
-                                />
-                            </Grid>
-
-                            {/* URLs */}
-                            <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" gutterBottom>
-                                    Links
-                                </Typography>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Controller
-                                    name="projectUrl"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="Project URL"
-                                            type="url"
-                                            error={!!errors.projectUrl}
-                                            helperText={errors.projectUrl?.message}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <Launch />
-                                                    </InputAdornment>
-                                                )
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Controller
-                                    name="githubUrl"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="GitHub URL"
-                                            type="url"
-                                            error={!!errors.githubUrl}
-                                            helperText={errors.githubUrl?.message}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <GitHub />
-                                                    </InputAdornment>
-                                                )
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            {/* Dates */}
-                            <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" gutterBottom>
-                                    Timeline
-                                </Typography>
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Controller
-                                    name="startDate"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="Start Date"
-                                            type="date"
-                                            InputLabelProps={{ shrink: true }}
-                                            error={!!errors.startDate}
-                                            helperText={errors.startDate?.message}
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <Controller
-                                    name="endDate"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="End Date"
-                                            type="date"
-                                            InputLabelProps={{ shrink: true }}
-                                            error={!!errors.endDate}
-                                            helperText={errors.endDate?.message}
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            {/* Settings */}
-                            <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" gutterBottom>
-                                    Settings
-                                </Typography>
-                            </Grid>
-
-                            <Grid item xs={12}>
-                                <Controller
-                                    name="featured"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FormControlLabel
-                                            control={
-                                                <Switch
-                                                    checked={field.value}
-                                                    onChange={field.onChange}
-                                                />
-                                            }
-                                            label="Featured Project"
-                                        />
-                                    )}
-                                />
-                            </Grid>
-
-                            {/* Image Upload */}
-                            <Grid item xs={12}>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="h6" gutterBottom>
-                                    Project Images
-                                </Typography>
-                                <ImageUpload
-                                    onImagesChange={(images) => setValue('images', images)}
-                                    existingImages={watchedImages}
-                                />
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                    <DialogActions sx={{ p: 3 }}>
-                        <Button onClick={handleCloseDialog} disabled={isSubmitting}>
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            disabled={isSubmitting}
-                            sx={{
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                '&:hover': {
-                                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b46a1 100%)',
-                                }
-                            }}
-                        >
-                            {isSubmitting ? (
-                                <CircularProgress size={20} />
-                            ) : (
-                                editingProject ? 'Update Project' : 'Add Project'
-                            )}
-                        </Button>
-                    </DialogActions>
-                </form>
-            </Dialog>
 
             {/* Confirmation Dialog */}
             <Dialog
                 open={confirmDialog.open}
                 onClose={() => setConfirmDialog({ ...confirmDialog, open: false })}
+                maxWidth="sm"
+                fullWidth
             >
-                <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Warning color="warning" />
-                    {confirmDialog.title}
-                </DialogTitle>
-                <DialogContent>
-                    <Typography>{confirmDialog.message}</Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setConfirmDialog({ ...confirmDialog, open: false })}>
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={async () => {
-                            if (confirmDialog.action) {
-                                await confirmDialog.action();
-                            }
-                            setConfirmDialog({ ...confirmDialog, open: false });
-                        }}
-                        color="error"
-                        variant="contained"
-                    >
-                        Confirm
-                    </Button>
-                </DialogActions>
+                <Box sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                        <Warning color="warning" />
+                        <Typography variant="h6">
+                            {confirmDialog.title}
+                        </Typography>
+                    </Box>
+                    <Typography variant="body1" sx={{ mb: 3 }}>
+                        {confirmDialog.message}
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                        <Button
+                            onClick={() => setConfirmDialog({ ...confirmDialog, open: false })}
+                            variant="outlined"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                if (confirmDialog.action) {
+                                    await confirmDialog.action();
+                                }
+                                setConfirmDialog({ ...confirmDialog, open: false });
+                            }}
+                            color="error"
+                            variant="contained"
+                        >
+                            Confirm
+                        </Button>
+                    </Box>
+                </Box>
             </Dialog>
 
             {/* Snackbar for notifications */}
@@ -1251,11 +849,13 @@ const ProjectsManager = () => {
                 open={snackbar.open}
                 autoHideDuration={6000}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
                 <Alert
                     onClose={() => setSnackbar({ ...snackbar, open: false })}
                     severity={snackbar.severity}
                     sx={{ width: '100%' }}
+                    variant="filled"
                 >
                     {snackbar.message}
                 </Alert>

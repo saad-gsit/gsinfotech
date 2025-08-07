@@ -50,15 +50,16 @@ const Team = () => {
         return icons[platform.toLowerCase()] || <Language />
     }
 
-    const TeamMemberCard = ({ member, index, isLeadership = false }) => (
+    const TeamMemberCard = ({ member, index }) => (
         <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
             whileHover={{ y: -8 }}
             className="group cursor-pointer"
+            style={{ height: '100%' }}
         >
-            <Link to={`/team/${member.slug || member.id}`} className="no-underline">
+            <Link to={`/team/${member.slug || member.id}`} className="no-underline" style={{ height: '100%', display: 'block' }}>
                 <Card
                     sx={{
                         p: 4,
@@ -70,9 +71,12 @@ const Team = () => {
                         transition: 'all 0.4s ease',
                         position: 'relative',
                         overflow: 'visible',
+                        height: '480px', // Fixed height for equal cards
+                        display: 'flex',
+                        flexDirection: 'column',
                         '&:hover': {
                             boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
-                            borderColor: isLeadership ? 'var(--sage-400)' : 'var(--coral-400)',
+                            borderColor: 'var(--sage-400)',
                         }
                     }}
                 >
@@ -95,6 +99,7 @@ const Team = () => {
                                 alignItems: 'center',
                                 gap: 0.5,
                                 boxShadow: '0 4px 12px -2px rgba(157, 176, 130, 0.4)',
+                                zIndex: 2
                             }}
                         >
                             <WorkspacePremiumOutlined sx={{ fontSize: 14 }} />
@@ -102,195 +107,215 @@ const Team = () => {
                         </Box>
                     )}
 
-                    {/* Avatar with Status */}
-                    <Box sx={{ position: 'relative', display: 'inline-block', mb: 3 }}>
-                        <Avatar
-                            src={member.photo || member.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=300&background=9db082&color=fff`}
-                            alt={member.name}
-                            sx={{
-                                width: isLeadership ? 120 : 100,
-                                height: isLeadership ? 120 : 100,
-                                mx: 'auto',
-                                border: `4px solid ${isLeadership ? 'var(--sage-100)' : 'var(--stone-100)'}`,
-                                transition: 'all 0.4s ease',
-                                filter: 'grayscale(20%)',
-                                '&:hover': {
-                                    filter: 'grayscale(0%)',
-                                    transform: 'scale(1.05)',
-                                    borderColor: isLeadership ? 'var(--sage-400)' : 'var(--coral-400)',
-                                }
-                            }}
-                            onError={(e) => {
-                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=300&background=9db082&color=fff`
-                            }}
-                        />
-
-                        {/* Status Indicator */}
-                        {member.is_active && (
-                            <Box
+                    {/* Avatar Section - Fixed Space */}
+                    <Box sx={{ mb: 3, flexShrink: 0 }}>
+                        <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                            <Avatar
+                                src={member.photo || member.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=300&background=9db082&color=fff`}
+                                alt={member.name}
                                 sx={{
-                                    position: 'absolute',
-                                    bottom: 8,
-                                    right: 8,
-                                    width: 16,
-                                    height: 16,
-                                    backgroundColor: 'var(--sage-400)',
-                                    borderRadius: '50%',
-                                    border: '3px solid white',
-                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                                    width: 100,
+                                    height: 100,
+                                    mx: 'auto',
+                                    border: '4px solid var(--stone-100)',
+                                    transition: 'all 0.4s ease',
+                                    filter: 'grayscale(20%)',
+                                    '&:hover': {
+                                        filter: 'grayscale(0%)',
+                                        transform: 'scale(1.05)',
+                                        borderColor: 'var(--sage-400)',
+                                    }
+                                }}
+                                onError={(e) => {
+                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=300&background=9db082&color=fff`
+                                }}
+                            />
+
+                            {/* Status Indicator */}
+                            {member.is_active && (
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        bottom: 8,
+                                        right: 8,
+                                        width: 16,
+                                        height: 16,
+                                        backgroundColor: 'var(--sage-400)',
+                                        borderRadius: '50%',
+                                        border: '3px solid white',
+                                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                                    }}
+                                />
+                            )}
+                        </Box>
+                    </Box>
+
+                    {/* Name and Position - Fixed Space */}
+                    <Box sx={{ mb: 2, flexShrink: 0, minHeight: '60px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 600,
+                                mb: 1,
+                                color: 'var(--stone-800)',
+                                fontSize: '1.1rem',
+                                lineHeight: 1.3,
+                                minHeight: '26px'
+                            }}
+                        >
+                            {member.name}
+                        </Typography>
+
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                color: 'var(--sage-600)',
+                                fontWeight: 500,
+                                fontSize: '0.875rem',
+                                minHeight: '20px'
+                            }}
+                        >
+                            {member.position || member.role}
+                        </Typography>
+                    </Box>
+
+                    {/* Department - Fixed Space */}
+                    <Box sx={{ mb: 3, flexShrink: 0, minHeight: '32px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+                        {member.department && (
+                            <Chip
+                                label={member.department}
+                                size="small"
+                                sx={{
+                                    backgroundColor: 'var(--stone-50)',
+                                    color: 'var(--stone-600)',
+                                    fontSize: '0.75rem',
+                                    borderRadius: '50px',
+                                    height: '24px'
                                 }}
                             />
                         )}
                     </Box>
 
-                    {/* Member Info */}
-                    <Typography
-                        variant="h6"
-                        sx={{
-                            fontWeight: 600,
-                            mb: 1,
-                            color: 'var(--stone-800)',
-                            fontSize: isLeadership ? '1.25rem' : '1.1rem'
-                        }}
-                    >
-                        {member.name}
-                    </Typography>
+                    {/* Bio Section - Flexible Space */}
+                    <Box sx={{ flex: 1, mb: 3, display: 'flex', alignItems: 'flex-start' }}>
+                        {member.bio && (
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: 'var(--stone-600)',
+                                    lineHeight: 1.5,
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 3,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    fontSize: '0.85rem'
+                                }}
+                            >
+                                {member.bio}
+                            </Typography>
+                        )}
+                    </Box>
 
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: isLeadership ? 'var(--sage-600)' : 'var(--coral-600)',
-                            mb: 2,
-                            fontWeight: 500,
-                            fontSize: '0.875rem'
-                        }}
-                    >
-                        {member.position || member.role}
-                    </Typography>
-
-                    {member.department && (
-                        <Chip
-                            label={member.department}
-                            size="small"
-                            sx={{
-                                backgroundColor: 'var(--stone-50)',
-                                color: 'var(--stone-600)',
-                                fontSize: '0.75rem',
-                                mb: 2,
-                                borderRadius: '50px',
-                            }}
-                        />
-                    )}
-
-                    {/* Bio Preview */}
-                    {member.bio && (
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                color: 'var(--stone-600)',
-                                mb: 3,
-                                lineHeight: 1.5,
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
-                            }}
-                        >
-                            {member.bio}
-                        </Typography>
-                    )}
-
-                    {/* Skills */}
-                    {member.skills && member.skills.length > 0 && (
-                        <Stack direction="row" spacing={0.5} justifyContent="center" sx={{ mb: 3, flexWrap: 'wrap', gap: 0.5 }}>
-                            {member.skills.slice(0, 3).map((skill, idx) => (
-                                <Chip
-                                    key={idx}
-                                    label={skill}
-                                    size="small"
-                                    sx={{
-                                        backgroundColor: 'var(--sand-50)',
-                                        color: 'var(--sand-600)',
-                                        fontSize: '0.7rem',
-                                        height: 24,
-                                        borderRadius: '12px',
-                                    }}
-                                />
-                            ))}
-                            {member.skills.length > 3 && (
-                                <Chip
-                                    label={`+${member.skills.length - 3}`}
-                                    size="small"
-                                    sx={{
-                                        backgroundColor: 'var(--stone-100)',
-                                        color: 'var(--stone-600)',
-                                        fontSize: '0.7rem',
-                                        height: 24,
-                                        borderRadius: '12px',
-                                    }}
-                                />
-                            )}
-                        </Stack>
-                    )}
-
-                    {/* Experience */}
-                    {member.years_experience && (
-                        <Typography
-                            variant="caption"
-                            sx={{
-                                color: 'var(--stone-500)',
-                                display: 'block',
-                                mb: 2,
-                                fontSize: '0.75rem'
-                            }}
-                        >
-                            {member.years_experience}+ years experience
-                        </Typography>
-                    )}
-
-                    {/* Social Links - Always visible on mobile, hover on desktop */}
-                    {member.social_links && Object.keys(member.social_links).length > 0 && (
-                        <Stack
-                            direction="row"
-                            spacing={1}
-                            justifyContent="center"
-                            sx={{
-                                opacity: { xs: 1, md: 0 },
-                                transition: 'opacity 0.3s ease',
-                                '.group:hover &': {
-                                    opacity: 1,
-                                }
-                            }}
-                        >
-                            {Object.entries(member.social_links).slice(0, 4).map(([platform, url]) => (
-                                url && (
-                                    <IconButton
-                                        key={platform}
-                                        href={url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                    {/* Skills Section - Fixed Space */}
+                    <Box sx={{ mb: 3, flexShrink: 0, minHeight: '30px' }}>
+                        {member.skills && member.skills.length > 0 && (
+                            <Stack
+                                direction="row"
+                                spacing={0.5}
+                                justifyContent="center"
+                                sx={{ flexWrap: 'wrap', gap: 0.5 }}
+                            >
+                                {member.skills.slice(0, 2).map((skill, idx) => (
+                                    <Chip
+                                        key={idx}
+                                        label={skill}
                                         size="small"
-                                        onClick={(e) => e.stopPropagation()}
                                         sx={{
-                                            color: 'var(--stone-500)',
-                                            backgroundColor: 'var(--stone-50)',
-                                            width: 32,
-                                            height: 32,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                color: 'white',
-                                                backgroundColor: 'var(--sage-400)',
-                                                transform: 'translateY(-2px)',
-                                            }
+                                            backgroundColor: 'var(--sand-50)',
+                                            color: 'var(--sand-600)',
+                                            fontSize: '0.7rem',
+                                            height: 22,
+                                            borderRadius: '11px',
                                         }}
-                                        title={`${member.name} on ${platform}`}
-                                    >
-                                        {getSocialIcon(platform)}
-                                    </IconButton>
-                                )
-                            ))}
-                        </Stack>
-                    )}
+                                    />
+                                ))}
+                                {member.skills.length > 2 && (
+                                    <Chip
+                                        label={`+${member.skills.length - 2}`}
+                                        size="small"
+                                        sx={{
+                                            backgroundColor: 'var(--stone-100)',
+                                            color: 'var(--stone-600)',
+                                            fontSize: '0.7rem',
+                                            height: 22,
+                                            borderRadius: '11px',
+                                        }}
+                                    />
+                                )}
+                            </Stack>
+                        )}
+                    </Box>
+
+                    {/* Experience - Fixed Space */}
+                    <Box sx={{ mb: 3, flexShrink: 0, minHeight: '20px' }}>
+                        {member.years_experience && (
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    color: 'var(--stone-500)',
+                                    fontSize: '0.75rem'
+                                }}
+                            >
+                                {member.years_experience}+ years experience
+                            </Typography>
+                        )}
+                    </Box>
+
+                    {/* Social Links - Bottom Fixed */}
+                    <Box sx={{ flexShrink: 0 }}>
+                        {member.social_links && Object.keys(member.social_links).length > 0 && (
+                            <Stack
+                                direction="row"
+                                spacing={1}
+                                justifyContent="center"
+                                sx={{
+                                    opacity: { xs: 1, md: 0 },
+                                    transition: 'opacity 0.3s ease',
+                                    '.group:hover &': {
+                                        opacity: 1,
+                                    }
+                                }}
+                            >
+                                {Object.entries(member.social_links).slice(0, 4).map(([platform, url]) => (
+                                    url && (
+                                        <IconButton
+                                            key={platform}
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            size="small"
+                                            onClick={(e) => e.stopPropagation()}
+                                            sx={{
+                                                color: 'var(--stone-500)',
+                                                backgroundColor: 'var(--stone-50)',
+                                                width: 32,
+                                                height: 32,
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    color: 'white',
+                                                    backgroundColor: 'var(--sage-400)',
+                                                    transform: 'translateY(-2px)',
+                                                }
+                                            }}
+                                            title={`${member.name} on ${platform}`}
+                                        >
+                                            {getSocialIcon(platform)}
+                                        </IconButton>
+                                    )
+                                ))}
+                            </Stack>
+                        )}
+                    </Box>
                 </Card>
             </Link>
         </motion.div>
@@ -303,7 +328,7 @@ const Team = () => {
                 <meta name="description" content="Meet the talented individuals who make up our team of developers, designers, and digital strategists." />
             </Helmet>
 
-            {/* Hero Section - Enhanced */}
+            {/* Hero Section - Center Aligned */}
             <section
                 style={{
                     paddingTop: '8rem',
@@ -338,81 +363,84 @@ const Team = () => {
                 />
 
                 <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10 }}>
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1 }}
-                        style={{ textAlign: 'center' }}
-                    >
-                        <Chip
-                            icon={<GroupsOutlined sx={{ fontSize: 16 }} />}
-                            label="OUR TEAM"
-                            sx={{
-                                backgroundColor: 'var(--sage-400)',
-                                color: 'white',
-                                fontWeight: 500,
-                                mb: 3,
-                                px: 2,
-                                borderRadius: '50px',
-                                fontSize: '0.75rem',
-                                letterSpacing: '0.1em',
-                            }}
-                        />
-                        <Typography
-                            variant="h1"
-                            sx={{
-                                fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5rem' },
-                                fontWeight: 300,
-                                lineHeight: 0.9,
-                                letterSpacing: '-0.02em',
-                                mb: 4,
-                                color: 'var(--stone-800)',
-                            }}
+                    <Box sx={{ textAlign: 'center' }}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1 }}
                         >
-                            Meet the people
-                            <br />
-                            <span style={{ fontWeight: 600, color: 'var(--sage-600)' }}>behind the magic</span>
-                        </Typography>
-                        <Typography
-                            variant="h5"
-                            sx={{
-                                color: 'var(--stone-600)',
-                                fontWeight: 300,
-                                lineHeight: 1.6,
-                                maxWidth: '700px',
-                                mx: 'auto',
-                                fontSize: { xs: '1.1rem', md: '1.25rem' }
-                            }}
-                        >
-                            A diverse team of thinkers, creators, and innovators working together
-                            to build exceptional digital experiences that make a difference.
-                        </Typography>
-                    </motion.div>
+                            <Chip
+                                icon={<GroupsOutlined sx={{ fontSize: 16 }} />}
+                                label="OUR TEAM"
+                                sx={{
+                                    backgroundColor: 'var(--sage-400)',
+                                    color: 'white',
+                                    fontWeight: 500,
+                                    mb: 3,
+                                    px: 2,
+                                    borderRadius: '50px',
+                                    fontSize: '0.75rem',
+                                    letterSpacing: '0.1em',
+                                }}
+                            />
+                            <Typography
+                                variant="h1"
+                                sx={{
+                                    fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5rem' },
+                                    fontWeight: 300,
+                                    lineHeight: 0.9,
+                                    letterSpacing: '-0.02em',
+                                    mb: 4,
+                                    color: 'var(--stone-800)',
+                                }}
+                            >
+                                Meet the people
+                                <br />
+                                <span style={{ fontWeight: 600, color: 'var(--sage-600)' }}>behind the magic</span>
+                            </Typography>
+                            <Typography
+                                variant="h5"
+                                sx={{
+                                    color: 'var(--stone-600)',
+                                    fontWeight: 300,
+                                    lineHeight: 1.6,
+                                    maxWidth: '700px',
+                                    mx: 'auto',
+                                    fontSize: { xs: '1.1rem', md: '1.25rem' }
+                                }}
+                            >
+                                A diverse team of thinkers, creators, and innovators working together
+                                to build exceptional digital experiences that make a difference.
+                            </Typography>
+                        </motion.div>
+                    </Box>
                 </Container>
             </section>
 
-            {/* Team Content */}
-            <section style={{ padding: '4rem 0', backgroundColor: 'white', minHeight: '60vh' }}>
+            {/* Team Content - 3 Cards Per Row */}
+            <section style={{ padding: '6rem 0', backgroundColor: 'white', minHeight: '60vh' }}>
                 <Container maxWidth="lg">
                     {/* Loading State */}
                     {isLoading && (
-                        <Grid container spacing={4}>
-                            {[...Array(8)].map((_, index) => (
-                                <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                                    <Card sx={{ p: 3, textAlign: 'center', borderRadius: '24px' }}>
-                                        <Skeleton
-                                            variant="circular"
-                                            width={100}
-                                            height={100}
-                                            sx={{ mx: 'auto', mb: 2 }}
-                                        />
-                                        <Skeleton variant="text" width="70%" sx={{ mx: 'auto', mb: 1 }} />
-                                        <Skeleton variant="text" width="50%" sx={{ mx: 'auto', mb: 2 }} />
-                                        <Skeleton variant="text" width="80%" sx={{ mx: 'auto' }} />
-                                    </Card>
-                                </Grid>
-                            ))}
-                        </Grid>
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <Grid container spacing={4} sx={{ maxWidth: '1000px' }}>
+                                {[...Array(6)].map((_, index) => (
+                                    <Grid item xs={12} sm={6} lg={4} key={index}>
+                                        <Card sx={{ p: 3, textAlign: 'center', borderRadius: '24px', height: '480px' }}>
+                                            <Skeleton
+                                                variant="circular"
+                                                width={100}
+                                                height={100}
+                                                sx={{ mx: 'auto', mb: 2 }}
+                                            />
+                                            <Skeleton variant="text" width="70%" sx={{ mx: 'auto', mb: 1 }} />
+                                            <Skeleton variant="text" width="50%" sx={{ mx: 'auto', mb: 2 }} />
+                                            <Skeleton variant="text" width="80%" sx={{ mx: 'auto' }} />
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Box>
                     )}
 
                     {/* Error State */}
@@ -454,99 +482,51 @@ const Team = () => {
                         </Box>
                     )}
 
-                    {/* Team Members */}
-                    {!isLoading && !isError && data && (
-                        <>
-                            {/* Leadership Section */}
-                            {data.members?.filter(m => m.is_leadership).length > 0 && (
-                                <Box sx={{ mb: 8 }}>
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.6 }}
-                                        viewport={{ once: true }}
-                                        style={{ textAlign: 'center', marginBottom: '3rem' }}
-                                    >
-                                        <Typography
-                                            variant="h2"
-                                            sx={{
-                                                fontSize: { xs: '2rem', md: '2.5rem' },
-                                                fontWeight: 300,
-                                                mb: 2,
-                                                color: 'var(--stone-800)',
-                                                letterSpacing: '-0.02em',
-                                            }}
-                                        >
-                                            Leadership Team
-                                        </Typography>
-                                        <Typography
-                                            variant="body1"
-                                            sx={{
-                                                color: 'var(--stone-600)',
-                                                maxWidth: '600px',
-                                                mx: 'auto'
-                                            }}
-                                        >
-                                            Visionary leaders who guide our mission and drive innovation.
-                                        </Typography>
-                                    </motion.div>
-                                    <Grid container spacing={4} justifyContent="center">
-                                        {data.members
-                                            .filter(m => m.is_leadership)
-                                            .map((member, index) => (
-                                                <Grid item xs={12} sm={6} md={4} key={member.id}>
-                                                    <TeamMemberCard member={member} index={index} isLeadership={true} />
-                                                </Grid>
-                                            ))}
-                                    </Grid>
-                                </Box>
-                            )}
+                    {/* Team Members - Exactly 3 Per Row */}
+                    {!isLoading && !isError && data && data.members?.length > 0 && (
+                        <Box>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6 }}
+                                viewport={{ once: true }}
+                                style={{ textAlign: 'center', marginBottom: '4rem' }}
+                            >
+                                <Typography
+                                    variant="h2"
+                                    sx={{
+                                        fontSize: { xs: '2rem', md: '2.5rem' },
+                                        fontWeight: 300,
+                                        mb: 2,
+                                        color: 'var(--stone-800)',
+                                        letterSpacing: '-0.02em',
+                                    }}
+                                >
+                                    Our Team Members
+                                </Typography>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        color: 'var(--stone-600)',
+                                        maxWidth: '600px',
+                                        mx: 'auto',
+                                        lineHeight: 1.6
+                                    }}
+                                >
+                                    Talented professionals bringing creativity, expertise, and innovation to every project we undertake.
+                                </Typography>
+                            </motion.div>
 
-                            {/* Regular Team Members */}
-                            {data.members?.filter(m => !m.is_leadership).length > 0 && (
-                                <Box>
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.6 }}
-                                        viewport={{ once: true }}
-                                        style={{ textAlign: 'center', marginBottom: '3rem' }}
-                                    >
-                                        <Typography
-                                            variant="h2"
-                                            sx={{
-                                                fontSize: { xs: '2rem', md: '2.5rem' },
-                                                fontWeight: 300,
-                                                mb: 2,
-                                                color: 'var(--stone-800)',
-                                                letterSpacing: '-0.02em',
-                                            }}
-                                        >
-                                            Our Team
-                                        </Typography>
-                                        <Typography
-                                            variant="body1"
-                                            sx={{
-                                                color: 'var(--stone-600)',
-                                                maxWidth: '600px',
-                                                mx: 'auto'
-                                            }}
-                                        >
-                                            Talented professionals who bring creativity and expertise to every project.
-                                        </Typography>
-                                    </motion.div>
-                                    <Grid container spacing={4}>
-                                        {data.members
-                                            ?.filter(m => !m.is_leadership)
-                                            .map((member, index) => (
-                                                <Grid item xs={12} sm={6} md={4} lg={3} key={member.id}>
-                                                    <TeamMemberCard member={member} index={index} isLeadership={false} />
-                                                </Grid>
-                                            ))}
-                                    </Grid>
-                                </Box>
-                            )}
-                        </>
+                            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                <Grid container spacing={4} sx={{ maxWidth: '1000px' }}>
+                                    {data.members.map((member, index) => (
+                                        <Grid item xs={12} sm={6} lg={4} key={member.id}>
+                                            <TeamMemberCard member={member} index={index} />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Box>
+                        </Box>
                     )}
 
                     {/* Empty State */}
@@ -597,7 +577,7 @@ const Team = () => {
                     }}
                 />
 
-                <Container maxWidth="md" sx={{ position: 'relative', zIndex: 10 }}>
+                <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10 }}>
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -632,7 +612,7 @@ const Team = () => {
                             for creating exceptional digital experiences and making a positive impact.
                         </Typography>
 
-                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} justifyContent="center" sx={{ mb: 4 }}>
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} justifyContent="center" sx={{ mb: 6 }}>
                             <Link to="/careers" className="no-underline">
                                 <Button
                                     variant="contained"
@@ -687,36 +667,38 @@ const Team = () => {
                             </Link>
                         </Stack>
 
-                        {/* Company Culture Highlights */}
-                        <Grid container spacing={3} sx={{ mt: 4 }}>
-                            {[
-                                { icon: '🚀', title: 'Innovation-Driven', desc: 'Work with cutting-edge technology' },
-                                { icon: '🌍', title: 'Remote-Friendly', desc: 'Flexible work arrangements' },
-                                { icon: '📈', title: 'Growth Focused', desc: 'Continuous learning opportunities' },
-                                { icon: '💼', title: 'Competitive Benefits', desc: 'Health, retirement, and more' }
-                            ].map((item, index) => (
-                                <Grid item xs={6} md={3} key={index}>
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.6, delay: index * 0.1 }}
-                                        viewport={{ once: true }}
-                                    >
-                                        <Box sx={{ textAlign: 'center' }}>
-                                            <Typography variant="h4" sx={{ mb: 1 }}>
-                                                {item.icon}
-                                            </Typography>
-                                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 500, mb: 0.5 }}>
-                                                {item.title}
-                                            </Typography>
-                                            <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                                                {item.desc}
-                                            </Typography>
-                                        </Box>
-                                    </motion.div>
-                                </Grid>
-                            ))}
-                        </Grid>
+                        {/* Company Culture Highlights - Single Row Center Aligned */}
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <Grid container spacing={3} sx={{ maxWidth: '800px' }}>
+                                {[
+                                    { icon: '🚀', title: 'Innovation-Driven', desc: 'Work with cutting-edge technology' },
+                                    { icon: '🌍', title: 'Remote-Friendly', desc: 'Flexible work arrangements' },
+                                    { icon: '📈', title: 'Growth Focused', desc: 'Continuous learning opportunities' },
+                                    { icon: '💼', title: 'Competitive Benefits', desc: 'Health, retirement, and more' }
+                                ].map((item, index) => (
+                                    <Grid item xs={6} sm={3} key={index}>
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.6, delay: index * 0.1 }}
+                                            viewport={{ once: true }}
+                                        >
+                                            <Box sx={{ textAlign: 'center' }}>
+                                                <Typography variant="h4" sx={{ mb: 1, fontSize: '2rem' }}>
+                                                    {item.icon}
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ color: 'white', fontWeight: 500, mb: 0.5 }}>
+                                                    {item.title}
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.75rem' }}>
+                                                    {item.desc}
+                                                </Typography>
+                                            </Box>
+                                        </motion.div>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Box>
                     </motion.div>
                 </Container>
             </section>

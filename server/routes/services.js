@@ -188,6 +188,8 @@ router.get('/category/:category',
     serviceController.getServicesByCategory
 );
 
+router.get('/test-db', serviceController.testDatabaseConnection);
+
 // GET /api/services/:id - Get single service by ID or slug
 router.get('/:id',
     validateServiceId,

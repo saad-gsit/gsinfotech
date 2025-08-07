@@ -1,4 +1,4 @@
-// server/controllers/serviceController.js - Fixed Export
+// server/controllers/serviceController.js - FIXED VERSION
 const { Service } = require('../models');
 const { Op } = require('sequelize');
 
@@ -22,6 +22,8 @@ const slugify = (text) => {
 // Get all services with filters, search, and pagination
 const getAllServices = async (req, res) => {
     try {
+        console.log('📊 Getting all services from database...');
+
         const {
             page = 1,
             limit = 10,
@@ -57,53 +59,15 @@ const getAllServices = async (req, res) => {
             whereClause.is_featured = true;
         }
 
-        // Active filter
+        // Active filter (default to true if not specified)
         if (active !== undefined) {
             whereClause.is_active = active === 'true';
+        } else {
+            // Default to active services only
+            whereClause.is_active = true;
         }
 
-        // For development, return mock data if Service model isn't available
-        if (!Service) {
-            return res.json({
-                success: true,
-                data: [
-                    {
-                        id: 1,
-                        slug: 'web-development',
-                        name: 'Web Development',
-                        short_description: 'Modern, responsive websites and web applications built with the latest technologies.',
-                        category: 'web_development',
-                        features: ['React/Next.js', 'Node.js', 'E-commerce', 'CMS Development'],
-                        technologies: ['React', 'Next.js', 'Node.js', 'TypeScript'],
-                        starting_price: 2500,
-                        estimated_timeline: '4-8 weeks',
-                        is_featured: true,
-                        is_active: true
-                    },
-                    {
-                        id: 2,
-                        slug: 'mobile-app-development',
-                        name: 'Mobile App Development',
-                        short_description: 'Native and cross-platform mobile applications for iOS and Android devices.',
-                        category: 'mobile_development',
-                        features: ['iOS Development', 'Android Development', 'React Native', 'Flutter'],
-                        technologies: ['React Native', 'Flutter', 'Swift', 'Kotlin'],
-                        starting_price: 5000,
-                        estimated_timeline: '8-12 weeks',
-                        is_featured: true,
-                        is_active: true
-                    }
-                ],
-                pagination: {
-                    currentPage: parseInt(page),
-                    totalPages: 1,
-                    totalItems: 2,
-                    itemsPerPage: parseInt(limit),
-                    hasNextPage: false,
-                    hasPrevPage: false
-                }
-            });
-        }
+        console.log('🔍 Query filters:', whereClause);
 
         // Get services with pagination
         const { count, rows: services } = await Service.findAndCountAll({
@@ -115,6 +79,8 @@ const getAllServices = async (req, res) => {
                 exclude: ['created_at', 'updated_at']
             }
         });
+
+        console.log(`✅ Found ${count} services in database`);
 
         // Calculate pagination info
         const totalPages = Math.ceil(count / parseInt(limit));
@@ -135,7 +101,7 @@ const getAllServices = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Get services error:', error);
+        console.error('❌ Get services error:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching services',
@@ -148,53 +114,7 @@ const getAllServices = async (req, res) => {
 const getServiceById = async (req, res) => {
     try {
         const { id } = req.params;
-
-        // Mock data for development
-        const mockServices = {
-            'web-development': {
-                id: 1,
-                slug: 'web-development',
-                name: 'Web Development',
-                short_description: 'Modern, responsive websites and web applications built with the latest technologies.',
-                description: 'We create modern, responsive websites and web applications that deliver exceptional user experiences. Our team specializes in building scalable, performant, and secure web solutions using cutting-edge technologies.',
-                category: 'web_development',
-                features: ['React/Next.js', 'Node.js', 'E-commerce', 'CMS Development'],
-                technologies: ['React', 'Next.js', 'Node.js', 'TypeScript'],
-                starting_price: 2500,
-                estimated_timeline: '4-8 weeks',
-                is_featured: true,
-                is_active: true
-            },
-            '1': {
-                id: 1,
-                slug: 'web-development',
-                name: 'Web Development',
-                short_description: 'Modern, responsive websites and web applications built with the latest technologies.',
-                description: 'We create modern, responsive websites and web applications that deliver exceptional user experiences.',
-                category: 'web_development',
-                features: ['React/Next.js', 'Node.js', 'E-commerce', 'CMS Development'],
-                technologies: ['React', 'Next.js', 'Node.js', 'TypeScript'],
-                starting_price: 2500,
-                estimated_timeline: '4-8 weeks',
-                is_featured: true,
-                is_active: true
-            }
-        };
-
-        // If Service model isn't available, return mock data
-        if (!Service) {
-            const service = mockServices[id];
-            if (!service) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Service not found'
-                });
-            }
-            return res.json({
-                success: true,
-                data: service
-            });
-        }
+        console.log(`🔍 Getting service by ID/slug: ${id}`);
 
         // Check if id is numeric (ID) or string (slug)
         const whereClause = isNaN(id)
@@ -206,11 +126,14 @@ const getServiceById = async (req, res) => {
         });
 
         if (!service) {
+            console.log(`❌ Service not found: ${id}`);
             return res.status(404).json({
                 success: false,
                 message: 'Service not found'
             });
         }
+
+        console.log(`✅ Service found: ${service.name}`);
 
         res.json({
             success: true,
@@ -218,7 +141,7 @@ const getServiceById = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Get service error:', error);
+        console.error('❌ Get service error:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching service',
@@ -232,26 +155,35 @@ const getServiceStats = async (req, res) => {
     try {
         console.log('📊 Service stats requested');
 
-        // Always return mock stats for now since Service model might not exist
-        const mockStats = {
-            total: 4,
-            active: 4,
-            inactive: 0,
-            featured: 3,
-            categories: 4,
-            servicesByCategory: [
-                { category: 'web_development', count: 1 },
-                { category: 'mobile_development', count: 1 },
-                { category: 'custom_software', count: 1 },
-                { category: 'ui_ux_design', count: 1 }
-            ]
+        // Get actual counts from database
+        const total = await Service.count();
+        const active = await Service.count({ where: { is_active: true } });
+        const inactive = await Service.count({ where: { is_active: false } });
+        const featured = await Service.count({ where: { is_featured: true } });
+
+        // Get services by category
+        const servicesByCategory = await Service.findAll({
+            attributes: ['category', [Service.sequelize.fn('COUNT', Service.sequelize.col('id')), 'count']],
+            group: ['category'],
+            raw: true
+        });
+
+        const categories = new Set(servicesByCategory.map(s => s.category)).size;
+
+        const stats = {
+            total,
+            active,
+            inactive,
+            featured,
+            categories,
+            servicesByCategory
         };
 
-        console.log('✅ Returning service stats:', mockStats);
+        console.log('✅ Service stats:', stats);
 
-        return res.json({
+        res.json({
             success: true,
-            data: mockStats
+            data: stats
         });
 
     } catch (error) {
@@ -267,6 +199,7 @@ const getServiceStats = async (req, res) => {
 // Create new service (Admin only)
 const createService = async (req, res) => {
     try {
+        console.log('➕ Creating new service...');
         const serviceData = req.body;
 
         // Generate slug if not provided
@@ -277,6 +210,7 @@ const createService = async (req, res) => {
         // Handle file upload if featured_image is provided
         if (req.file) {
             serviceData.featured_image = `/uploads/services/${req.file.filename}`;
+            console.log('📁 Image uploaded:', serviceData.featured_image);
         }
 
         // Ensure arrays are properly formatted
@@ -293,19 +227,11 @@ const createService = async (req, res) => {
             serviceData.seo_keywords = JSON.parse(serviceData.seo_keywords);
         }
 
-        // Mock response if Service model isn't available
-        if (!Service) {
-            return res.status(201).json({
-                success: true,
-                message: 'Service created successfully',
-                data: {
-                    id: Date.now(),
-                    ...serviceData
-                }
-            });
-        }
+        console.log('💾 Service data to create:', serviceData);
 
         const service = await Service.create(serviceData);
+
+        console.log('✅ Service created successfully:', service.name);
 
         res.status(201).json({
             success: true,
@@ -314,7 +240,7 @@ const createService = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Create service error:', error);
+        console.error('❌ Create service error:', error);
 
         // Handle validation errors
         if (error.name === 'SequelizeValidationError') {
@@ -349,18 +275,7 @@ const updateService = async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
-
-        // Mock response if Service model isn't available
-        if (!Service) {
-            return res.json({
-                success: true,
-                message: 'Service updated successfully',
-                data: {
-                    id: parseInt(id),
-                    ...updateData
-                }
-            });
-        }
+        console.log(`✏️ Updating service ID: ${id}`);
 
         const service = await Service.findByPk(id);
         if (!service) {
@@ -373,6 +288,7 @@ const updateService = async (req, res) => {
         // Handle file upload if new featured_image is provided
         if (req.file) {
             updateData.featured_image = `/uploads/services/${req.file.filename}`;
+            console.log('📁 New image uploaded:', updateData.featured_image);
         }
 
         // Update slug if name changed
@@ -396,6 +312,8 @@ const updateService = async (req, res) => {
 
         await service.update(updateData);
 
+        console.log('✅ Service updated successfully:', service.name);
+
         res.json({
             success: true,
             message: 'Service updated successfully',
@@ -403,7 +321,7 @@ const updateService = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Update service error:', error);
+        console.error('❌ Update service error:', error);
 
         if (error.name === 'SequelizeValidationError') {
             return res.status(400).json({
@@ -428,14 +346,7 @@ const updateService = async (req, res) => {
 const deleteService = async (req, res) => {
     try {
         const { id } = req.params;
-
-        // Mock response if Service model isn't available
-        if (!Service) {
-            return res.json({
-                success: true,
-                message: 'Service deleted successfully'
-            });
-        }
+        console.log(`🗑️ Deleting service ID: ${id}`);
 
         const service = await Service.findByPk(id);
         if (!service) {
@@ -447,13 +358,15 @@ const deleteService = async (req, res) => {
 
         await service.destroy();
 
+        console.log('✅ Service deleted successfully');
+
         res.json({
             success: true,
             message: 'Service deleted successfully'
         });
 
     } catch (error) {
-        console.error('Delete service error:', error);
+        console.error('❌ Delete service error:', error);
         res.status(500).json({
             success: false,
             message: 'Error deleting service',
@@ -466,24 +379,12 @@ const deleteService = async (req, res) => {
 const bulkUpdateServices = async (req, res) => {
     try {
         const { updates } = req.body;
+        console.log(`📝 Bulk updating ${updates.length} services`);
 
         if (!updates || !Array.isArray(updates)) {
             return res.status(400).json({
                 success: false,
                 message: 'Updates array is required'
-            });
-        }
-
-        // Mock response if Service model isn't available
-        if (!Service) {
-            return res.json({
-                success: true,
-                message: `Bulk update completed: ${updates.length} successful, 0 failed`,
-                results: {
-                    successful: updates.length,
-                    failed: 0,
-                    details: updates.map(u => ({ status: 'fulfilled' }))
-                }
             });
         }
 
@@ -500,6 +401,8 @@ const bulkUpdateServices = async (req, res) => {
         const successful = results.filter(r => r.status === 'fulfilled').length;
         const failed = results.filter(r => r.status === 'rejected').length;
 
+        console.log(`✅ Bulk update completed: ${successful} successful, ${failed} failed`);
+
         res.json({
             success: true,
             message: `Bulk update completed: ${successful} successful, ${failed} failed`,
@@ -511,7 +414,7 @@ const bulkUpdateServices = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Bulk update error:', error);
+        console.error('❌ Bulk update error:', error);
         res.status(500).json({
             success: false,
             message: 'Error performing bulk update',
@@ -524,20 +427,12 @@ const bulkUpdateServices = async (req, res) => {
 const bulkDeleteServices = async (req, res) => {
     try {
         const { ids } = req.body;
+        console.log(`🗑️ Bulk deleting services:`, ids);
 
         if (!ids || !Array.isArray(ids)) {
             return res.status(400).json({
                 success: false,
                 message: 'Service IDs array is required'
-            });
-        }
-
-        // Mock response if Service model isn't available
-        if (!Service) {
-            return res.json({
-                success: true,
-                message: `${ids.length} service(s) deleted successfully`,
-                deletedCount: ids.length
             });
         }
 
@@ -549,6 +444,8 @@ const bulkDeleteServices = async (req, res) => {
             }
         });
 
+        console.log(`✅ ${deletedCount} services deleted successfully`);
+
         res.json({
             success: true,
             message: `${deletedCount} service(s) deleted successfully`,
@@ -556,7 +453,7 @@ const bulkDeleteServices = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Bulk delete error:', error);
+        console.error('❌ Bulk delete error:', error);
         res.status(500).json({
             success: false,
             message: 'Error performing bulk delete',
@@ -570,35 +467,7 @@ const getServicesByCategory = async (req, res) => {
     try {
         const { category } = req.params;
         const { active = true } = req.query;
-
-        // Mock response if Service model isn't available
-        if (!Service) {
-            const mockServicesByCategory = {
-                'web_development': [{
-                    id: 1,
-                    slug: 'web-development',
-                    name: 'Web Development',
-                    short_description: 'Modern, responsive websites and web applications.',
-                    category: 'web_development',
-                    is_active: true
-                }],
-                'mobile_development': [{
-                    id: 2,
-                    slug: 'mobile-app-development',
-                    name: 'Mobile App Development',
-                    short_description: 'Native and cross-platform mobile applications.',
-                    category: 'mobile_development',
-                    is_active: true
-                }]
-            };
-
-            return res.json({
-                success: true,
-                data: mockServicesByCategory[category] || [],
-                category,
-                count: mockServicesByCategory[category]?.length || 0
-            });
-        }
+        console.log(`🏷️ Getting services by category: ${category}`);
 
         const whereClause = { category };
         if (active !== 'false') {
@@ -610,6 +479,8 @@ const getServicesByCategory = async (req, res) => {
             order: [['display_order', 'ASC'], ['created_at', 'DESC']]
         });
 
+        console.log(`✅ Found ${services.length} services in category: ${category}`);
+
         res.json({
             success: true,
             data: services,
@@ -618,7 +489,7 @@ const getServicesByCategory = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Get services by category error:', error);
+        console.error('❌ Get services by category error:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching services by category',
@@ -631,58 +502,23 @@ const getServicesByCategory = async (req, res) => {
 const getFeaturedServices = async (req, res) => {
     try {
         const { limit = 4 } = req.query;
-        console.log('⭐ Featured services requested, limit:', limit);
+        console.log('⭐ Getting featured services, limit:', limit);
 
-        // Always return mock data for now
-        const mockFeaturedServices = [
-            {
-                id: 1,
-                slug: 'web-development',
-                name: 'Web Development',
-                short_description: 'Modern, responsive websites and web applications built with the latest technologies.',
-                category: 'web_development',
-                features: ['React/Next.js', 'Node.js', 'E-commerce', 'CMS Development'],
-                technologies: ['React', 'Next.js', 'Node.js', 'TypeScript'],
-                starting_price: 2500,
-                estimated_timeline: '4-8 weeks',
+        const services = await Service.findAll({
+            where: {
                 is_featured: true,
                 is_active: true
             },
-            {
-                id: 2,
-                slug: 'mobile-app-development',
-                name: 'Mobile App Development',
-                short_description: 'Native and cross-platform mobile applications for iOS and Android devices.',
-                category: 'mobile_development',
-                features: ['iOS Development', 'Android Development', 'React Native', 'Flutter'],
-                technologies: ['React Native', 'Flutter', 'Swift', 'Kotlin'],
-                starting_price: 5000,
-                estimated_timeline: '8-12 weeks',
-                is_featured: true,
-                is_active: true
-            },
-            {
-                id: 3,
-                slug: 'custom-software-development',
-                name: 'Custom Software Development',
-                short_description: 'Tailored software solutions designed specifically for your business needs.',
-                category: 'custom_software',
-                features: ['Enterprise Applications', 'API Development', 'Database Design', 'Cloud Integration'],
-                technologies: ['Node.js', 'Python', 'PostgreSQL', 'AWS'],
-                starting_price: 7500,
-                estimated_timeline: '12-16 weeks',
-                is_featured: true,
-                is_active: true
-            }
-        ];
+            order: [['display_order', 'ASC'], ['created_at', 'DESC']],
+            limit: parseInt(limit)
+        });
 
-        const limitedServices = mockFeaturedServices.slice(0, parseInt(limit));
-        console.log('✅ Returning featured services:', limitedServices.length);
+        console.log(`✅ Found ${services.length} featured services`);
 
-        return res.json({
+        res.json({
             success: true,
-            data: limitedServices,
-            count: limitedServices.length
+            data: services,
+            count: services.length
         });
 
     } catch (error) {
@@ -695,7 +531,35 @@ const getFeaturedServices = async (req, res) => {
     }
 };
 
-// Export all functions as an object
+// Test database connection (useful for debugging)
+const testDatabaseConnection = async (req, res) => {
+    try {
+        console.log('🔍 Testing database connection...');
+
+        // Test basic connection
+        await Service.sequelize.authenticate();
+
+        // Test service table specifically
+        const serviceCount = await Service.count();
+
+        console.log(`✅ Database connected successfully. Services count: ${serviceCount}`);
+
+        res.json({
+            success: true,
+            message: 'Database connection successful',
+            serviceCount
+        });
+    } catch (error) {
+        console.error('❌ Database connection failed:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Database connection failed',
+            error: error.message
+        });
+    }
+};
+
+// Export all functions
 module.exports = {
     getAllServices,
     getServiceById,
@@ -706,5 +570,6 @@ module.exports = {
     bulkUpdateServices,
     bulkDeleteServices,
     getServicesByCategory,
-    getFeaturedServices
+    getFeaturedServices,
+    testDatabaseConnection
 };

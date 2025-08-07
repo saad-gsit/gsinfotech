@@ -289,7 +289,7 @@ const About = () => {
                 <meta name="description" content="We are a digital innovation studio that combines strategy, design, and technology to create products that matter." />
             </Helmet>
 
-            {/* Hero Section - Enhanced */}
+            {/* Hero Section - Center Aligned */}
             <section
                 style={{
                     minHeight: '80vh',
@@ -338,183 +338,143 @@ const About = () => {
                 />
 
                 <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10 }}>
-                    <Grid container spacing={8} alignItems="center">
-                        <Grid item xs={12} lg={7}>
-                            <motion.div
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 1 }}
+                    <Box sx={{ textAlign: 'center' }}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1 }}
+                        >
+                            <Chip
+                                label="ABOUT US"
+                                sx={{
+                                    backgroundColor: 'var(--sage-400)',
+                                    color: 'white',
+                                    fontWeight: 500,
+                                    mb: 3,
+                                    px: 2,
+                                    borderRadius: '50px',
+                                    fontSize: '0.75rem',
+                                    letterSpacing: '0.1em',
+                                }}
+                            />
+                            <Typography
+                                variant="h1"
+                                sx={{
+                                    fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5rem' },
+                                    fontWeight: 300,
+                                    lineHeight: 0.9,
+                                    letterSpacing: '-0.02em',
+                                    mb: 4,
+                                    color: 'var(--stone-800)',
+                                }}
                             >
-                                <Chip
-                                    label="ABOUT US"
-                                    sx={{
-                                        backgroundColor: 'var(--sage-400)',
-                                        color: 'white',
-                                        fontWeight: 500,
-                                        mb: 3,
-                                        px: 2,
-                                        borderRadius: '50px',
-                                        fontSize: '0.75rem',
-                                        letterSpacing: '0.1em',
-                                    }}
-                                />
-                                <Typography
-                                    variant="h1"
-                                    sx={{
-                                        fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5rem' },
-                                        fontWeight: 300,
-                                        lineHeight: 0.9,
-                                        letterSpacing: '-0.02em',
-                                        mb: 4,
-                                        color: 'var(--stone-800)',
-                                    }}
-                                >
-                                    We are a team of
-                                    <br />
-                                    <span style={{ fontWeight: 600, color: 'var(--sage-600)' }}>digital innovators</span>
-                                </Typography>
-                                <Typography
-                                    variant="h5"
-                                    sx={{
-                                        color: 'var(--stone-600)',
-                                        fontWeight: 300,
-                                        lineHeight: 1.6,
-                                        maxWidth: '600px',
-                                        mb: 6,
-                                        fontSize: { xs: '1.1rem', md: '1.25rem' }
-                                    }}
-                                >
-                                    Combining strategy, design, and technology to create digital products
-                                    that make a meaningful impact on businesses and their users worldwide.
-                                </Typography>
-
-                                {/* Achievement Badges */}
-                                <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', gap: 1 }}>
-                                    {achievements.map((achievement, index) => (
-                                        <motion.div
-                                            key={index}
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ delay: 0.5 + index * 0.1 }}
-                                        >
-                                            <Chip
-                                                icon={<span style={{ fontSize: '1rem' }}>{achievement.icon}</span>}
-                                                label={achievement.label}
-                                                sx={{
-                                                    backgroundColor: 'white',
-                                                    border: '1px solid var(--stone-200)',
-                                                    color: 'var(--stone-700)',
-                                                    fontWeight: 500,
-                                                    px: 1,
-                                                    borderRadius: '50px',
-                                                    fontSize: '0.875rem',
-                                                }}
-                                            />
-                                        </motion.div>
-                                    ))}
-                                </Stack>
-                            </motion.div>
-                        </Grid>
-
-                        <Grid item xs={12} lg={5}>
-                            <motion.div
-                                initial={{ opacity: 0, x: 30 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 1, delay: 0.3 }}
+                                We are a team of
+                                <br />
+                                <span style={{ fontWeight: 600, color: 'var(--sage-600)' }}>digital innovators</span>
+                            </Typography>
+                            <Typography
+                                variant="h5"
+                                sx={{
+                                    color: 'var(--stone-600)',
+                                    fontWeight: 300,
+                                    lineHeight: 1.6,
+                                    maxWidth: '700px',
+                                    mx: 'auto',
+                                    mb: 6,
+                                    fontSize: { xs: '1.1rem', md: '1.25rem' }
+                                }}
                             >
-                                <Box sx={{ position: 'relative' }}>
-                                    {/* Main Image */}
-                                    <Box
-                                        sx={{
-                                            borderRadius: '32px',
-                                            overflow: 'hidden',
-                                            boxShadow: '0 20px 60px -10px rgba(0, 0, 0, 0.2)',
-                                            transform: 'rotate(-2deg)',
-                                        }}
+                                Combining strategy, design, and technology to create digital products
+                                that make a meaningful impact on businesses and their users worldwide.
+                            </Typography>
+
+                            {/* Achievement Badges */}
+                            <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 1 }}>
+                                {achievements.map((achievement, index) => (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: 0.5 + index * 0.1 }}
                                     >
-                                        <img
-                                            src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&h=600&fit=crop&auto=format"
-                                            alt="Our team working together"
-                                            style={{
-                                                width: '100%',
-                                                height: '500px',
-                                                objectFit: 'cover',
+                                        <Chip
+                                            icon={<span style={{ fontSize: '1rem' }}>{achievement.icon}</span>}
+                                            label={achievement.label}
+                                            sx={{
+                                                backgroundColor: 'white',
+                                                border: '1px solid var(--stone-200)',
+                                                color: 'var(--stone-700)',
+                                                fontWeight: 500,
+                                                px: 1,
+                                                borderRadius: '50px',
+                                                fontSize: '0.875rem',
                                             }}
                                         />
-                                    </Box>
-
-                                    {/* Floating Card */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.8 }}
-                                        style={{
-                                            position: 'absolute',
-                                            bottom: -20,
-                                            right: -20,
-                                            backgroundColor: 'white',
-                                            padding: '1.5rem',
-                                            borderRadius: '20px',
-                                            boxShadow: '0 15px 35px -5px rgba(0, 0, 0, 0.15)',
-                                            border: '1px solid var(--stone-100)',
-                                        }}
-                                    >
-                                        <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--stone-800)', mb: 1 }}>
-                                            50+ Team Members
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ color: 'var(--stone-600)' }}>
-                                            Across 3 Countries
-                                        </Typography>
                                     </motion.div>
-                                </Box>
-                            </motion.div>
-                        </Grid>
-                    </Grid>
+                                ))}
+                            </Box>
+                        </motion.div>
+                    </Box>
                 </Container>
             </section>
 
-            {/* Stats Section - Beautiful Cards */}
+            {/* Stats Section - Center Aligned Single Row */}
             <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
                 <Container maxWidth="lg">
-                    <Grid container spacing={4} ref={ref}>
-                        {stats.map((stat, index) => (
-                            <Grid item xs={6} md={3} key={index}>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 30 }}
-                                    animate={inView ? { opacity: 1, y: 0 } : {}}
-                                    transition={{ duration: 0.8, delay: index * 0.1 }}
-                                    whileHover={{ y: -8 }}
+                    {/* Stats Grid - Single Line */}
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Grid
+                            container
+                            spacing={3}
+                            ref={ref}
+                            sx={{
+                                maxWidth: '1000px',
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }}
+                        >
+                            {stats.map((stat, index) => (
+                                <Grid
+                                    item
+                                    xs={12}
+                                    sm={6}
+                                    md={3}
+                                    lg={3}
+                                    key={index}
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'center'
+                                    }}
                                 >
-                                    <Card
-                                        sx={{
-                                            p: 4,
-                                            textAlign: 'center',
-                                            border: '1px solid var(--stone-100)',
-                                            borderRadius: '24px',
-                                            backgroundColor: 'white',
-                                            boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
-                                            transition: 'all 0.4s ease',
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                                boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
-                                                borderColor: stat.color,
-                                            }
-                                        }}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={inView ? { opacity: 1, y: 0 } : {}}
+                                        transition={{ duration: 0.8, delay: index * 0.1 }}
+                                        whileHover={{ y: -8 }}
+                                        style={{ width: '100%', maxWidth: '220px' }}
                                     >
-                                        <Box
+                                        <Card
                                             sx={{
-                                                width: 64,
-                                                height: 64,
-                                                backgroundColor: stat.bgColor,
-                                                borderRadius: '16px',
+                                                p: 3,
+                                                textAlign: 'center',
+                                                border: '1px solid var(--stone-100)',
+                                                borderRadius: '24px',
+                                                backgroundColor: 'white',
+                                                boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
+                                                transition: 'all 0.4s ease',
+                                                cursor: 'pointer',
+                                                height: '160px',
                                                 display: 'flex',
+                                                flexDirection: 'column',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                mx: 'auto',
-                                                mb: 3,
+                                                '&:hover': {
+                                                    boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
+                                                    borderColor: stat.color,
+                                                }
                                             }}
                                         >
-                                            <Typography variant="h4" sx={{ color: stat.color, fontWeight: 300 }}>
+                                            <Typography variant="h3" sx={{ color: stat.color, fontWeight: 600, mb: 1 }}>
                                                 {inView && (
                                                     <CountUp
                                                         start={0}
@@ -524,25 +484,30 @@ const About = () => {
                                                     />
                                                 )}
                                             </Typography>
-                                        </Box>
-                                        <Typography variant="body2" sx={{
-                                            color: 'var(--stone-600)',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.1em',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 500
-                                        }}>
-                                            {stat.label}
-                                        </Typography>
-                                    </Card>
-                                </motion.div>
-                            </Grid>
-                        ))}
-                    </Grid>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: 'var(--stone-600)',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.1em',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 500,
+                                                    textAlign: 'center',
+                                                    lineHeight: 1.4
+                                                }}
+                                            >
+                                                {stat.label}
+                                            </Typography>
+                                        </Card>
+                                    </motion.div>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
                 </Container>
             </section>
 
-            {/* Values Section - Enhanced Cards */}
+            {/* Values Section - Equal Height and Width Cards */}
             <section style={{ padding: '6rem 0', background: 'linear-gradient(135deg, var(--sage-50) 0%, var(--sand-50) 100%)' }}>
                 <Container maxWidth="lg">
                     <motion.div
@@ -578,58 +543,101 @@ const About = () => {
                         </Typography>
                     </motion.div>
 
-                    <Grid container spacing={4}>
-                        {values.map((value, index) => (
-                            <Grid item xs={12} md={4} key={index}>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: index * 0.2 }}
-                                    viewport={{ once: true }}
-                                    whileHover={{ y: -12 }}
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Grid
+                            container
+                            spacing={4}
+                            sx={{
+                                maxWidth: '900px',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            {values.map((value, index) => (
+                                <Grid
+                                    item
+                                    xs={12}
+                                    sm={6}
+                                    md={4}
+                                    key={index}
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'center'
+                                    }}
                                 >
-                                    <Card
-                                        sx={{
-                                            p: 4,
-                                            height: '100%',
-                                            border: '1px solid var(--stone-100)',
-                                            borderRadius: '24px',
-                                            backgroundColor: 'white',
-                                            boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
-                                            transition: 'all 0.4s ease',
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                                boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
-                                                borderColor: value.color,
-                                            }
-                                        }}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 30 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.6, delay: index * 0.2 }}
+                                        viewport={{ once: true }}
+                                        whileHover={{ y: -12 }}
+                                        style={{ width: '100%', maxWidth: '280px' }}
                                     >
-                                        <Box
+                                        <Card
                                             sx={{
-                                                width: 72,
-                                                height: 72,
-                                                backgroundColor: value.bgColor,
-                                                borderRadius: '20px',
+                                                p: 4,
+                                                width: '280px',
+                                                height: '320px',
                                                 display: 'flex',
+                                                flexDirection: 'column',
                                                 alignItems: 'center',
-                                                justifyContent: 'center',
-                                                mb: 3,
-                                                color: value.color,
+                                                justifyContent: 'flex-start',
+                                                border: '1px solid var(--stone-100)',
+                                                borderRadius: '24px',
+                                                backgroundColor: 'white',
+                                                boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
+                                                transition: 'all 0.4s ease',
+                                                cursor: 'pointer',
+                                                '&:hover': {
+                                                    boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
+                                                    borderColor: value.color,
+                                                }
                                             }}
                                         >
-                                            {value.icon}
-                                        </Box>
-                                        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: 'var(--stone-800)' }}>
-                                            {value.title}
-                                        </Typography>
-                                        <Typography variant="body1" sx={{ color: 'var(--stone-600)', lineHeight: 1.6 }}>
-                                            {value.description}
-                                        </Typography>
-                                    </Card>
-                                </motion.div>
-                            </Grid>
-                        ))}
-                    </Grid>
+                                            <Box
+                                                sx={{
+                                                    width: 72,
+                                                    height: 72,
+                                                    backgroundColor: value.bgColor,
+                                                    borderRadius: '20px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    mb: 3,
+                                                    color: value.color,
+                                                }}
+                                            >
+                                                {value.icon}
+                                            </Box>
+                                            <Typography
+                                                variant="h5"
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    mb: 2,
+                                                    color: 'var(--stone-800)',
+                                                    textAlign: 'center'
+                                                }}
+                                            >
+                                                {value.title}
+                                            </Typography>
+                                            <Typography
+                                                variant="body1"
+                                                sx={{
+                                                    color: 'var(--stone-600)',
+                                                    lineHeight: 1.6,
+                                                    textAlign: 'center',
+                                                    flex: 1,
+                                                    display: 'flex',
+                                                    alignItems: 'center'
+                                                }}
+                                            >
+                                                {value.description}
+                                            </Typography>
+                                        </Card>
+                                    </motion.div>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
                 </Container>
             </section>
 

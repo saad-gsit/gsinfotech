@@ -243,7 +243,7 @@ const Home = () => {
             </Helmet>
 
             <Box sx={{ backgroundColor: 'white' }}>
-                {/* Hero Section - Inspired by u-mts.com */}
+                {/* Hero Section - Center Aligned */}
                 <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
                     {/* Background Elements */}
                     <Box
@@ -273,181 +273,179 @@ const Home = () => {
                         }}
                     />
 
-                    <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10 }}>
-                        <Grid container spacing={8} alignItems="center">
-                            <Grid item xs={12} lg={7}>
+                    <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                        >
+                            {/* Badge */}
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.3 }}
+                                style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}
+                            >
+                                <Chip
+                                    icon={<AutoAwesomeOutlined sx={{ fontSize: 16, color: 'white' }} />}
+                                    label="Digital Innovation Studio"
+                                    sx={{
+                                        backgroundColor: 'var(--sage-400)',
+                                        color: 'white',
+                                        fontWeight: 500,
+                                        px: 2,
+                                        py: 0.5,
+                                        borderRadius: '50px',
+                                        fontSize: '0.875rem',
+                                        letterSpacing: '0.025em',
+                                    }}
+                                />
+                            </motion.div>
+
+                            <Typography
+                                variant="h1"
+                                sx={{
+                                    fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5.5rem' },
+                                    fontWeight: 300,
+                                    lineHeight: 0.9,
+                                    letterSpacing: '-0.02em',
+                                    mb: 4,
+                                    color: 'var(--stone-800)',
+                                }}
+                            >
+                                Crafting digital
+                                <br />
+                                experiences that
+                                <br />
+                                <span style={{ fontWeight: 600, color: 'var(--sage-600)' }}>inspire</span>
+                            </Typography>
+
+                            <Typography
+                                variant="h5"
+                                sx={{
+                                    color: 'var(--stone-600)',
+                                    fontWeight: 300,
+                                    lineHeight: 1.6,
+                                    mb: 6,
+                                    maxWidth: '700px',
+                                    mx: 'auto',
+                                    fontSize: { xs: '1.1rem', md: '1.25rem' }
+                                }}
+                            >
+                                We partner with ambitious brands to create exceptional digital products
+                                through strategy, design, and cutting-edge development.
+                            </Typography>
+
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} justifyContent="center" sx={{ mb: 8 }}>
+                                <Link to="/contact" className="no-underline">
+                                    <Button
+                                        variant="contained"
+                                        size="large"
+                                        endIcon={<ArrowOutward />}
+                                        sx={{
+                                            backgroundColor: 'var(--sage-400)',
+                                            color: 'white',
+                                            borderRadius: '50px',
+                                            px: 5,
+                                            py: 2,
+                                            fontSize: '1rem',
+                                            fontWeight: 500,
+                                            letterSpacing: '0.025em',
+                                            textTransform: 'none',
+                                            boxShadow: '0 8px 25px -8px rgba(157, 176, 130, 0.4)',
+                                            transition: 'all 0.4s ease',
+                                            '&:hover': {
+                                                backgroundColor: 'var(--sage-500)',
+                                                transform: 'translateY(-3px)',
+                                                boxShadow: '0 12px 35px -8px rgba(157, 176, 130, 0.5)'
+                                            }
+                                        }}
+                                    >
+                                        Start Your Project
+                                    </Button>
+                                </Link>
+
+                                <Link to="/projects" className="no-underline">
+                                    <Button
+                                        variant="outlined"
+                                        size="large"
+                                        startIcon={<PlayArrow />}
+                                        sx={{
+                                            borderColor: 'var(--stone-300)',
+                                            color: 'var(--stone-700)',
+                                            borderRadius: '50px',
+                                            px: 5,
+                                            py: 2,
+                                            fontSize: '1rem',
+                                            fontWeight: 500,
+                                            letterSpacing: '0.025em',
+                                            textTransform: 'none',
+                                            transition: 'all 0.4s ease',
+                                            '&:hover': {
+                                                borderColor: 'var(--sage-400)',
+                                                backgroundColor: 'var(--sage-50)',
+                                                color: 'var(--sage-600)',
+                                                transform: 'translateY(-2px)',
+                                            }
+                                        }}
+                                    >
+                                        View Our Work
+                                    </Button>
+                                </Link>
+                            </Stack>
+
+                            {/* Social Proof - Centered */}
+                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                <Box sx={{ textAlign: 'center' }}>
+                                    <Typography variant="h3" sx={{ fontWeight: 300, color: 'var(--stone-800)', mb: 0.5 }}>
+                                        {stats?.projects && !projectStatsLoading ? (
+                                            <CountUp end={stats.projects} duration={2.5} />
+                                        ) : (
+                                            <Skeleton width={60} />
+                                        )}
+                                        +
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ color: 'var(--stone-500)', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.75rem' }}>
+                                        Projects Delivered
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ height: 48, width: 1, backgroundColor: 'var(--stone-200)' }} />
+                                <Box sx={{ textAlign: 'center' }}>
+                                    <Typography variant="h3" sx={{ fontWeight: 300, color: 'var(--stone-800)', mb: 0.5 }}>
+                                        {stats?.clients && !projectStatsLoading ? (
+                                            <CountUp end={stats.clients} duration={2.5} />
+                                        ) : (
+                                            <Skeleton width={50} />
+                                        )}
+                                        %
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ color: 'var(--stone-500)', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.75rem' }}>
+                                        Client Satisfaction
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ height: 48, width: 1, backgroundColor: 'var(--stone-200)' }} />
+                                <Box sx={{ textAlign: 'center' }}>
+                                    <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ mb: 1 }}>
+                                        <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: 24, height: 24, fontSize: '0.75rem' } }}>
+                                            <Avatar sx={{ backgroundColor: 'var(--sage-400)' }}>A</Avatar>
+                                            <Avatar sx={{ backgroundColor: 'var(--coral-400)' }}>B</Avatar>
+                                            <Avatar sx={{ backgroundColor: 'var(--sand-400)' }}>C</Avatar>
+                                        </AvatarGroup>
+                                        <Typography variant="body2" sx={{ color: 'var(--stone-600)', fontWeight: 500 }}>
+                                            Trusted by 50+ clients
+                                        </Typography>
+                                    </Stack>
+                                </Box>
+                            </Box>
+
+                            {/* Hero Image - Centered */}
+                            <Box sx={{ mt: 8, display: 'flex', justifyContent: 'center' }}>
                                 <motion.div
                                     initial={{ opacity: 0, y: 30 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 1, ease: "easeOut" }}
+                                    transition={{ duration: 1, delay: 0.5 }}
                                 >
-                                    {/* Badge */}
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: 0.3 }}
-                                        style={{ marginBottom: '2rem' }}
-                                    >
-                                        <Chip
-                                            icon={<AutoAwesomeOutlined sx={{ fontSize: 16, color: 'white' }} />}
-                                            label="Digital Innovation Studio"
-                                            sx={{
-                                                backgroundColor: 'var(--sage-400)',
-                                                color: 'white',
-                                                fontWeight: 500,
-                                                px: 2,
-                                                py: 0.5,
-                                                borderRadius: '50px',
-                                                fontSize: '0.875rem',
-                                                letterSpacing: '0.025em',
-                                            }}
-                                        />
-                                    </motion.div>
-
-                                    <Typography
-                                        variant="h1"
-                                        sx={{
-                                            fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5.5rem' },
-                                            fontWeight: 300,
-                                            lineHeight: 0.9,
-                                            letterSpacing: '-0.02em',
-                                            mb: 4,
-                                            color: 'var(--stone-800)',
-                                        }}
-                                    >
-                                        Crafting digital
-                                        <br />
-                                        experiences that
-                                        <br />
-                                        <span style={{ fontWeight: 600, color: 'var(--sage-600)' }}>inspire</span>
-                                    </Typography>
-
-                                    <Typography
-                                        variant="h5"
-                                        sx={{
-                                            color: 'var(--stone-600)',
-                                            fontWeight: 300,
-                                            lineHeight: 1.6,
-                                            mb: 6,
-                                            maxWidth: '600px',
-                                            fontSize: { xs: '1.1rem', md: '1.25rem' }
-                                        }}
-                                    >
-                                        We partner with ambitious brands to create exceptional digital products
-                                        through strategy, design, and cutting-edge development.
-                                    </Typography>
-
-                                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ mb: 8 }}>
-                                        <Link to="/contact" className="no-underline">
-                                            <Button
-                                                variant="contained"
-                                                size="large"
-                                                endIcon={<ArrowOutward />}
-                                                sx={{
-                                                    backgroundColor: 'var(--sage-400)',
-                                                    color: 'white',
-                                                    borderRadius: '50px',
-                                                    px: 5,
-                                                    py: 2,
-                                                    fontSize: '1rem',
-                                                    fontWeight: 500,
-                                                    letterSpacing: '0.025em',
-                                                    textTransform: 'none',
-                                                    boxShadow: '0 8px 25px -8px rgba(157, 176, 130, 0.4)',
-                                                    transition: 'all 0.4s ease',
-                                                    '&:hover': {
-                                                        backgroundColor: 'var(--sage-500)',
-                                                        transform: 'translateY(-3px)',
-                                                        boxShadow: '0 12px 35px -8px rgba(157, 176, 130, 0.5)'
-                                                    }
-                                                }}
-                                            >
-                                                Start Your Project
-                                            </Button>
-                                        </Link>
-
-                                        <Link to="/projects" className="no-underline">
-                                            <Button
-                                                variant="outlined"
-                                                size="large"
-                                                startIcon={<PlayArrow />}
-                                                sx={{
-                                                    borderColor: 'var(--stone-300)',
-                                                    color: 'var(--stone-700)',
-                                                    borderRadius: '50px',
-                                                    px: 5,
-                                                    py: 2,
-                                                    fontSize: '1rem',
-                                                    fontWeight: 500,
-                                                    letterSpacing: '0.025em',
-                                                    textTransform: 'none',
-                                                    transition: 'all 0.4s ease',
-                                                    '&:hover': {
-                                                        borderColor: 'var(--sage-400)',
-                                                        backgroundColor: 'var(--sage-50)',
-                                                        color: 'var(--sage-600)',
-                                                        transform: 'translateY(-2px)',
-                                                    }
-                                                }}
-                                            >
-                                                View Our Work
-                                            </Button>
-                                        </Link>
-                                    </Stack>
-
-                                    {/* Social Proof */}
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                                        <Box>
-                                            <Typography variant="h3" sx={{ fontWeight: 300, color: 'var(--stone-800)', mb: 0.5 }}>
-                                                {stats?.projects && !projectStatsLoading ? (
-                                                    <CountUp end={stats.projects} duration={2.5} />
-                                                ) : (
-                                                    <Skeleton width={60} />
-                                                )}
-                                                +
-                                            </Typography>
-                                            <Typography variant="caption" sx={{ color: 'var(--stone-500)', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.75rem' }}>
-                                                Projects Delivered
-                                            </Typography>
-                                        </Box>
-                                        <Box sx={{ height: 48, width: 1, backgroundColor: 'var(--stone-200)' }} />
-                                        <Box>
-                                            <Typography variant="h3" sx={{ fontWeight: 300, color: 'var(--stone-800)', mb: 0.5 }}>
-                                                {stats?.clients && !projectStatsLoading ? (
-                                                    <CountUp end={stats.clients} duration={2.5} />
-                                                ) : (
-                                                    <Skeleton width={50} />
-                                                )}
-                                                %
-                                            </Typography>
-                                            <Typography variant="caption" sx={{ color: 'var(--stone-500)', textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.75rem' }}>
-                                                Client Satisfaction
-                                            </Typography>
-                                        </Box>
-                                        <Box sx={{ height: 48, width: 1, backgroundColor: 'var(--stone-200)' }} />
-                                        <Box>
-                                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                                                <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: 24, height: 24, fontSize: '0.75rem' } }}>
-                                                    <Avatar sx={{ backgroundColor: 'var(--sage-400)' }}>A</Avatar>
-                                                    <Avatar sx={{ backgroundColor: 'var(--coral-400)' }}>B</Avatar>
-                                                    <Avatar sx={{ backgroundColor: 'var(--sand-400)' }}>C</Avatar>
-                                                </AvatarGroup>
-                                                <Typography variant="body2" sx={{ color: 'var(--stone-600)', fontWeight: 500 }}>
-                                                    Trusted by 50+ clients
-                                                </Typography>
-                                            </Stack>
-                                        </Box>
-                                    </Box>
-                                </motion.div>
-                            </Grid>
-
-                            <Grid item xs={12} lg={5}>
-                                <motion.div
-                                    initial={{ opacity: 0, x: 30 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 1, delay: 0.3 }}
-                                >
-                                    <Box sx={{ position: 'relative' }}>
+                                    <Box sx={{ position: 'relative', maxWidth: '600px' }}>
                                         {/* Main Hero Image */}
                                         <Box
                                             sx={{
@@ -459,11 +457,11 @@ const Home = () => {
                                             }}
                                         >
                                             <img
-                                                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=700&fit=crop&auto=format"
+                                                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=400&fit=crop&auto=format"
                                                 alt="Creative team collaboration"
                                                 style={{
                                                     width: '100%',
-                                                    height: '500px',
+                                                    height: '400px',
                                                     objectFit: 'cover',
                                                 }}
                                             />
@@ -539,12 +537,12 @@ const Home = () => {
                                         </motion.div>
                                     </Box>
                                 </motion.div>
-                            </Grid>
-                        </Grid>
+                            </Box>
+                        </motion.div>
                     </Container>
                 </section>
 
-                {/* Services Section - Clean & Professional */}
+                {/* Services Section - Center Aligned */}
                 <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
                     <Container maxWidth="lg">
                         <motion.div
@@ -594,7 +592,7 @@ const Home = () => {
                             </Typography>
                         </motion.div>
 
-                        <Grid container spacing={4}>
+                        <Grid container spacing={4} justifyContent="center">
                             {services.map((service, index) => (
                                 <Grid item xs={12} md={6} key={index}>
                                     <motion.div
@@ -613,6 +611,7 @@ const Home = () => {
                                                 backgroundColor: 'white',
                                                 transition: 'all 0.4s ease',
                                                 cursor: 'pointer',
+                                                textAlign: 'center',
                                                 '&:hover': {
                                                     boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.1)',
                                                     borderColor: service.color,
@@ -629,6 +628,7 @@ const Home = () => {
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     mb: 3,
+                                                    mx: 'auto',
                                                     color: service.color,
                                                 }}
                                             >
@@ -643,7 +643,7 @@ const Home = () => {
                                                 {service.description}
                                             </Typography>
 
-                                            <Box sx={{ display: 'flex', alignItems: 'center', color: service.color }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: service.color }}>
                                                 <Typography variant="body2" sx={{ fontWeight: 500, mr: 1 }}>
                                                     Learn more
                                                 </Typography>
@@ -657,7 +657,7 @@ const Home = () => {
                     </Container>
                 </section>
 
-                {/* Stats Section - Dynamic with Beautiful Colors */}
+                {/* Stats Section - Center Aligned */}
                 <section style={{ padding: '6rem 0', background: 'linear-gradient(135deg, var(--sage-50) 0%, var(--sand-50) 100%)' }}>
                     <Container maxWidth="lg">
                         <motion.div
@@ -681,7 +681,7 @@ const Home = () => {
                             </Typography>
                         </motion.div>
 
-                        <Grid container spacing={6} ref={ref}>
+                        <Grid container spacing={6} ref={ref} justifyContent="center">
                             {dynamicStats.map((stat, index) => (
                                 <Grid item xs={6} md={3} key={index}>
                                     <motion.div
@@ -732,7 +732,7 @@ const Home = () => {
                     </Container>
                 </section>
 
-                {/* Featured Work - Beautiful Gallery */}
+                {/* Featured Work - Center Aligned */}
                 <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
                     <Container maxWidth="lg">
                         <motion.div
@@ -740,90 +740,87 @@ const Home = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8 }}
                             viewport={{ once: true }}
-                            style={{ marginBottom: '4rem' }}
+                            style={{ marginBottom: '4rem', textAlign: 'center' }}
                         >
-                            <Grid container spacing={4} alignItems="center">
-                                <Grid item xs={12} md={8}>
-                                    <Typography
-                                        variant="overline"
-                                        sx={{
-                                            color: 'var(--stone-500)',
-                                            letterSpacing: '0.15em',
-                                            mb: 2,
-                                            display: 'block',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 600,
-                                        }}
-                                    >
-                                        FEATURED WORK
-                                    </Typography>
-                                    <Typography
-                                        variant="h2"
-                                        sx={{
-                                            fontSize: { xs: '2.5rem', md: '3.5rem' },
-                                            fontWeight: 300,
-                                            mb: 2,
-                                            color: 'var(--stone-800)',
-                                            letterSpacing: '-0.02em',
-                                        }}
-                                    >
-                                        Recent Projects
-                                    </Typography>
-                                    <Typography
-                                        variant="h6"
-                                        sx={{
-                                            color: 'var(--stone-600)',
-                                            fontWeight: 300,
-                                            lineHeight: 1.6,
-                                        }}
-                                    >
-                                        Explore our latest work and see how we've helped brands achieve their digital goals.
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-                                    <Link to="/projects" className="no-underline">
-                                        <Button
-                                            variant="outlined"
-                                            endIcon={<ArrowOutward />}
-                                            sx={{
-                                                borderColor: 'var(--sage-400)',
-                                                color: 'var(--sage-600)',
-                                                borderRadius: '50px',
-                                                px: 4,
-                                                py: 1.5,
-                                                fontSize: '0.875rem',
-                                                fontWeight: 500,
-                                                letterSpacing: '0.025em',
-                                                textTransform: 'none',
-                                                transition: 'all 0.4s ease',
-                                                '&:hover': {
-                                                    backgroundColor: 'var(--sage-400)',
-                                                    color: 'white',
-                                                    transform: 'translateY(-2px)',
-                                                }
-                                            }}
-                                        >
-                                            View All Projects
-                                        </Button>
-                                    </Link>
-                                </Grid>
-                            </Grid>
+                            <Typography
+                                variant="overline"
+                                sx={{
+                                    color: 'var(--stone-500)',
+                                    letterSpacing: '0.15em',
+                                    mb: 2,
+                                    display: 'block',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 600,
+                                }}
+                            >
+                                FEATURED WORK
+                            </Typography>
+                            <Typography
+                                variant="h2"
+                                sx={{
+                                    fontSize: { xs: '2.5rem', md: '3.5rem' },
+                                    fontWeight: 300,
+                                    mb: 3,
+                                    color: 'var(--stone-800)',
+                                    letterSpacing: '-0.02em',
+                                }}
+                            >
+                                Recent Projects
+                            </Typography>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    color: 'var(--stone-600)',
+                                    fontWeight: 300,
+                                    lineHeight: 1.6,
+                                    maxWidth: '600px',
+                                    mx: 'auto',
+                                    mb: 4
+                                }}
+                            >
+                                Explore our latest work and see how we've helped brands achieve their digital goals.
+                            </Typography>
+                            <Link to="/projects" className="no-underline">
+                                <Button
+                                    variant="outlined"
+                                    endIcon={<ArrowOutward />}
+                                    sx={{
+                                        borderColor: 'var(--sage-400)',
+                                        color: 'var(--sage-600)',
+                                        borderRadius: '50px',
+                                        px: 4,
+                                        py: 1.5,
+                                        fontSize: '0.875rem',
+                                        fontWeight: 500,
+                                        letterSpacing: '0.025em',
+                                        textTransform: 'none',
+                                        transition: 'all 0.4s ease',
+                                        '&:hover': {
+                                            backgroundColor: 'var(--sage-400)',
+                                            color: 'white',
+                                            transform: 'translateY(-2px)',
+                                        }
+                                    }}
+                                >
+                                    View All Projects
+                                </Button>
+                            </Link>
                         </motion.div>
 
                         {projectsLoading ? (
-                            <Grid container spacing={4}>
+                            <Grid container spacing={4} justifyContent="center">
                                 {[...Array(3)].map((_, index) => (
                                     <Grid item xs={12} md={4} key={index}>
                                         <Skeleton variant="rectangular" height={320} sx={{ borderRadius: '24px' }} />
-                                        <Box sx={{ pt: 3 }}>
-                                            <Skeleton variant="text" width="70%" />
-                                            <Skeleton variant="text" width="50%" />
+                                        <Box sx={{ pt: 3, textAlign: 'center' }}>
+                                            <Skeleton variant="text" width="70%" sx={{ mx: 'auto' }} />
+                                            <Skeleton variant="text" width="50%" sx={{ mx: 'auto' }} />
                                         </Box>
                                     </Grid>
                                 ))}
                             </Grid>
                         ) : (
-                            <Grid container spacing={4}>
+                            <Grid container spacing={4} justifyContent="center">
                                 {getProjectsArray().slice(0, 3).map((project, index) => (
                                     <Grid item xs={12} md={4} key={project.id}>
                                         <FeaturedProjectCard project={project} index={index} />
@@ -834,7 +831,7 @@ const Home = () => {
                     </Container>
                 </section>
 
-                {/* CTA Section - Elegant & Compelling */}
+                {/* CTA Section - Center Aligned */}
                 <section
                     style={{
                         padding: '8rem 0',
@@ -948,14 +945,8 @@ const Home = () => {
                                 </Link>
                             </Stack>
 
-                            {/* Trust Indicators */}
+                            {/* Trust Indicators - Centered */}
                             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <CheckCircleOutline sx={{ color: 'var(--sage-400)', fontSize: 20 }} />
-                                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-                                        Free Consultation
-                                    </Typography>
-                                </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <CheckCircleOutline sx={{ color: 'var(--sage-400)', fontSize: 20 }} />
                                     <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
@@ -970,126 +961,6 @@ const Home = () => {
                                 </Box>
                             </Box>
                         </motion.div>
-                    </Container>
-                </section>
-
-                {/* Client Testimonials - New Section */}
-                <section style={{ padding: '6rem 0', backgroundColor: 'var(--sage-50)' }}>
-                    <Container maxWidth="lg">
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8 }}
-                            viewport={{ once: true }}
-                            style={{ marginBottom: '4rem', textAlign: 'center' }}
-                        >
-                            <Typography
-                                variant="overline"
-                                sx={{
-                                    color: 'var(--stone-500)',
-                                    letterSpacing: '0.15em',
-                                    mb: 2,
-                                    display: 'block',
-                                    fontSize: '0.75rem',
-                                    fontWeight: 600,
-                                }}
-                            >
-                                CLIENT TESTIMONIALS
-                            </Typography>
-                            <Typography
-                                variant="h2"
-                                sx={{
-                                    fontSize: { xs: '2.5rem', md: '3.5rem' },
-                                    fontWeight: 300,
-                                    mb: 3,
-                                    color: 'var(--stone-800)',
-                                    letterSpacing: '-0.02em',
-                                }}
-                            >
-                                What Our Clients Say
-                            </Typography>
-                        </motion.div>
-
-                        <Grid container spacing={4}>
-                            {[
-                                {
-                                    name: "Sarah Johnson",
-                                    role: "CEO, TechFlow",
-                                    content: "GS Infotech transformed our digital presence completely. Their strategic approach and attention to detail exceeded our expectations.",
-                                    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b789?w=150&h=150&fit=crop&crop=face"
-                                },
-                                {
-                                    name: "Michael Chen",
-                                    role: "Founder, InnovateLab",
-                                    content: "The team's expertise in both design and development made our project seamless. Highly recommended for any serious business.",
-                                    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
-                                },
-                                {
-                                    name: "Emily Rodriguez",
-                                    role: "Marketing Director, GrowthCo",
-                                    content: "Professional, reliable, and creative. They delivered exactly what we needed and more. Our ROI has increased by 150%.",
-                                    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
-                                }
-                            ].map((testimonial, index) => (
-                                <Grid item xs={12} md={4} key={index}>
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 30 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.6, delay: index * 0.2 }}
-                                        viewport={{ once: true }}
-                                    >
-                                        <Card
-                                            sx={{
-                                                p: 4,
-                                                height: '100%',
-                                                border: '1px solid var(--stone-100)',
-                                                borderRadius: '24px',
-                                                backgroundColor: 'white',
-                                                boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
-                                                transition: 'all 0.4s ease',
-                                                '&:hover': {
-                                                    transform: 'translateY(-8px)',
-                                                    boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
-                                                }
-                                            }}
-                                        >
-                                            <Box sx={{ display: 'flex', mb: 2 }}>
-                                                {[...Array(5)].map((_, i) => (
-                                                    <StarRounded key={i} sx={{ color: 'var(--sand-400)', fontSize: 20 }} />
-                                                ))}
-                                            </Box>
-
-                                            <Typography
-                                                variant="body1"
-                                                sx={{
-                                                    color: 'var(--stone-700)',
-                                                    mb: 3,
-                                                    lineHeight: 1.6,
-                                                    fontStyle: 'italic',
-                                                }}
-                                            >
-                                                "{testimonial.content}"
-                                            </Typography>
-
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                                <Avatar
-                                                    src={testimonial.avatar}
-                                                    sx={{ width: 48, height: 48 }}
-                                                />
-                                                <Box>
-                                                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--stone-800)' }}>
-                                                        {testimonial.name}
-                                                    </Typography>
-                                                    <Typography variant="caption" sx={{ color: 'var(--stone-500)' }}>
-                                                        {testimonial.role}
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
-                                        </Card>
-                                    </motion.div>
-                                </Grid>
-                            ))}
-                        </Grid>
                     </Container>
                 </section>
 

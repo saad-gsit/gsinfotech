@@ -33,6 +33,7 @@ import Projects from './pages/Projects'
 import ProjectDetail from './pages/ProjectDetail'
 import Team from './pages/Team'
 import Blog from './pages/Blog'
+import BlogPost from './pages/BlogPost'
 import Contact from './pages/Contact'
 
 // Admin Pages
@@ -201,10 +202,11 @@ const FallbackPage = ({ title, description = "We're crafting something extraordi
       style={{ backgroundColor: '#8B9471' }}
     />
   </motion.div>
+
+  
 )
 
 // Fallback imports for missing pages
-const BlogPost = () => <FallbackPage title="Blog Post" description="Discover insights and stories from our digital innovation journey." />
 const TeamMember = () => <FallbackPage title="Team Member" description="Meet the creative minds behind our digital excellence." />
 const NotFound = () => <FallbackPage title="404" description="The page you're looking for seems to have wandered off into the digital realm." />
 
@@ -228,7 +230,7 @@ const AdminBlog = () => (
 )
 
 const AdminTeam = () => (
-  <AuthGuard permissions={{ resource: 'team', action: 'read' }}>
+  <AuthGuard permissions={{ resource: 'team',  action: 'read' }}>
     <TeamManager />
   </AuthGuard>
 )
@@ -340,6 +342,8 @@ const theme = createTheme({
     '0 16px 32px -8px rgba(139, 148, 113, 0.25), 0 32px 64px -16px rgba(139, 148, 113, 0.25)',
     // Add more shadows as needed...
   ],
+
+  
   components: {
     MuiButton: {
       styleOverrides: {
@@ -404,6 +408,7 @@ const theme = createTheme({
     },
   },
 })
+
 
 // Enhanced Global Styles with redesign aesthetics
 const GlobalStyles = () => (
@@ -669,6 +674,26 @@ const GlobalStyles = () => (
           color: black;
         }
       }
+
+      /* Contact page specific overrides */
+.contact-section-center {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    width: 100% !important;
+}
+
+.contact-section-center .MuiStack-root {
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.contact-section-center .MuiBox-root {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
     `}
   />
 )

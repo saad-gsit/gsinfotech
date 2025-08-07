@@ -439,11 +439,12 @@ const ServiceDetail = () => {
                                                                 fontWeight: 'bold'
                                                             }}
                                                         >
-                                                            {index + 1}
+                                                            {step.step || index + 1}
                                                         </Box>
                                                     </ListItemIcon>
                                                     <ListItemText
-                                                        primary={step}
+                                                        primary={step.title || step.name || `Step ${index + 1}`}
+                                                        secondary={step.description}
                                                         sx={{ ml: 2 }}
                                                     />
                                                 </ListItem>
