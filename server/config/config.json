@@ -14,10 +14,10 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "u226800403_gsinfo",
-    "password": "Gsinfo@3686",
-    "database": "u226800403_gsinfotech_db",
-    "host": "srv1474.hstgr.io",
+    "username": "sql12794174",
+    "password": "hQfNvkd3Ef",
+    "database": "sql12794174",
+    "host": "sql12.freesqldatabase.com",
     "dialect": "mysql"
   }
 }
