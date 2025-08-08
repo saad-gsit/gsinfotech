@@ -40,10 +40,10 @@ module.exports = {
         logging: false
     },
     production: {
-        username: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
-        host: process.env.DB_HOST,
+        username: process.env.DB_USER || 'u226800403_gsinfo',
+        password: process.env.DB_PASSWORD || 'Gsinfo@3686',
+        database: process.env.DB_NAME || 'u226800403_gsinfotech_db',
+        host: process.env.DB_HOST || 'srv1474.hstgr.io',
         port: process.env.DB_PORT || 3306,
         dialect: 'mysql',
         logging: false,
