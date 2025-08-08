@@ -730,7 +730,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const HOST = process.env.HOST || 'https://gsinfotech.onrender.com';
+// const HOST = process.env.HOST || 'https://gsinfotech.onrender.com';
 
 const startServer = async () => {
     try {
@@ -753,19 +753,19 @@ const startServer = async () => {
         console.log('⏳ Attempting to start server...');
 
         // Start the server
-        app.listen(PORT, HOST, () => {
+        app.listen(PORT,  () => {
             console.log(`
 🚀 GS Infotech Enhanced Server Started Successfully!
 📍 Environment: ${process.env.NODE_ENV}
-🌐 Server: http://${HOST}:${PORT}
-📊 Health Check: http://${HOST}:${PORT}/api/health
-📈 Performance: http://${HOST}:${PORT}/api/performance
-📊 Storage Stats: http://${HOST}:${PORT}/api/storage/stats
-🗺️  Sitemap XML: http://${HOST}:${PORT}/sitemap.xml
-🗺️  Sitemap HTML: http://${HOST}:${PORT}/sitemap.html
-🤖 Robots.txt: http://${HOST}:${PORT}/robots.txt
-📖 API Info: http://${HOST}:${PORT}/api
-🔧 DB Test: http://${HOST}:${PORT}/api/db-test
+// 🌐 Server: http://${HOST}:${PORT}
+// 📊 Health Check: http://${HOST}:${PORT}/api/health
+// 📈 Performance: http://${HOST}:${PORT}/api/performance
+// 📊 Storage Stats: http://${HOST}:${PORT}/api/storage/stats
+// 🗺️  Sitemap XML: http://${HOST}:${PORT}/sitemap.xml
+// 🗺️  Sitemap HTML: http://${HOST}:${PORT}/sitemap.html
+// 🤖 Robots.txt: http://${HOST}:${PORT}/robots.txt
+// 📖 API Info: http://${HOST}:${PORT}/api
+// 🔧 DB Test: http://${HOST}:${PORT}/api/db-test
 💾 Database: Connected to ${process.env.DB_NAME}
 🛡️  Security: Enhanced middleware active
 ⚡ Performance: Enhanced monitoring enabled
@@ -774,25 +774,25 @@ const startServer = async () => {
 🗄️  Cache: ${process.env.ENABLE_CACHE !== 'false' ? 'Enabled' : 'Disabled'}
 
 🔐 Admin Authentication:
-   • Login: POST http://${HOST}:${PORT}/api/auth/login
-   • Logout: POST http://${HOST}:${PORT}/api/auth/logout
-   • Profile: GET http://${HOST}:${PORT}/api/auth/me
-   • Test Auth: GET http://${HOST}:${PORT}/api/test/admin-auth
+//    • Login: POST http://${HOST}:${PORT}/api/auth/login
+//    • Logout: POST http://${HOST}:${PORT}/api/auth/logout
+//    • Profile: GET http://${HOST}:${PORT}/api/auth/me
+//    • Test Auth: GET http://${HOST}:${PORT}/api/test/admin-auth
 
-🛡️  Protected Admin Routes:
-   • Stats: GET http://${HOST}:${PORT}/api/admin/stats
-   • Content Stats: GET http://${HOST}:${PORT}/api/admin/content-stats
-   • System Health: GET http://${HOST}:${PORT}/api/admin/system-health
+// 🛡️  Protected Admin Routes:
+//    • Stats: GET http://${HOST}:${PORT}/api/admin/stats
+//    • Content Stats: GET http://${HOST}:${PORT}/api/admin/content-stats
+//    • System Health: GET http://${HOST}:${PORT}/api/admin/system-health
 
-🔧 Services API:
-   • All Services: GET http://${HOST}:${PORT}/api/services
-   • Service Stats: GET http://${HOST}:${PORT}/api/services/stats
-   • Featured Services: GET http://${HOST}:${PORT}/api/services/featured
-   • Service by ID/Slug: GET http://${HOST}:${PORT}/api/services/:id
-   • Services by Category: GET http://${HOST}:${PORT}/api/services/category/:category
-   • Create Service: POST http://${HOST}:${PORT}/api/services (Admin)
-   • Update Service: PUT http://${HOST}:${PORT}/api/services/:id (Admin)
-   • Delete Service: DELETE http://${HOST}:${PORT}/api/services/:id (Admin)
+// 🔧 Services API:
+//    • All Services: GET http://${HOST}:${PORT}/api/services
+//    • Service Stats: GET http://${HOST}:${PORT}/api/services/stats
+//    • Featured Services: GET http://${HOST}:${PORT}/api/services/featured
+//    • Service by ID/Slug: GET http://${HOST}:${PORT}/api/services/:id
+//    • Services by Category: GET http://${HOST}:${PORT}/api/services/category/:category
+//    • Create Service: POST http://${HOST}:${PORT}/api/services (Admin)
+//    • Update Service: PUT http://${HOST}:${PORT}/api/services/:id (Admin)
+//    • Delete Service: DELETE http://${HOST}:${PORT}/api/services/:id (Admin)
 
 ⏰ Started at: ${new Date().toISOString()}
 
@@ -805,12 +805,12 @@ const startServer = async () => {
    • POST /api/seo/generate-sitemap?type=all - Generate sitemaps via API
    • GET /api/images/cleanup?hours=1 - Cleanup temp files
 
-🔗 Quick Links:
-   • All Endpoints: http://${HOST}:${PORT}/api
-   • Generate Sitemap: http://${HOST}:${PORT}/generate-sitemap
-   • Performance Dashboard: http://${HOST}:${PORT}/api/performance
-   • Admin Login: http://${HOST}:${PORT}/admin/login (Frontend)
-   • Services Page: http://${HOST}:${PORT}/services (Frontend)
+// 🔗 Quick Links:
+//    • All Endpoints: http://${HOST}:${PORT}/api
+//    • Generate Sitemap: http://${HOST}:${PORT}/generate-sitemap
+//    • Performance Dashboard: http://${HOST}:${PORT}/api/performance
+//    • Admin Login: http://${HOST}:${PORT}/admin/login (Frontend)
+//    • Services Page: http://${HOST}:${PORT}/services (Frontend)
             `);
         });
     } catch (error) {
