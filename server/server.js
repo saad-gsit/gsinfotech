@@ -730,7 +730,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const HOST = process.env.HOST || 'sql12.freesqldatabase.com';
+const HOST = process.env.HOST || 'https://gsinfotech.onrender.com';
 
 const startServer = async () => {
     try {
