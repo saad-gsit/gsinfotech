@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: gsinfotech-backend
+    env: node
+    repo: https://github.com/saad-gsit/gsinfotech
+    branch: main
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
