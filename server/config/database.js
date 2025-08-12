@@ -2,16 +2,16 @@ require('dotenv').config();
 
 module.exports = {
     development: {
-        // username: process.env.DB_USER || 'root',
-        // password: process.env.DB_PASSWORD || 'root',
-        // database: process.env.DB_NAME || 'gsinfotech_db',
-        // host: process.env.DB_HOST || 'localhost',
-        // port: process.env.DB_PORT || 3306,
-        username: process.env.DB_USER || 'sql12794174',
-        password: process.env.DB_PASSWORD || 'hQfNvkd3Ef',
-        database: process.env.DB_NAME || 'sql12794174',
-        host: process.env.DB_HOST || 'sql12.freesqldatabase.com',
+        username: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || 'root',
+        database: process.env.DB_NAME || 'gsinfotech_db',
+        host: process.env.DB_HOST || 'localhost',
         port: process.env.DB_PORT || 3306,
+        // username: process.env.DB_USER || 'sql12794174',
+        // password: process.env.DB_PASSWORD || 'hQfNvkd3Ef',
+        // database: process.env.DB_NAME || 'sql12794174',
+        // host: process.env.DB_HOST || 'sql12.freesqldatabase.com',
+        // port: process.env.DB_PORT || 3306,
         dialect: 'mysql',
         logging: console.log,
         pool: {

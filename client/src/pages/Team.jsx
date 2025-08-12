@@ -56,268 +56,267 @@ const Team = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
             whileHover={{ y: -8 }}
-            className="group cursor-pointer"
+            className="group"
             style={{ height: '100%' }}
         >
-            <Link to={`/team/${member.slug || member.id}`} className="no-underline" style={{ height: '100%', display: 'block' }}>
-                <Card
-                    sx={{
-                        p: 4,
-                        textAlign: 'center',
-                        border: '1px solid var(--stone-100)',
-                        borderRadius: '24px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
-                        transition: 'all 0.4s ease',
-                        position: 'relative',
-                        overflow: 'visible',
-                        height: '480px', // Fixed height for equal cards
-                        display: 'flex',
-                        flexDirection: 'column',
-                        '&:hover': {
-                            boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
-                            borderColor: 'var(--sage-400)',
-                        }
-                    }}
-                >
-                    {/* Leadership Badge */}
-                    {member.is_leadership && (
-                        <Box
-                            sx={{
-                                position: 'absolute',
-                                top: -12,
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                backgroundColor: 'var(--sage-400)',
-                                color: 'white',
-                                px: 2,
-                                py: 0.5,
-                                borderRadius: '50px',
-                                fontSize: '0.75rem',
-                                fontWeight: 500,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 0.5,
-                                boxShadow: '0 4px 12px -2px rgba(157, 176, 130, 0.4)',
-                                zIndex: 2
-                            }}
-                        >
-                            <WorkspacePremiumOutlined sx={{ fontSize: 14 }} />
-                            Leadership
-                        </Box>
-                    )}
+            {/* Removed Link wrapper and cursor-pointer class */}
+            <Card
+                sx={{
+                    p: 4,
+                    textAlign: 'center',
+                    border: '1px solid var(--stone-100)',
+                    borderRadius: '24px',
+                    backgroundColor: 'white',
+                    boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.4s ease',
+                    position: 'relative',
+                    overflow: 'visible',
+                    height: '480px', // Fixed height for equal cards
+                    display: 'flex',
+                    flexDirection: 'column',
+                    '&:hover': {
+                        boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
+                        borderColor: 'var(--sage-400)',
+                    }
+                }}
+            >
+                {/* Leadership Badge */}
+                {member.is_leadership && (
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: -12,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            backgroundColor: 'var(--sage-400)',
+                            color: 'white',
+                            px: 2,
+                            py: 0.5,
+                            borderRadius: '50px',
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                            boxShadow: '0 4px 12px -2px rgba(157, 176, 130, 0.4)',
+                            zIndex: 2
+                        }}
+                    >
+                        <WorkspacePremiumOutlined sx={{ fontSize: 14 }} />
+                        Leadership
+                    </Box>
+                )}
 
-                    {/* Avatar Section - Fixed Space */}
-                    <Box sx={{ mb: 3, flexShrink: 0 }}>
-                        <Box sx={{ position: 'relative', display: 'inline-block' }}>
-                            <Avatar
-                                src={member.photo || member.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=300&background=9db082&color=fff`}
-                                alt={member.name}
+                {/* Avatar Section - Fixed Space */}
+                <Box sx={{ mb: 3, flexShrink: 0 }}>
+                    <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                        <Avatar
+                            src={member.photo || member.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=300&background=9db082&color=fff`}
+                            alt={member.name}
+                            sx={{
+                                width: 100,
+                                height: 100,
+                                mx: 'auto',
+                                border: '4px solid var(--stone-100)',
+                                transition: 'all 0.4s ease',
+                                filter: 'grayscale(20%)',
+                                '&:hover': {
+                                    filter: 'grayscale(0%)',
+                                    transform: 'scale(1.05)',
+                                    borderColor: 'var(--sage-400)',
+                                }
+                            }}
+                            onError={(e) => {
+                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=300&background=9db082&color=fff`
+                            }}
+                        />
+
+                        {/* Status Indicator */}
+                        {member.is_active && (
+                            <Box
                                 sx={{
-                                    width: 100,
-                                    height: 100,
-                                    mx: 'auto',
-                                    border: '4px solid var(--stone-100)',
-                                    transition: 'all 0.4s ease',
-                                    filter: 'grayscale(20%)',
-                                    '&:hover': {
-                                        filter: 'grayscale(0%)',
-                                        transform: 'scale(1.05)',
-                                        borderColor: 'var(--sage-400)',
-                                    }
-                                }}
-                                onError={(e) => {
-                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=300&background=9db082&color=fff`
+                                    position: 'absolute',
+                                    bottom: 8,
+                                    right: 8,
+                                    width: 16,
+                                    height: 16,
+                                    backgroundColor: 'var(--sage-400)',
+                                    borderRadius: '50%',
+                                    border: '3px solid white',
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                                 }}
                             />
-
-                            {/* Status Indicator */}
-                            {member.is_active && (
-                                <Box
-                                    sx={{
-                                        position: 'absolute',
-                                        bottom: 8,
-                                        right: 8,
-                                        width: 16,
-                                        height: 16,
-                                        backgroundColor: 'var(--sage-400)',
-                                        borderRadius: '50%',
-                                        border: '3px solid white',
-                                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                                    }}
-                                />
-                            )}
-                        </Box>
+                        )}
                     </Box>
+                </Box>
 
-                    {/* Name and Position - Fixed Space */}
-                    <Box sx={{ mb: 2, flexShrink: 0, minHeight: '60px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <Typography
-                            variant="h6"
+                {/* Name and Position - Fixed Space */}
+                <Box sx={{ mb: 2, flexShrink: 0, minHeight: '60px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: 600,
+                            mb: 1,
+                            color: 'var(--stone-800)',
+                            fontSize: '1.1rem',
+                            lineHeight: 1.3,
+                            minHeight: '26px'
+                        }}
+                    >
+                        {member.name}
+                    </Typography>
+
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            color: 'var(--sage-600)',
+                            fontWeight: 500,
+                            fontSize: '0.875rem',
+                            minHeight: '20px'
+                        }}
+                    >
+                        {member.position || member.role}
+                    </Typography>
+                </Box>
+
+                {/* Department - Fixed Space */}
+                <Box sx={{ mb: 3, flexShrink: 0, minHeight: '32px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+                    {member.department && (
+                        <Chip
+                            label={member.department}
+                            size="small"
                             sx={{
-                                fontWeight: 600,
-                                mb: 1,
-                                color: 'var(--stone-800)',
-                                fontSize: '1.1rem',
-                                lineHeight: 1.3,
-                                minHeight: '26px'
+                                backgroundColor: 'var(--stone-50)',
+                                color: 'var(--stone-600)',
+                                fontSize: '0.75rem',
+                                borderRadius: '50px',
+                                height: '24px'
                             }}
-                        >
-                            {member.name}
-                        </Typography>
+                        />
+                    )}
+                </Box>
 
+                {/* Bio Section - Flexible Space */}
+                <Box sx={{ flex: 1, mb: 3, display: 'flex', alignItems: 'flex-start' }}>
+                    {member.bio && (
                         <Typography
                             variant="body2"
                             sx={{
-                                color: 'var(--sage-600)',
-                                fontWeight: 500,
-                                fontSize: '0.875rem',
-                                minHeight: '20px'
+                                color: 'var(--stone-600)',
+                                lineHeight: 1.5,
+                                display: '-webkit-box',
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                fontSize: '0.85rem'
                             }}
                         >
-                            {member.position || member.role}
+                            {member.bio}
                         </Typography>
-                    </Box>
+                    )}
+                </Box>
 
-                    {/* Department - Fixed Space */}
-                    <Box sx={{ mb: 3, flexShrink: 0, minHeight: '32px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
-                        {member.department && (
-                            <Chip
-                                label={member.department}
-                                size="small"
-                                sx={{
-                                    backgroundColor: 'var(--stone-50)',
-                                    color: 'var(--stone-600)',
-                                    fontSize: '0.75rem',
-                                    borderRadius: '50px',
-                                    height: '24px'
-                                }}
-                            />
-                        )}
-                    </Box>
+                {/* Skills Section - Fixed Space */}
+                <Box sx={{ mb: 3, flexShrink: 0, minHeight: '30px' }}>
+                    {member.skills && member.skills.length > 0 && (
+                        <Stack
+                            direction="row"
+                            spacing={0.5}
+                            justifyContent="center"
+                            sx={{ flexWrap: 'wrap', gap: 0.5 }}
+                        >
+                            {member.skills.slice(0, 2).map((skill, idx) => (
+                                <Chip
+                                    key={idx}
+                                    label={skill}
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: 'var(--sand-50)',
+                                        color: 'var(--sand-600)',
+                                        fontSize: '0.7rem',
+                                        height: 22,
+                                        borderRadius: '11px',
+                                    }}
+                                />
+                            ))}
+                            {member.skills.length > 2 && (
+                                <Chip
+                                    label={`+${member.skills.length - 2}`}
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: 'var(--stone-100)',
+                                        color: 'var(--stone-600)',
+                                        fontSize: '0.7rem',
+                                        height: 22,
+                                        borderRadius: '11px',
+                                    }}
+                                />
+                            )}
+                        </Stack>
+                    )}
+                </Box>
 
-                    {/* Bio Section - Flexible Space */}
-                    <Box sx={{ flex: 1, mb: 3, display: 'flex', alignItems: 'flex-start' }}>
-                        {member.bio && (
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    color: 'var(--stone-600)',
-                                    lineHeight: 1.5,
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 3,
-                                    WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden',
-                                    fontSize: '0.85rem'
-                                }}
-                            >
-                                {member.bio}
-                            </Typography>
-                        )}
-                    </Box>
+                {/* Experience - Fixed Space */}
+                <Box sx={{ mb: 3, flexShrink: 0, minHeight: '20px' }}>
+                    {member.years_experience && (
+                        <Typography
+                            variant="caption"
+                            sx={{
+                                color: 'var(--stone-500)',
+                                fontSize: '0.75rem'
+                            }}
+                        >
+                            {member.years_experience}+ years experience
+                        </Typography>
+                    )}
+                </Box>
 
-                    {/* Skills Section - Fixed Space */}
-                    <Box sx={{ mb: 3, flexShrink: 0, minHeight: '30px' }}>
-                        {member.skills && member.skills.length > 0 && (
-                            <Stack
-                                direction="row"
-                                spacing={0.5}
-                                justifyContent="center"
-                                sx={{ flexWrap: 'wrap', gap: 0.5 }}
-                            >
-                                {member.skills.slice(0, 2).map((skill, idx) => (
-                                    <Chip
-                                        key={idx}
-                                        label={skill}
+                {/* Social Links - Bottom Fixed */}
+                <Box sx={{ flexShrink: 0 }}>
+                    {member.social_links && Object.keys(member.social_links).length > 0 && (
+                        <Stack
+                            direction="row"
+                            spacing={1}
+                            justifyContent="center"
+                            sx={{
+                                opacity: { xs: 1, md: 0 },
+                                transition: 'opacity 0.3s ease',
+                                '.group:hover &': {
+                                    opacity: 1,
+                                }
+                            }}
+                        >
+                            {Object.entries(member.social_links).slice(0, 4).map(([platform, url]) => (
+                                url && (
+                                    <IconButton
+                                        key={platform}
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         size="small"
+                                        onClick={(e) => e.stopPropagation()}
                                         sx={{
-                                            backgroundColor: 'var(--sand-50)',
-                                            color: 'var(--sand-600)',
-                                            fontSize: '0.7rem',
-                                            height: 22,
-                                            borderRadius: '11px',
+                                            color: 'var(--stone-500)',
+                                            backgroundColor: 'var(--stone-50)',
+                                            width: 32,
+                                            height: 32,
+                                            transition: 'all 0.3s ease',
+                                            '&:hover': {
+                                                color: 'white',
+                                                backgroundColor: 'var(--sage-400)',
+                                                transform: 'translateY(-2px)',
+                                            }
                                         }}
-                                    />
-                                ))}
-                                {member.skills.length > 2 && (
-                                    <Chip
-                                        label={`+${member.skills.length - 2}`}
-                                        size="small"
-                                        sx={{
-                                            backgroundColor: 'var(--stone-100)',
-                                            color: 'var(--stone-600)',
-                                            fontSize: '0.7rem',
-                                            height: 22,
-                                            borderRadius: '11px',
-                                        }}
-                                    />
-                                )}
-                            </Stack>
-                        )}
-                    </Box>
-
-                    {/* Experience - Fixed Space */}
-                    <Box sx={{ mb: 3, flexShrink: 0, minHeight: '20px' }}>
-                        {member.years_experience && (
-                            <Typography
-                                variant="caption"
-                                sx={{
-                                    color: 'var(--stone-500)',
-                                    fontSize: '0.75rem'
-                                }}
-                            >
-                                {member.years_experience}+ years experience
-                            </Typography>
-                        )}
-                    </Box>
-
-                    {/* Social Links - Bottom Fixed */}
-                    <Box sx={{ flexShrink: 0 }}>
-                        {member.social_links && Object.keys(member.social_links).length > 0 && (
-                            <Stack
-                                direction="row"
-                                spacing={1}
-                                justifyContent="center"
-                                sx={{
-                                    opacity: { xs: 1, md: 0 },
-                                    transition: 'opacity 0.3s ease',
-                                    '.group:hover &': {
-                                        opacity: 1,
-                                    }
-                                }}
-                            >
-                                {Object.entries(member.social_links).slice(0, 4).map(([platform, url]) => (
-                                    url && (
-                                        <IconButton
-                                            key={platform}
-                                            href={url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            size="small"
-                                            onClick={(e) => e.stopPropagation()}
-                                            sx={{
-                                                color: 'var(--stone-500)',
-                                                backgroundColor: 'var(--stone-50)',
-                                                width: 32,
-                                                height: 32,
-                                                transition: 'all 0.3s ease',
-                                                '&:hover': {
-                                                    color: 'white',
-                                                    backgroundColor: 'var(--sage-400)',
-                                                    transform: 'translateY(-2px)',
-                                                }
-                                            }}
-                                            title={`${member.name} on ${platform}`}
-                                        >
-                                            {getSocialIcon(platform)}
-                                        </IconButton>
-                                    )
-                                ))}
-                            </Stack>
-                        )}
-                    </Box>
-                </Card>
-            </Link>
+                                        title={`${member.name} on ${platform}`}
+                                    >
+                                        {getSocialIcon(platform)}
+                                    </IconButton>
+                                )
+                            ))}
+                        </Stack>
+                    )}
+                </Box>
+            </Card>
         </motion.div>
     )
 
@@ -417,15 +416,29 @@ const Team = () => {
                 </Container>
             </section>
 
-            {/* Team Content - 3 Cards Per Row */}
+            {/* Team Content - 3 Cards Per Row using Flexbox */}
             <section style={{ padding: '6rem 0', backgroundColor: 'white', minHeight: '60vh' }}>
                 <Container maxWidth="lg">
                     {/* Loading State */}
                     {isLoading && (
                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                            <Grid container spacing={4} sx={{ maxWidth: '1000px' }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: 4,
+                                    justifyContent: 'center',
+                                    maxWidth: '1200px'
+                                }}
+                            >
                                 {[...Array(6)].map((_, index) => (
-                                    <Grid item xs={12} sm={6} lg={4} key={index}>
+                                    <Box
+                                        key={index}
+                                        sx={{
+                                            width: { xs: '100%', sm: 'calc(50% - 16px)', lg: 'calc(33.333% - 21.33px)' },
+                                            maxWidth: '350px'
+                                        }}
+                                    >
                                         <Card sx={{ p: 3, textAlign: 'center', borderRadius: '24px', height: '480px' }}>
                                             <Skeleton
                                                 variant="circular"
@@ -437,9 +450,9 @@ const Team = () => {
                                             <Skeleton variant="text" width="50%" sx={{ mx: 'auto', mb: 2 }} />
                                             <Skeleton variant="text" width="80%" sx={{ mx: 'auto' }} />
                                         </Card>
-                                    </Grid>
+                                    </Box>
                                 ))}
-                            </Grid>
+                            </Box>
                         </Box>
                     )}
 
@@ -482,7 +495,7 @@ const Team = () => {
                         </Box>
                     )}
 
-                    {/* Team Members - Exactly 3 Per Row */}
+                    {/* Team Members - Flexbox Layout for Equal Sizing */}
                     {!isLoading && !isError && data && data.members?.length > 0 && (
                         <Box>
                             <motion.div
@@ -517,14 +530,30 @@ const Team = () => {
                                 </Typography>
                             </motion.div>
 
+                            {/* Flexbox Container for Equal-Sized Cards */}
                             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                                <Grid container spacing={4} sx={{ maxWidth: '1000px' }}>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: 4,
+                                        justifyContent: 'center',
+                                        maxWidth: '1200px'
+                                    }}
+                                >
                                     {data.members.map((member, index) => (
-                                        <Grid item xs={12} sm={6} lg={4} key={member.id}>
+                                        <Box
+                                            key={member.id}
+                                            sx={{
+                                                width: { xs: '100%', sm: 'calc(50% - 16px)', lg: 'calc(33.333% - 21.33px)' },
+                                                maxWidth: '350px',
+                                                minWidth: '280px'
+                                            }}
+                                        >
                                             <TeamMemberCard member={member} index={index} />
-                                        </Grid>
+                                        </Box>
                                     ))}
-                                </Grid>
+                                </Box>
                             </Box>
                         </Box>
                     )}
@@ -667,37 +696,50 @@ const Team = () => {
                             </Link>
                         </Stack>
 
-                        {/* Company Culture Highlights - Single Row Center Aligned */}
+                        {/* Company Culture Highlights - Flexbox for Equal Sizing */}
                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                            <Grid container spacing={3} sx={{ maxWidth: '800px' }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: 3,
+                                    justifyContent: 'center',
+                                    maxWidth: '800px'
+                                }}
+                            >
                                 {[
                                     { icon: '🚀', title: 'Innovation-Driven', desc: 'Work with cutting-edge technology' },
                                     { icon: '🌍', title: 'Remote-Friendly', desc: 'Flexible work arrangements' },
                                     { icon: '📈', title: 'Growth Focused', desc: 'Continuous learning opportunities' },
                                     { icon: '💼', title: 'Competitive Benefits', desc: 'Health, retirement, and more' }
                                 ].map((item, index) => (
-                                    <Grid item xs={6} sm={3} key={index}>
+                                    <Box
+                                        key={index}
+                                        sx={{
+                                            width: { xs: 'calc(50% - 12px)', sm: 'calc(25% - 18px)' },
+                                            minWidth: '150px',
+                                            textAlign: 'center'
+                                        }}
+                                    >
                                         <motion.div
                                             initial={{ opacity: 0, y: 20 }}
                                             whileInView={{ opacity: 1, y: 0 }}
                                             transition={{ duration: 0.6, delay: index * 0.1 }}
                                             viewport={{ once: true }}
                                         >
-                                            <Box sx={{ textAlign: 'center' }}>
-                                                <Typography variant="h4" sx={{ mb: 1, fontSize: '2rem' }}>
-                                                    {item.icon}
-                                                </Typography>
-                                                <Typography variant="body2" sx={{ color: 'white', fontWeight: 500, mb: 0.5 }}>
-                                                    {item.title}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.75rem' }}>
-                                                    {item.desc}
-                                                </Typography>
-                                            </Box>
+                                            <Typography variant="h4" sx={{ mb: 1, fontSize: '2rem' }}>
+                                                {item.icon}
+                                            </Typography>
+                                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 500, mb: 0.5 }}>
+                                                {item.title}
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.75rem' }}>
+                                                {item.desc}
+                                            </Typography>
                                         </motion.div>
-                                    </Grid>
+                                    </Box>
                                 ))}
-                            </Grid>
+                            </Box>
                         </Box>
                     </motion.div>
                 </Container>

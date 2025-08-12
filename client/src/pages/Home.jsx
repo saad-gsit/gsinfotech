@@ -592,9 +592,23 @@ const Home = () => {
                             </Typography>
                         </motion.div>
 
-                        <Grid container spacing={4} justifyContent="center">
+                        {/* Using Flexbox instead of Grid for guaranteed 2 columns */}
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 4,
+                                justifyContent: 'center'
+                            }}
+                        >
                             {services.map((service, index) => (
-                                <Grid item xs={12} md={6} key={index}>
+                                <Box
+                                    key={index}
+                                    sx={{
+                                        width: { xs: '100%', md: 'calc(50% - 16px)' },
+                                        maxWidth: '500px'
+                                    }}
+                                >
                                     <motion.div
                                         initial={{ opacity: 0, y: 30 }}
                                         whileInView={{ opacity: 1, y: 0 }}
@@ -651,9 +665,9 @@ const Home = () => {
                                             </Box>
                                         </Card>
                                     </motion.div>
-                                </Grid>
+                                </Box>
                             ))}
-                        </Grid>
+                        </Box>
                     </Container>
                 </section>
 

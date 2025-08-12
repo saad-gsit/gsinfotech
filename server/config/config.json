@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "u226800403_gsinfo",
-    "password": "Gsinfo@3686",
-    "database": "u226800403_gsinfotech_db",
-    "host": "srv1474.hstgr.io",
+    "username": "root",
+    "password": "root",
+    "database": "gsinfotech_db",
+    "host": "127.0.0.1",
     "dialect": "mysql"
   },
   "test": {

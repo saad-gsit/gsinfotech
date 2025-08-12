@@ -128,6 +128,7 @@ const Services = () => {
         }
     ]
 
+    // [Keep all your existing useEffect and function implementations as they are]
     useEffect(() => {
         loadServices()
     }, [])
@@ -317,7 +318,7 @@ const Services = () => {
                 <meta name="keywords" content="web development, mobile app development, custom software, UI UX design, enterprise solutions" />
             </Helmet>
 
-            {/* Hero Section - Center Aligned */}
+            {/* Hero Section - Keep as is */}
             <section
                 style={{
                     minHeight: '80vh',
@@ -327,7 +328,6 @@ const Services = () => {
                     overflow: 'hidden'
                 }}
             >
-                {/* Background Gradient */}
                 <Box
                     sx={{
                         position: 'absolute',
@@ -337,7 +337,6 @@ const Services = () => {
                     }}
                 />
 
-                {/* Floating Elements */}
                 <Box
                     sx={{
                         position: 'absolute',
@@ -420,7 +419,7 @@ const Services = () => {
                 </Container>
             </section>
 
-            {/* Stats Section - Single Row Center Aligned */}
+            {/* Stats Section - Keep as is */}
             <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
                 <Container maxWidth="lg">
                     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -497,10 +496,10 @@ const Services = () => {
                 </Container>
             </section>
 
-            {/* Services Section - Center Aligned */}
+            {/* Services Section - Updated with Flexbox Layout */}
             <section style={{ padding: '6rem 0', background: 'linear-gradient(135deg, var(--sage-50) 0%, var(--sand-50) 100%)' }}>
                 <Container maxWidth="lg">
-                    {/* Section Header */}
+                    {/* Section Header - Keep as is */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -534,7 +533,7 @@ const Services = () => {
                         </Typography>
                     </motion.div>
 
-                    {/* Search and Filter - Center Aligned */}
+                    {/* Search and Filter - Redesigned Compact Version */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -543,89 +542,223 @@ const Services = () => {
                         style={{ marginBottom: '3rem' }}
                     >
                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                            <Card sx={{
-                                p: 4,
-                                borderRadius: '24px',
-                                border: '1px solid var(--stone-100)',
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: { xs: 'column', md: 'row' },
+                                gap: 2,
+                                alignItems: 'center',
+                                maxWidth: '700px',
+                                width: '100%',
+                                p: 2,
                                 backgroundColor: 'white',
-                                boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
-                                maxWidth: '800px',
-                                width: '100%'
+                                borderRadius: '16px',
+                                border: '1px solid var(--stone-200)',
+                                boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.08)',
                             }}>
-                                <Grid container spacing={3} alignItems="center">
-                                    <Grid item xs={12} md={8}>
-                                        <TextField
-                                            fullWidth
-                                            placeholder="Search services, technologies, or keywords..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <Search sx={{ color: 'var(--stone-400)' }} />
-                                                    </InputAdornment>
-                                                ),
-                                                sx: {
-                                                    borderRadius: '50px',
-                                                    backgroundColor: 'var(--stone-50)',
-                                                    '& .MuiOutlinedInput-root': {
-                                                        '& fieldset': {
-                                                            borderColor: 'transparent',
-                                                        },
-                                                        '&:hover fieldset': {
-                                                            borderColor: 'var(--sage-400)',
-                                                        },
-                                                        '&.Mui-focused fieldset': {
-                                                            borderColor: 'var(--sage-400)',
-                                                        },
+                                {/* Search Field - Compact */}
+                                <Box sx={{ flex: 1, minWidth: { xs: '100%', md: '300px' } }}>
+                                    <TextField
+                                        fullWidth
+                                        placeholder="Search services or technologies..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        size="small"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Search sx={{ color: 'var(--stone-400)', fontSize: 20 }} />
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                borderRadius: '12px',
+                                                backgroundColor: 'var(--stone-50)',
+                                                border: 'none',
+                                                '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': {
+                                                        border: 'none',
                                                     },
+                                                    '&:hover fieldset': {
+                                                        border: '1px solid var(--sage-300)',
+                                                    },
+                                                    '&.Mui-focused fieldset': {
+                                                        border: '1px solid var(--sage-400)',
+                                                        boxShadow: '0 0 0 3px rgba(139, 148, 113, 0.1)',
+                                                    },
+                                                },
+                                            }
+                                        }}
+                                    />
+                                </Box>
+
+                                {/* Divider */}
+                                <Box sx={{
+                                    width: { xs: '100%', md: '1px' },
+                                    height: { xs: '1px', md: '40px' },
+                                    backgroundColor: 'var(--stone-200)',
+                                    display: { xs: 'block', md: 'block' }
+                                }} />
+
+                                {/* Filter Dropdown - Compact */}
+                                <Box sx={{ minWidth: { xs: '100%', md: '200px' } }}>
+                                    <FormControl fullWidth size="small">
+                                        <Select
+                                            value={filterCategory}
+                                            onChange={(e) => setFilterCategory(e.target.value)}
+                                            displayEmpty
+                                            startAdornment={<FilterList sx={{ mr: 1, color: 'var(--stone-400)', fontSize: 20 }} />}
+                                            sx={{
+                                                borderRadius: '12px',
+                                                backgroundColor: 'var(--stone-50)',
+                                                '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': {
+                                                        border: 'none',
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        border: '1px solid var(--sage-300)',
+                                                    },
+                                                    '&.Mui-focused fieldset': {
+                                                        border: '1px solid var(--sage-400)',
+                                                        boxShadow: '0 0 0 3px rgba(139, 148, 113, 0.1)',
+                                                    },
+                                                },
+                                            }}
+                                        >
+                                            <MenuItem value="all">
+                                                <Typography variant="body2" sx={{ color: 'var(--stone-600)' }}>
+                                                    All Categories
+                                                </Typography>
+                                            </MenuItem>
+                                            {serviceCategories.map((category) => (
+                                                <MenuItem key={category.value} value={category.value}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <Box sx={{ color: category.color, fontSize: 18 }}>
+                                                            {category.icon}
+                                                        </Box>
+                                                        <Typography variant="body2">
+                                                            {category.label}
+                                                        </Typography>
+                                                    </Box>
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+
+                                {/* Clear Filters Button - Only show when filters are active */}
+                                {(searchTerm || filterCategory !== 'all') && (
+                                    <Box sx={{ flexShrink: 0 }}>
+                                        <Button
+                                            variant="text"
+                                            size="small"
+                                            onClick={() => {
+                                                setSearchTerm('')
+                                                setFilterCategory('all')
+                                            }}
+                                            sx={{
+                                                color: 'var(--stone-500)',
+                                                minWidth: 'auto',
+                                                px: 2,
+                                                py: 1,
+                                                borderRadius: '8px',
+                                                fontSize: '0.8rem',
+                                                '&:hover': {
+                                                    backgroundColor: 'var(--stone-100)',
+                                                    color: 'var(--stone-700)',
                                                 }
                                             }}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} md={4}>
-                                        <FormControl fullWidth>
-                                            <InputLabel sx={{ color: 'var(--stone-600)' }}>Filter by Category</InputLabel>
-                                            <Select
-                                                value={filterCategory}
-                                                label="Filter by Category"
-                                                onChange={(e) => setFilterCategory(e.target.value)}
-                                                startAdornment={<FilterList sx={{ mr: 1, color: 'var(--stone-400)' }} />}
-                                                sx={{
-                                                    borderRadius: '50px',
-                                                    '& .MuiOutlinedInput-root': {
-                                                        '& fieldset': {
-                                                            borderColor: 'var(--stone-200)',
-                                                        },
-                                                        '&:hover fieldset': {
-                                                            borderColor: 'var(--sage-400)',
-                                                        },
-                                                        '&.Mui-focused fieldset': {
-                                                            borderColor: 'var(--sage-400)',
-                                                        },
-                                                    },
-                                                }}
-                                            >
-                                                <MenuItem value="all">All Services</MenuItem>
-                                                {serviceCategories.map((category) => (
-                                                    <MenuItem key={category.value} value={category.value}>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                            <Box sx={{ color: category.color }}>
-                                                                {category.icon}
-                                                            </Box>
-                                                            {category.label}
-                                                        </Box>
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                </Grid>
-                            </Card>
+                                        >
+                                            Clear
+                                        </Button>
+                                    </Box>
+                                )}
+                            </Box>
                         </Box>
                     </motion.div>
 
-                    {/* Results Count - Center Aligned */}
+                    {/* Results Count & Active Filters - Redesigned */}
+                    {!loading && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            style={{ marginBottom: '2rem' }}
+                        >
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: { xs: 'column', sm: 'row' },
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                gap: 2,
+                                maxWidth: '700px',
+                                mx: 'auto',
+                                px: 2
+                            }}>
+                                {/* Results Count */}
+                                <Typography variant="body2" sx={{
+                                    color: 'var(--stone-600)',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 500
+                                }}>
+                                    {filteredServices.length === 0
+                                        ? 'No services found'
+                                        : `${filteredServices.length} service${filteredServices.length !== 1 ? 's' : ''} found`
+                                    }
+                                </Typography>
+
+                                {/* Active Filters Display */}
+                                {(searchTerm || filterCategory !== 'all') && (
+                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                                        <Typography variant="caption" sx={{ color: 'var(--stone-500)', mr: 1 }}>
+                                            Active filters:
+                                        </Typography>
+
+                                        {searchTerm && (
+                                            <Chip
+                                                label={`"${searchTerm}"`}
+                                                size="small"
+                                                onDelete={() => setSearchTerm('')}
+                                                sx={{
+                                                    backgroundColor: 'var(--sage-100)',
+                                                    color: 'var(--sage-700)',
+                                                    fontSize: '0.75rem',
+                                                    height: '24px',
+                                                    '& .MuiChip-deleteIcon': {
+                                                        color: 'var(--sage-600)',
+                                                        fontSize: '14px',
+                                                        '&:hover': {
+                                                            color: 'var(--sage-800)',
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        )}
+
+                                        {filterCategory !== 'all' && (
+                                            <Chip
+                                                label={serviceCategories.find(cat => cat.value === filterCategory)?.label}
+                                                size="small"
+                                                onDelete={() => setFilterCategory('all')}
+                                                sx={{
+                                                    backgroundColor: 'var(--coral-100)',
+                                                    color: 'var(--coral-700)',
+                                                    fontSize: '0.75rem',
+                                                    height: '24px',
+                                                    '& .MuiChip-deleteIcon': {
+                                                        color: 'var(--coral-600)',
+                                                        fontSize: '14px',
+                                                        '&:hover': {
+                                                            color: 'var(--coral-800)',
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    </Box>
+                                )}
+                            </Box>
+                        </motion.div>
+                    )}
+
+                    {/* Results Count - Keep as is */}
                     {!loading && (
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -641,20 +774,33 @@ const Services = () => {
                         </motion.div>
                     )}
 
-                    {/* Enhanced Services Grid - Center Aligned */}
+                    {/* Enhanced Services Grid - Updated with Flexbox for 2 per row */}
                     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                         <Box sx={{ width: '100%', maxWidth: '1200px' }}>
                             {loading ? (
-                                <Grid container spacing={4} justifyContent="center">
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: 4,
+                                        justifyContent: 'center'
+                                    }}
+                                >
                                     {Array.from({ length: 6 }).map((_, index) => (
-                                        <Grid item xs={12} md={6} lg={4} key={index}>
+                                        <Box
+                                            key={index}
+                                            sx={{
+                                                width: { xs: '100%', md: 'calc(50% - 16px)' },
+                                                maxWidth: '500px'
+                                            }}
+                                        >
                                             <ServiceSkeleton />
-                                        </Grid>
+                                        </Box>
                                     ))}
-                                </Grid>
+                                </Box>
                             ) : filteredServices.length > 0 ? (
                                 <>
-                                    {/* Featured Services - Centered */}
+                                    {/* Featured Services - Flexbox Layout for 2 per row */}
                                     <Box sx={{ mb: 6 }}>
                                         <Typography variant="h4" sx={{
                                             color: 'var(--stone-800)',
@@ -664,11 +810,24 @@ const Services = () => {
                                         }}>
                                             Featured Services
                                         </Typography>
-                                        <Grid container spacing={4} justifyContent="center">
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                flexWrap: 'wrap',
+                                                gap: 4,
+                                                justifyContent: 'center'
+                                            }}
+                                        >
                                             {filteredServices.filter(service => service.is_featured).map((service, index) => {
                                                 const categoryData = getCategoryData(service.category)
                                                 return (
-                                                    <Grid item xs={12} md={6} key={service.id}>
+                                                    <Box
+                                                        key={service.id}
+                                                        sx={{
+                                                            width: { xs: '100%', md: 'calc(50% - 16px)' },
+                                                            maxWidth: '500px'
+                                                        }}
+                                                    >
                                                         <motion.div
                                                             initial={{ opacity: 0, y: 40, scale: 0.95 }}
                                                             whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -689,6 +848,7 @@ const Services = () => {
                                                                     boxShadow: '0 8px 32px -8px rgba(0, 0, 0, 0.12)',
                                                                     transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                                                                     cursor: 'pointer',
+                                                                    minHeight: '600px', // Fixed height for equal cards
                                                                     '&:hover': {
                                                                         boxShadow: '0 24px 64px -12px rgba(0, 0, 0, 0.18)',
                                                                         borderColor: categoryData.color,
@@ -950,213 +1110,288 @@ const Services = () => {
                                                                 </CardActions>
                                                             </Card>
                                                         </motion.div>
-                                                    </Grid>
+                                                    </Box>
                                                 )
                                             })}
-                                        </Grid>
+                                        </Box>
                                     </Box>
-
-                                    {/* Regular Services - Center Aligned Compact Grid */}
-                                    {filteredServices.filter(service => !service.is_featured).length > 0 && (
-                                        <Box>
-                                            <Typography variant="h4" sx={{
-                                                color: 'var(--stone-800)',
-                                                fontWeight: 300,
-                                                mb: 4,
-                                                textAlign: 'center'
-                                            }}>
-                                                All Services
-                                            </Typography>
-                                            <Grid container spacing={3} justifyContent="center">
-                                                {filteredServices.filter(service => !service.is_featured).map((service, index) => {
-                                                    const categoryData = getCategoryData(service.category)
-                                                    return (
-                                                        <Grid item xs={12} sm={6} md={4} key={service.id}>
-                                                            <motion.div
-                                                                initial={{ opacity: 0, y: 30 }}
-                                                                whileInView={{ opacity: 1, y: 0 }}
-                                                                transition={{ duration: 0.6, delay: index * 0.1 }}
-                                                                viewport={{ once: true }}
-                                                                whileHover={{ y: -8 }}
+                                        {/* Regular Services - Flexbox Layout for 2 per row - FIXED */}
+                                        {filteredServices.filter(service => !service.is_featured).length > 0 && (
+                                            <Box>
+                                                <Typography variant="h4" sx={{
+                                                    color: 'var(--stone-800)',
+                                                    fontWeight: 300,
+                                                    mb: 4,
+                                                    textAlign: 'center'
+                                                }}>
+                                                    All Services
+                                                </Typography>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        flexWrap: 'wrap',
+                                                        gap: 3,
+                                                        justifyContent: 'center'
+                                                    }}
+                                                >
+                                                    {filteredServices.filter(service => !service.is_featured).map((service, index) => {
+                                                        const categoryData = getCategoryData(service.category)
+                                                        return (
+                                                            <Box
+                                                                key={service.id}
+                                                                sx={{
+                                                                    width: { xs: '100%', md: 'calc(50% - 12px)' },
+                                                                    maxWidth: '450px'
+                                                                }}
                                                             >
-                                                                <Card
-                                                                    sx={{
-                                                                        height: '100%',
-                                                                        display: 'flex',
-                                                                        flexDirection: 'column',
-                                                                        border: '1px solid var(--stone-100)',
-                                                                        borderRadius: '24px',
-                                                                        backgroundColor: 'white',
-                                                                        boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
-                                                                        transition: 'all 0.4s ease',
-                                                                        cursor: 'pointer',
-                                                                        '&:hover': {
-                                                                            boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
-                                                                            borderColor: categoryData.color,
-                                                                            '& .service-icon': {
-                                                                                transform: 'scale(1.1)',
-                                                                                backgroundColor: categoryData.color,
-                                                                                color: 'white'
-                                                                            },
-                                                                            '& .learn-more-btn': {
-                                                                                backgroundColor: categoryData.color,
-                                                                                color: 'white',
-                                                                                borderColor: categoryData.color,
-                                                                            }
-                                                                        }
-                                                                    }}
-                                                                    onClick={() => handleServiceClick(service)}
+                                                                <motion.div
+                                                                    initial={{ opacity: 0, y: 30 }}
+                                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                                                                    viewport={{ once: true }}
+                                                                    whileHover={{ y: -8 }}
                                                                 >
-                                                                    <CardContent sx={{ flexGrow: 1, p: 4 }}>
-                                                                        {/* Service Icon - Centered */}
-                                                                        <Box sx={{ mb: 3, textAlign: 'center' }}>
-                                                                            <Avatar
-                                                                                className="service-icon"
-                                                                                sx={{
-                                                                                    width: 64,
-                                                                                    height: 64,
-                                                                                    backgroundColor: categoryData.bgColor,
-                                                                                    color: categoryData.color,
-                                                                                    transition: 'all 0.4s ease',
-                                                                                    fontSize: '1.8rem',
-                                                                                    mx: 'auto',
-                                                                                }}
-                                                                            >
-                                                                                {React.cloneElement(categoryData.icon, { sx: { fontSize: 'inherit' } })}
-                                                                            </Avatar>
-                                                                        </Box>
+                                                                    <Card
+                                                                        sx={{
+                                                                            height: '520px', // Increased height for better content fit
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            border: '1px solid var(--stone-100)',
+                                                                            borderRadius: '24px',
+                                                                            backgroundColor: 'white',
+                                                                            boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
+                                                                            transition: 'all 0.4s ease',
+                                                                            cursor: 'pointer',
+                                                                            overflow: 'hidden', // Prevent content overflow
+                                                                            '&:hover': {
+                                                                                boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.15)',
+                                                                                borderColor: categoryData.color,
+                                                                                '& .service-icon': {
+                                                                                    transform: 'scale(1.1)',
+                                                                                    backgroundColor: categoryData.color,
+                                                                                    color: 'white'
+                                                                                },
+                                                                                '& .learn-more-btn': {
+                                                                                    backgroundColor: categoryData.color,
+                                                                                    color: 'white',
+                                                                                    borderColor: categoryData.color,
+                                                                                }
+                                                                            }
+                                                                        }}
+                                                                        onClick={() => handleServiceClick(service)}
+                                                                    >
+                                                                        <CardContent sx={{
+                                                                            flexGrow: 1,
+                                                                            p: 3,
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            overflow: 'hidden' // Prevent content overflow
+                                                                        }}>
+                                                                            {/* Service Icon - Fixed Space */}
+                                                                            <Box sx={{ mb: 2, textAlign: 'center', flexShrink: 0 }}>
+                                                                                <Avatar
+                                                                                    className="service-icon"
+                                                                                    sx={{
+                                                                                        width: 56, // Slightly smaller icon
+                                                                                        height: 56,
+                                                                                        backgroundColor: categoryData.bgColor,
+                                                                                        color: categoryData.color,
+                                                                                        transition: 'all 0.4s ease',
+                                                                                        fontSize: '1.5rem', // Smaller icon size
+                                                                                        mx: 'auto',
+                                                                                    }}
+                                                                                >
+                                                                                    {React.cloneElement(categoryData.icon, { sx: { fontSize: 'inherit' } })}
+                                                                                </Avatar>
+                                                                            </Box>
 
-                                                                        {/* Category & Title - Centered */}
-                                                                        <Box sx={{ textAlign: 'center', mb: 3 }}>
-                                                                            <Chip
-                                                                                label={categoryData.label}
-                                                                                size="small"
-                                                                                sx={{
-                                                                                    mb: 2,
-                                                                                    backgroundColor: categoryData.bgColor,
-                                                                                    color: categoryData.color,
-                                                                                    fontWeight: 500,
-                                                                                    fontSize: '0.75rem',
-                                                                                    borderRadius: '50px',
-                                                                                }}
-                                                                            />
+                                                                            {/* Category & Title - Fixed Space */}
+                                                                            <Box sx={{ textAlign: 'center', mb: 2, flexShrink: 0 }}>
+                                                                                <Chip
+                                                                                    label={categoryData.label}
+                                                                                    size="small"
+                                                                                    sx={{
+                                                                                        mb: 1.5,
+                                                                                        backgroundColor: categoryData.bgColor,
+                                                                                        color: categoryData.color,
+                                                                                        fontWeight: 500,
+                                                                                        fontSize: '0.7rem', // Smaller font
+                                                                                        borderRadius: '50px',
+                                                                                        height: '22px', // Fixed height
+                                                                                    }}
+                                                                                />
 
-                                                                            <Typography
-                                                                                variant="h6"
-                                                                                sx={{
-                                                                                    fontWeight: 600,
-                                                                                    lineHeight: 1.3,
-                                                                                    color: 'var(--stone-800)',
-                                                                                    mb: 2,
-                                                                                }}
-                                                                            >
-                                                                                {service.name}
-                                                                            </Typography>
+                                                                                <Typography
+                                                                                    variant="h6"
+                                                                                    sx={{
+                                                                                        fontWeight: 600,
+                                                                                        lineHeight: 1.2,
+                                                                                        color: 'var(--stone-800)',
+                                                                                        mb: 1,
+                                                                                        fontSize: '1rem', // Controlled font size
+                                                                                        minHeight: '24px', // Fixed minimum height
+                                                                                    }}
+                                                                                >
+                                                                                    {service.name}
+                                                                                </Typography>
 
-                                                                            <Typography
-                                                                                variant="body2"
-                                                                                sx={{
-                                                                                    color: 'var(--stone-600)',
-                                                                                    lineHeight: 1.6,
-                                                                                    mb: 3,
-                                                                                }}
-                                                                            >
-                                                                                {service.short_description}
-                                                                            </Typography>
-                                                                        </Box>
+                                                                                <Typography
+                                                                                    variant="body2"
+                                                                                    sx={{
+                                                                                        color: 'var(--stone-600)',
+                                                                                        lineHeight: 1.4,
+                                                                                        mb: 2,
+                                                                                        fontSize: '0.85rem',
+                                                                                        minHeight: '40px', // Fixed minimum height
+                                                                                        display: '-webkit-box',
+                                                                                        WebkitLineClamp: 2, // Limit to 2 lines
+                                                                                        WebkitBoxOrient: 'vertical',
+                                                                                        overflow: 'hidden',
+                                                                                    }}
+                                                                                >
+                                                                                    {service.short_description}
+                                                                                </Typography>
+                                                                            </Box>
 
-                                                                        {/* Key Features - Centered */}
-                                                                        {service.features && service.features.length > 0 && (
-                                                                            <Box sx={{ mb: 3, textAlign: 'center' }}>
-                                                                                <Stack spacing={1} alignItems="center">
-                                                                                    {service.features.slice(0, 3).map((feature, idx) => (
-                                                                                        <Box
-                                                                                            key={idx}
-                                                                                            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                                                                                        >
-                                                                                            <CheckCircle sx={{
-                                                                                                fontSize: 14,
-                                                                                                color: categoryData.color,
-                                                                                                flexShrink: 0,
-                                                                                            }} />
-                                                                                            <Typography
-                                                                                                variant="body2"
+                                                                            {/* Key Features - Flexible Space */}
+                                                                            <Box sx={{
+                                                                                mb: 2,
+                                                                                textAlign: 'center',
+                                                                                flex: 1,
+                                                                                display: 'flex',
+                                                                                flexDirection: 'column',
+                                                                                justifyContent: 'flex-start',
+                                                                                minHeight: '80px', // Reserve space for features
+                                                                                maxHeight: '100px', // Prevent overflow
+                                                                                overflow: 'hidden'
+                                                                            }}>
+                                                                                {service.features && service.features.length > 0 && (
+                                                                                    <Stack spacing={0.5} alignItems="center">
+                                                                                        {service.features.slice(0, 3).map((feature, idx) => (
+                                                                                            <Box
+                                                                                                key={idx}
                                                                                                 sx={{
-                                                                                                    color: 'var(--stone-600)',
-                                                                                                    fontSize: '0.8rem',
+                                                                                                    display: 'flex',
+                                                                                                    alignItems: 'center',
+                                                                                                    gap: 0.5,
+                                                                                                    maxWidth: '100%'
                                                                                                 }}
                                                                                             >
-                                                                                                {feature}
+                                                                                                <CheckCircle sx={{
+                                                                                                    fontSize: 12, // Smaller icon
+                                                                                                    color: categoryData.color,
+                                                                                                    flexShrink: 0,
+                                                                                                }} />
+                                                                                                <Typography
+                                                                                                    variant="body2"
+                                                                                                    sx={{
+                                                                                                        color: 'var(--stone-600)',
+                                                                                                        fontSize: '0.75rem', // Smaller font
+                                                                                                        lineHeight: 1.2,
+                                                                                                        overflow: 'hidden',
+                                                                                                        textOverflow: 'ellipsis',
+                                                                                                        whiteSpace: 'nowrap',
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {feature}
+                                                                                                </Typography>
+                                                                                            </Box>
+                                                                                        ))}
+                                                                                    </Stack>
+                                                                                )}
+                                                                            </Box>
+
+                                                                            {/* Pricing Info - Fixed Bottom Space */}
+                                                                            <Box sx={{
+                                                                                display: 'flex',
+                                                                                justifyContent: 'center',
+                                                                                p: 1.5, // Reduced padding
+                                                                                backgroundColor: 'var(--stone-50)',
+                                                                                borderRadius: '8px', // Smaller border radius
+                                                                                mb: 2,
+                                                                                flexShrink: 0,
+                                                                                minHeight: '60px', // Fixed height
+                                                                            }}>
+                                                                                <Stack
+                                                                                    direction="row"
+                                                                                    spacing={2}
+                                                                                    divider={<Box sx={{ width: 1, height: 24, backgroundColor: 'var(--stone-200)' }} />}
+                                                                                    sx={{ alignItems: 'center' }}
+                                                                                >
+                                                                                    {service.starting_price && (
+                                                                                        <Box sx={{ textAlign: 'center', minWidth: '60px' }}>
+                                                                                            <Typography variant="caption" sx={{
+                                                                                                color: 'var(--stone-500)',
+                                                                                                fontSize: '0.65rem'
+                                                                                            }}>
+                                                                                                From
+                                                                                            </Typography>
+                                                                                            <Typography variant="body2" sx={{
+                                                                                                color: 'var(--stone-800)',
+                                                                                                fontWeight: 600,
+                                                                                                fontSize: '0.8rem',
+                                                                                                lineHeight: 1.2
+                                                                                            }}>
+                                                                                                ${service.starting_price.toLocaleString()}
                                                                                             </Typography>
                                                                                         </Box>
-                                                                                    ))}
+                                                                                    )}
+                                                                                    {service.estimated_timeline && (
+                                                                                        <Box sx={{ textAlign: 'center', minWidth: '60px' }}>
+                                                                                            <Typography variant="caption" sx={{
+                                                                                                color: 'var(--stone-500)',
+                                                                                                fontSize: '0.65rem'
+                                                                                            }}>
+                                                                                                Timeline
+                                                                                            </Typography>
+                                                                                            <Typography variant="body2" sx={{
+                                                                                                color: 'var(--stone-800)',
+                                                                                                fontWeight: 600,
+                                                                                                fontSize: '0.8rem',
+                                                                                                lineHeight: 1.2,
+                                                                                                overflow: 'hidden',
+                                                                                                textOverflow: 'ellipsis',
+                                                                                                whiteSpace: 'nowrap',
+                                                                                            }}>
+                                                                                                {service.estimated_timeline}
+                                                                                            </Typography>
+                                                                                        </Box>
+                                                                                    )}
                                                                                 </Stack>
                                                                             </Box>
-                                                                        )}
+                                                                        </CardContent>
 
-                                                                        {/* Pricing Info - Centered */}
-                                                                        <Box sx={{
-                                                                            display: 'flex',
-                                                                            justifyContent: 'center',
-                                                                            p: 2,
-                                                                            backgroundColor: 'var(--stone-50)',
-                                                                            borderRadius: '12px',
-                                                                            mb: 3
-                                                                        }}>
-                                                                            <Stack direction="row" spacing={4} divider={<Box sx={{ width: 1, height: 30, backgroundColor: 'var(--stone-200)' }} />}>
-                                                                                {service.starting_price && (
-                                                                                    <Box sx={{ textAlign: 'center' }}>
-                                                                                        <Typography variant="caption" sx={{ color: 'var(--stone-500)' }}>
-                                                                                            From
-                                                                                        </Typography>
-                                                                                        <Typography variant="body2" sx={{ color: 'var(--stone-800)', fontWeight: 600 }}>
-                                                                                            ${service.starting_price.toLocaleString()}
-                                                                                        </Typography>
-                                                                                    </Box>
-                                                                                )}
-                                                                                {service.estimated_timeline && (
-                                                                                    <Box sx={{ textAlign: 'center' }}>
-                                                                                        <Typography variant="caption" sx={{ color: 'var(--stone-500)' }}>
-                                                                                            Timeline
-                                                                                        </Typography>
-                                                                                        <Typography variant="body2" sx={{ color: 'var(--stone-800)', fontWeight: 600 }}>
-                                                                                            {service.estimated_timeline}
-                                                                                        </Typography>
-                                                                                    </Box>
-                                                                                )}
-                                                                            </Stack>
-                                                                        </Box>
-                                                                    </CardContent>
-
-                                                                    <CardActions sx={{ p: 4, pt: 0 }}>
-                                                                        <Button
-                                                                            className="learn-more-btn"
-                                                                            fullWidth
-                                                                            variant="outlined"
-                                                                            endIcon={<ArrowOutward />}
-                                                                            sx={{
-                                                                                borderColor: 'var(--stone-200)',
-                                                                                color: 'var(--stone-700)',
-                                                                                fontWeight: 500,
-                                                                                py: 1.5,
-                                                                                borderRadius: '50px',
-                                                                                transition: 'all 0.4s ease',
-                                                                            }}
-                                                                        >
-                                                                            Learn More
-                                                                        </Button>
-                                                                    </CardActions>
-                                                                </Card>
-                                                            </motion.div>
-                                                        </Grid>
-                                                    )
-                                                })}
-                                            </Grid>
-                                        </Box>
-                                    )}
+                                                                        {/* Button - Fixed Bottom */}
+                                                                        <CardActions sx={{ p: 3, pt: 0, flexShrink: 0 }}>
+                                                                            <Button
+                                                                                className="learn-more-btn"
+                                                                                fullWidth
+                                                                                variant="outlined"
+                                                                                endIcon={<ArrowOutward />}
+                                                                                sx={{
+                                                                                    borderColor: 'var(--stone-200)',
+                                                                                    color: 'var(--stone-700)',
+                                                                                    fontWeight: 500,
+                                                                                    py: 1.2, // Reduced padding
+                                                                                    borderRadius: '50px',
+                                                                                    fontSize: '0.85rem', // Smaller font
+                                                                                    transition: 'all 0.4s ease',
+                                                                                }}
+                                                                            >
+                                                                                Learn More
+                                                                            </Button>
+                                                                        </CardActions>
+                                                                    </Card>
+                                                                </motion.div>
+                                                            </Box>
+                                                        )
+                                                    })}
+                                                </Box>
+                                            </Box>
+                                        )}
                                 </>
                             ) : (
-                                // Enhanced Empty State - Centered
+                                // Enhanced Empty State - Keep as is
                                 <Box sx={{ width: '100%' }}>
                                     <motion.div
                                         initial={{ opacity: 0, scale: 0.9 }}
@@ -1239,10 +1474,9 @@ const Services = () => {
                 </Container>
             </section>
 
-            {/* Why Choose Us Section - Center Aligned */}
+            {/* Why Choose Us Section - Keep as is */}
             <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
                 <Container maxWidth="lg">
-                    {/* Section Header - Center Aligned */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -1276,7 +1510,6 @@ const Services = () => {
                             We combine technical expertise with creative vision to deliver exceptional results that drive your business forward.
                         </Typography>
 
-                        {/* Enhanced Quote Section */}
                         <Box sx={{
                             display: 'flex',
                             justifyContent: 'center',
@@ -1307,7 +1540,6 @@ const Services = () => {
                         </Box>
                     </motion.div>
 
-                    {/* Enhanced Features Grid - Perfect Center Aligned */}
                     <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                         <Grid container spacing={4} justifyContent="center" sx={{ maxWidth: '1000px' }}>
                             {[
@@ -1382,7 +1614,6 @@ const Services = () => {
                                                 }
                                             }}
                                         >
-                                            {/* Icon Section - Centered */}
                                             <Box sx={{ textAlign: 'center', mb: 4 }}>
                                                 <Box
                                                     className="feature-icon"
@@ -1412,7 +1643,6 @@ const Services = () => {
                                                     {item.icon}
                                                 </Box>
 
-                                                {/* Stats Badge */}
                                                 <Typography
                                                     className="feature-stat"
                                                     variant="body2"
@@ -1427,7 +1657,6 @@ const Services = () => {
                                                 </Typography>
                                             </Box>
 
-                                            {/* Content Section - Centered */}
                                             <Box sx={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                                 <Typography
                                                     variant="h5"
@@ -1459,7 +1688,6 @@ const Services = () => {
                         </Grid>
                     </Box>
 
-                    {/* Bottom CTA Section - Center Aligned */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
