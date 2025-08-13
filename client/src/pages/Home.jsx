@@ -978,41 +978,7 @@ const Home = () => {
                     </Container>
                 </section>
 
-                {/* Scroll to Top Button */}
-                <AnimatePresence>
-                    {showScrollTop && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            style={{
-                                position: 'fixed',
-                                bottom: '2rem',
-                                right: '2rem',
-                                zIndex: 1000,
-                            }}
-                        >
-                            <IconButton
-                                onClick={scrollToTop}
-                                sx={{
-                                    width: 56,
-                                    height: 56,
-                                    backgroundColor: 'var(--sage-400)',
-                                    color: 'white',
-                                    boxShadow: '0 8px 25px -8px rgba(157, 176, 130, 0.4)',
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                        backgroundColor: 'var(--sage-500)',
-                                        transform: 'translateY(-3px)',
-                                        boxShadow: '0 12px 35px -8px rgba(157, 176, 130, 0.5)',
-                                    }
-                                }}
-                            >
-                                <KeyboardArrowUp />
-                            </IconButton>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+               
             </Box>
         </>
     )

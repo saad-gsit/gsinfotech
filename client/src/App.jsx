@@ -35,6 +35,7 @@ import Team from './pages/Team'
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
 import Contact from './pages/Contact'
+import NotFound from './pages/error/NotFound'
 
 // Admin Pages
 import Login from './pages/admin/Login'
@@ -208,7 +209,7 @@ const FallbackPage = ({ title, description = "We're crafting something extraordi
 
 // Fallback imports for missing pages
 const TeamMember = () => <FallbackPage title="Team Member" description="Meet the creative minds behind our digital excellence." />
-const NotFound = () => <FallbackPage title="404" description="The page you're looking for seems to have wandered off into the digital realm." />
+// const NotFound = () => <FallbackPage title="404" description="The page you're looking for seems to have wandered off into the digital realm." />
 
 // Admin pages with AuthGuard
 const AdminProjects = () => (
@@ -765,6 +766,7 @@ const AppContent = () => {
     <>
       <AuthInitializer />
       <AnimatePresence mode="wait" initial={false}>
+        // Find this section in your Routes and update it:
         <Routes location={location} key={location.pathname}>
           {/* Public Routes */}
           <Route path="/" element={<Layout />}>
@@ -828,6 +830,13 @@ const AppContent = () => {
                 <APITest />
               </PageTransition>
             } />
+
+            {/* Move the 404 route inside the Layout route */}
+            <Route path="*" element={
+              <PageTransition pageKey="404">
+                <NotFound />
+              </PageTransition>
+            } />
           </Route>
 
           {/* Admin Login Route */}
@@ -859,13 +868,6 @@ const AppContent = () => {
             <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
-
-          {/* 404 Route */}
-          <Route path="*" element={
-            <PageTransition pageKey="404">
-              <NotFound />
-            </PageTransition>
-          } />
         </Routes>
       </AnimatePresence>
 

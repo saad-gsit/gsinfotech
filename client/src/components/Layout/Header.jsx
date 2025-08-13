@@ -50,30 +50,40 @@ const Header = () => {
                 position="fixed"
                 elevation={0}
                 sx={{
-                    backgroundColor: scrolled
-                        ? 'var(--sand-100)'
-                        : 'transparent',
-                    backdropFilter: scrolled ? 'blur(20px)' : 'none',
-                    borderBottom: scrolled ? '1px solid var(--sage-100)' : 'none',
+                    // Keep consistent color regardless of scroll
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(20px)',
+                    borderBottom: '1px solid var(--stone-100)',
                     transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    // Remove rounded corners from top
+                    borderRadius: 0,
                 }}
             >
-                <Toolbar className="max-w-7xl mx-auto w-full px-6 lg:px-12 py-6">
-                    {/* Logo */}
+                <Toolbar
+                    className="max-w-7xl mx-auto w-full px-6 lg:px-12"
+                    sx={{
+                        // Further reduced padding and height
+                        py: { xs: 1, md: 1.5 },
+                        minHeight: { xs: 56, md: 64 },
+                        height: { xs: 56, md: 64 }
+                    }}
+                >
+                    {/* Logo - slightly smaller */}
                     <Link to="/" className="flex items-center no-underline group">
                         <motion.div
                             className="flex items-center"
                             whileHover={{ scale: 1.02 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <div className="w-8 h-8 bg-sage-400 rounded-full mr-3 flex items-center justify-center">
-                                <Typography variant="body2" className="text-white font-semibold text-sm">
+                            <div className="w-7 h-7 bg-sage-400 rounded-full mr-2.5 flex items-center justify-center">
+                                <Typography variant="body2" className="text-white font-semibold" sx={{ fontSize: '0.75rem' }}>
                                     GS
                                 </Typography>
                             </div>
                             <Typography
                                 variant="h6"
                                 className="font-medium tracking-tight text-stone-800 group-hover:text-sage-600 transition-colors duration-300"
+                                sx={{ fontSize: '1.1rem' }}
                             >
                                 GS Infotech
                             </Typography>
@@ -83,7 +93,7 @@ const Header = () => {
                     <Box sx={{ flexGrow: 1 }} />
 
                     {/* Desktop Navigation */}
-                    <Box sx={{ display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 0.5 }}>
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
@@ -92,8 +102,8 @@ const Header = () => {
                             >
                                 <Button
                                     sx={{
-                                        px: 3,
-                                        py: 1.5,
+                                        px: 2.5,
+                                        py: 1,
                                         fontSize: '0.875rem',
                                         fontWeight: 500,
                                         letterSpacing: '0.025em',
@@ -119,17 +129,18 @@ const Header = () => {
                             </Link>
                         ))}
 
-                        <Box className="ml-6 pl-6" sx={{ borderLeft: '1px solid var(--stone-200)' }}>
+                        {/* Increased gap before Let's Talk button */}
+                        <Box className="ml-8 pl-8" sx={{ borderLeft: '1px solid var(--stone-200)' }}>
                             <Link to="/contact" className="no-underline">
                                 <Button
                                     variant="contained"
-                                    endIcon={<ArrowOutward className="text-sm" />}
+                                    endIcon={<ArrowOutward sx={{ fontSize: '0.875rem' }} />}
                                     sx={{
                                         backgroundColor: 'var(--sage-400)',
                                         color: 'white',
                                         borderRadius: '50px',
-                                        px: 4,
-                                        py: 1.5,
+                                        px: 3.5,
+                                        py: 1,
                                         fontSize: '0.875rem',
                                         fontWeight: 500,
                                         letterSpacing: '0.025em',
@@ -155,6 +166,7 @@ const Header = () => {
                         sx={{
                             display: { lg: 'none' },
                             color: 'var(--stone-800)',
+                            p: 1,
                             '&:hover': {
                                 backgroundColor: 'var(--stone-50)'
                             }
@@ -180,7 +192,7 @@ const Header = () => {
             >
                 <Box className="h-full flex flex-col">
                     {/* Header */}
-                    <Box className="flex justify-between items-center p-8" sx={{ borderBottom: '1px solid var(--stone-200)' }}>
+                    <Box className="flex justify-between items-center p-6" sx={{ borderBottom: '1px solid var(--stone-200)' }}>
                         <Typography variant="h6" className="font-medium text-stone-800">
                             Navigation
                         </Typography>
@@ -193,7 +205,7 @@ const Header = () => {
                     </Box>
 
                     {/* Navigation Links */}
-                    <Box className="flex-1 p-8 overflow-y-auto">
+                    <Box className="flex-1 p-6 overflow-y-auto">
                         <Stack spacing={1}>
                             {navigation.map((item, index) => (
                                 <motion.div
@@ -212,7 +224,7 @@ const Header = () => {
                                                 py: 2,
                                                 px: 3,
                                                 borderRadius: '16px',
-                                                fontSize: '1.25rem',
+                                                fontSize: '1.125rem',
                                                 fontWeight: 500,
                                                 transition: 'all 0.3s ease',
                                                 color: location.pathname === item.href ||
@@ -238,7 +250,7 @@ const Header = () => {
                     </Box>
 
                     {/* Mobile CTA */}
-                    <Box className="p-8" sx={{ borderTop: '1px solid var(--stone-200)' }}>
+                    <Box className="p-6" sx={{ borderTop: '1px solid var(--stone-200)' }}>
                         <Link
                             to="/contact"
                             onClick={() => dispatch(toggleMobileMenu())}
@@ -252,8 +264,8 @@ const Header = () => {
                                     backgroundColor: 'var(--sage-400)',
                                     color: 'white',
                                     borderRadius: '16px',
-                                    py: 2,
-                                    fontSize: '1.125rem',
+                                    py: 1.5,
+                                    fontSize: '1rem',
                                     fontWeight: 500,
                                     letterSpacing: '0.025em',
                                     textTransform: 'none',
@@ -267,8 +279,8 @@ const Header = () => {
                             </Button>
                         </Link>
 
-                        <Box className="mt-6 text-center">
-                            <Typography variant="body2" sx={{ color: 'var(--stone-600)', lineHeight: 1.6 }}>
+                        <Box className="mt-4 text-center">
+                            <Typography variant="body2" sx={{ color: 'var(--stone-600)', lineHeight: 1.6, fontSize: '0.875rem' }}>
                                 Ready to bring your vision to life?
                                 <br />
                                 Let's create something beautiful together.
@@ -278,8 +290,8 @@ const Header = () => {
                 </Box>
             </Drawer>
 
-            {/* Spacer */}
-            <Toolbar sx={{ minHeight: { xs: 88, md: 104 } }} />
+            {/* Further reduced height spacer */}
+            <Toolbar sx={{ minHeight: { xs: 56, md: 64 } }} />
         </>
     )
 }

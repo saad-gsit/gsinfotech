@@ -12,8 +12,6 @@ import { checkServerHealth, testDatabaseConnection } from '../services/api';
 import { servicesAPI } from '../services/servicesAPI';
 import { companyAPI } from '../services/companyAPI';
 
-
-
 // Query Keys - centralized for cache management
 export const QUERY_KEYS = {
     // Projects
@@ -44,7 +42,6 @@ export const QUERY_KEYS = {
     // Company
     COMPANY_INFO: 'company-info',
     COMPANY_STATS: 'company-stats',
-
 
     // Contact
     CONTACT_SUBMISSIONS: 'contact-submissions',
@@ -238,13 +235,25 @@ export const useDeleteTeamMember = () => {
     });
 };
 
-// ============= BLOG HOOKS =============
+// ============= BLOG HOOKS (UPDATED FOR PAGINATION) =============
 
-export const useBlogPosts = (params = {}) => {
+export const useBlogPosts = (params = {}, options = {}) => {
+    // Create a stable query key that includes all relevant parameters
+    const queryKey = [QUERY_KEYS.BLOG_POSTS, params];
+
     return useQuery({
-        queryKey: [QUERY_KEYS.BLOG_POSTS, params],
-        queryFn: () => blogAPI.getAllPosts(params),
-        staleTime: 5 * 60 * 1000,
+        queryKey,
+        queryFn: () => {
+            console.log('Fetching blog posts with params:', params); // Debug log
+            return blogAPI.getAllPosts(params);
+        },
+        staleTime: 0, // Always consider data stale for pagination
+        cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+        keepPreviousData: true, // Keep previous data while fetching new data
+        refetchOnMount: true, // Always refetch when component mounts
+        refetchOnWindowFocus: false, // Don't refetch on window focus
+        // Merge with custom options
+        ...options,
     });
 };
 
@@ -253,6 +262,7 @@ export const useBlogPost = (id) => {
         queryKey: [QUERY_KEYS.BLOG_POST, id],
         queryFn: () => blogAPI.getPostById(id),
         enabled: !!id,
+        staleTime: 10 * 60 * 1000, // 10 minutes for individual posts
     });
 };
 
@@ -290,9 +300,11 @@ export const useCreateBlogPost = () => {
         mutationFn: ({ postData, featuredImage, additionalImages }) =>
             blogAPI.createPost(postData, featuredImage, additionalImages),
         onSuccess: () => {
+            // Invalidate all blog posts queries to refresh pagination
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BLOG_POSTS] });
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FEATURED_POSTS] });
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BLOG_STATS] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BLOG_CATEGORIES] });
             toast.success('Blog post created successfully!');
         },
         onError: (error) => {
@@ -308,9 +320,11 @@ export const useUpdateBlogPost = () => {
         mutationFn: ({ id, postData, featuredImage, additionalImages }) =>
             blogAPI.updatePost(id, postData, featuredImage, additionalImages),
         onSuccess: (data, variables) => {
+            // Invalidate all blog posts queries to refresh pagination
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BLOG_POSTS] });
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BLOG_POST, variables.id] });
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FEATURED_POSTS] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BLOG_CATEGORIES] });
             toast.success('Blog post updated successfully!');
         },
         onError: (error) => {
@@ -325,9 +339,11 @@ export const useDeleteBlogPost = () => {
     return useMutation({
         mutationFn: (id) => blogAPI.deletePost(id),
         onSuccess: () => {
+            // Invalidate all blog posts queries to refresh pagination
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BLOG_POSTS] });
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FEATURED_POSTS] });
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BLOG_STATS] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BLOG_CATEGORIES] });
             toast.success('Blog post deleted successfully!');
         },
         onError: (error) => {
@@ -456,7 +472,6 @@ export const useUpdateCompanyInfo = () => {
         },
     });
 };
-
 
 // ============= CONTACT HOOKS =============
 
@@ -611,5 +626,27 @@ export const usePrefetch = () => {
                 staleTime: 5 * 60 * 1000,
             });
         },
+    };
+};
+
+// NEW: Helper hook for blog pagination debugging
+export const useBlogDebug = () => {
+    const queryClient = useQueryClient();
+
+    return {
+        logCacheStatus: () => {
+            const cache = queryClient.getQueryCache();
+            const blogQueries = cache.findAll([QUERY_KEYS.BLOG_POSTS]);
+            console.log('Blog queries in cache:', blogQueries.map(q => ({
+                queryKey: q.queryKey,
+                state: q.state.status,
+                dataUpdatedAt: q.state.dataUpdatedAt,
+                data: q.state.data
+            })));
+        },
+        clearBlogCache: () => {
+            queryClient.removeQueries({ queryKey: [QUERY_KEYS.BLOG_POSTS] });
+            console.log('Blog cache cleared');
+        }
     };
 };

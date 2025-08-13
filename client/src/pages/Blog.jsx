@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import {
     Box,
     Container,
@@ -36,11 +36,62 @@ import {
 import { useBlogPosts, useFeaturedPosts, useBlogCategories } from '@/hooks/useApi'
 
 const Blog = () => {
-    const [selectedCategory, setSelectedCategory] = useState('all')
-    const [page, setPage] = useState(1)
-    const [searchTerm, setSearchTerm] = useState('')
+    const [searchParams, setSearchParams] = useSearchParams()
+    const navigate = useNavigate()
 
-    // Build query parameters
+    // Get URL parameters or use defaults
+    const urlPage = parseInt(searchParams.get('page')) || 1
+    const urlCategory = searchParams.get('category') || 'all'
+    const urlSearch = searchParams.get('search') || ''
+
+    // Use URL parameters as state
+    const [selectedCategory, setSelectedCategory] = useState(urlCategory)
+    const [page, setPage] = useState(urlPage)
+    const [searchTerm, setSearchTerm] = useState(urlSearch)
+
+    // Update URL when state changes
+    const updateURL = (newPage, newCategory, newSearch) => {
+        const params = new URLSearchParams()
+
+        if (newPage > 1) params.set('page', newPage.toString())
+        if (newCategory !== 'all') params.set('category', newCategory)
+        if (newSearch) params.set('search', newSearch)
+
+        setSearchParams(params)
+    }
+
+    // Handle page change
+    const handlePageChange = (newPage) => {
+        setPage(newPage)
+        updateURL(newPage, selectedCategory, searchTerm)
+        // Scroll to top smoothly
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    // Handle category change
+    const handleCategoryChange = (category) => {
+        setSelectedCategory(category)
+        setPage(1) // Reset to page 1 when changing category
+        updateURL(1, category, searchTerm)
+        // Scroll to top smoothly
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    // Handle search change
+    const handleSearchChange = (search) => {
+        setSearchTerm(search)
+        setPage(1) // Reset to page 1 when searching
+        updateURL(1, selectedCategory, search)
+    }
+
+    // Sync state with URL parameters on mount and URL changes
+    useEffect(() => {
+        setPage(urlPage)
+        setSelectedCategory(urlCategory)
+        setSearchTerm(urlSearch)
+    }, [urlPage, urlCategory, urlSearch])
+
+    // Build query parameters for API
     const queryParams = {
         page,
         limit: 9,
@@ -55,22 +106,24 @@ const Blog = () => {
         queryParams.search = searchTerm
     }
 
-    // Use your existing React Query hooks
+    // Use your existing React Query hooks with dependency on queryParams
     const {
         data: blogData,
         isLoading,
         error,
         refetch,
-        isError
-    } = useBlogPosts(queryParams)
+        isError,
+        isFetching
+    } = useBlogPosts(queryParams, {
+        // Add these options to ensure proper refetching
+        refetchOnMount: true,
+        refetchOnWindowFocus: false,
+        staleTime: 0, // Always consider data stale
+        cacheTime: 1000 * 60 * 5, // Cache for 5 minutes
+    })
 
     const { data: featuredPostsData } = useFeaturedPosts(1)
     const { data: categoriesData, isError: categoriesError } = useBlogCategories()
-
-    // Reset page when category changes
-    useEffect(() => {
-        setPage(1)
-    }, [selectedCategory, searchTerm])
 
     // Process blog data
     const posts = blogData?.posts || blogData?.data || []
@@ -118,6 +171,7 @@ const Blog = () => {
         }
     }, [categoriesData, categoriesError, posts, total])
 
+    // BlogCard component remains the same
     const BlogCard = ({ post, index, size = 'regular' }) => {
         const isLarge = size === 'large'
 
@@ -132,7 +186,7 @@ const Blog = () => {
                 <Link to={`/blog/${post.slug || post.id}`} style={{ textDecoration: 'none', height: '100%', display: 'block' }}>
                     <Card
                         sx={{
-                            height: isLarge ? '500px' : '420px', // Fixed heights for consistency
+                            height: isLarge ? '500px' : '420px',
                             border: 'none',
                             borderRadius: '24px',
                             backgroundColor: 'white',
@@ -149,7 +203,7 @@ const Blog = () => {
                             }
                         }}
                     >
-                        {/* Image - Fixed Space */}
+                        {/* Image */}
                         <Box
                             sx={{
                                 position: 'relative',
@@ -207,9 +261,9 @@ const Blog = () => {
                             </Box>
                         </Box>
 
-                        {/* Content - Flexible Space */}
+                        {/* Content */}
                         <Box sx={{ p: isLarge ? 3 : 2.5, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                            {/* Meta Information - Fixed Space */}
+                            {/* Meta Information */}
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, flexShrink: 0 }}>
                                 <Avatar
                                     sx={{
@@ -255,7 +309,7 @@ const Blog = () => {
                                 </Box>
                             </Box>
 
-                            {/* Title - Fixed Space */}
+                            {/* Title */}
                             <Typography
                                 variant={isLarge ? "h6" : "subtitle1"}
                                 sx={{
@@ -275,7 +329,7 @@ const Blog = () => {
                                 {post.title}
                             </Typography>
 
-                            {/* Excerpt - Flexible Space */}
+                            {/* Excerpt */}
                             <Typography
                                 variant="body2"
                                 sx={{
@@ -293,7 +347,7 @@ const Blog = () => {
                                 {post.excerpt || post.description || 'Discover insights and ideas from our digital innovation journey.'}
                             </Typography>
 
-                            {/* Footer - Fixed Space */}
+                            {/* Footer */}
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, pt: 1 }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                     <VisibilityOutlined sx={{ fontSize: 14, color: 'var(--stone-400)' }} />
@@ -332,12 +386,11 @@ const Blog = () => {
             </Helmet>
 
             <Box sx={{ backgroundColor: 'white', minHeight: '100vh' }}>
-                {/* Enhanced Hero Section - Center Aligned */}
-                {/* Enhanced Hero Section - Center Aligned with Compact Stats */}
+                {/* Hero Section - Keep the same */}
                 <section
                     style={{
                         paddingTop: '8rem',
-                        paddingBottom: '2rem', // Reduced padding
+                        paddingBottom: '2rem',
                         position: 'relative',
                         background: 'linear-gradient(135deg, var(--sage-50) 0%, var(--sand-50) 100%)',
                         overflow: 'hidden'
@@ -424,7 +477,7 @@ const Blog = () => {
                                         lineHeight: 1.6,
                                         maxWidth: '700px',
                                         mx: 'auto',
-                                        mb: 4, // Reduced margin
+                                        mb: 4,
                                         fontSize: { xs: '1.1rem', md: '1.25rem' }
                                     }}
                                 >
@@ -433,7 +486,7 @@ const Blog = () => {
                                 </Typography>
                             </Box>
 
-                            {/* Compact Stats Bar - Single Row with Minimal Space */}
+                            {/* Stats Bar */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -446,12 +499,12 @@ const Blog = () => {
                                             alignItems: 'center',
                                             gap: { xs: 2, sm: 4 },
                                             backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                            borderRadius: '16px', // Smaller border radius
-                                            px: { xs: 2, sm: 4 }, // Reduced padding
-                                            py: 2, // Much smaller vertical padding
+                                            borderRadius: '16px',
+                                            px: { xs: 2, sm: 4 },
+                                            py: 2,
                                             backdropFilter: 'blur(20px)',
                                             border: '1px solid rgba(255, 255, 255, 0.3)',
-                                            boxShadow: '0 8px 25px -8px rgba(139, 148, 113, 0.15)', // Softer shadow
+                                            boxShadow: '0 8px 25px -8px rgba(139, 148, 113, 0.15)',
                                             flexWrap: 'nowrap',
                                             overflowX: 'auto',
                                             '&::-webkit-scrollbar': { display: 'none' },
@@ -507,19 +560,18 @@ const Blog = () => {
                     </Container>
                 </section>
 
-
-                {/* Enhanced Categories Filter - Sticky with Better Positioning */}
+                {/* Categories Filter - Updated with proper handlers */}
                 <section
                     style={{
-                        padding: '1.5rem 0', // Reduced padding
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)', // More transparent
+                        padding: '1.5rem 0',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
                         borderBottom: '1px solid var(--stone-100)',
                         position: 'sticky',
-                        top: '4rem', // Adjusted for your header height
-                        zIndex: 100, // Higher z-index to ensure it stays on top
+                        top: '4rem',
+                        zIndex: 100,
                         backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)', // Safari support
-                        boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)', // Add subtle shadow when sticky
+                        WebkitBackdropFilter: 'blur(20px)',
+                        boxShadow: '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
                     }}
                 >
                     <Container maxWidth="lg">
@@ -530,8 +582,8 @@ const Blog = () => {
                                     alignItems: 'center',
                                     gap: 1,
                                     backgroundColor: 'var(--stone-50)',
-                                    borderRadius: '18px', // Slightly smaller
-                                    p: 0.75, // Reduced padding
+                                    borderRadius: '18px',
+                                    p: 0.75,
                                     border: '1px solid var(--stone-100)',
                                     overflowX: 'auto',
                                     maxWidth: '100%',
@@ -563,16 +615,16 @@ const Blog = () => {
                                                     <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>({category.count})</span>
                                                 </Box>
                                             }
-                                            onClick={() => setSelectedCategory(category.id)}
+                                            onClick={() => handleCategoryChange(category.id)}
                                             sx={{
                                                 cursor: 'pointer',
                                                 transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                                                 px: 2,
-                                                py: 0.75, // Slightly reduced padding
-                                                height: 32, // Smaller height
-                                                borderRadius: '12px', // Smaller border radius
+                                                py: 0.75,
+                                                height: 32,
+                                                borderRadius: '12px',
                                                 fontWeight: 500,
-                                                fontSize: '0.75rem', // Slightly smaller font
+                                                fontSize: '0.75rem',
                                                 letterSpacing: '0.025em',
                                                 whiteSpace: 'nowrap',
                                                 ...(selectedCategory === category.id
@@ -598,25 +650,26 @@ const Blog = () => {
                             </Box>
                         </Box>
 
-                        {/* Results indicator - More compact */}
+                        {/* Results indicator */}
                         <Typography
                             variant="body2"
                             sx={{
                                 textAlign: 'center',
                                 color: 'var(--stone-500)',
-                                fontSize: '0.8rem', // Smaller font
+                                fontSize: '0.8rem',
                                 fontWeight: 500
                             }}
                         >
-                            {isLoading ? 'Loading...' :
+                            {isLoading || isFetching ? 'Loading...' :
                                 `${posts.length} ${posts.length === 1 ? 'article' : 'articles'}${selectedCategory !== 'all' ? ` in ${categories.find(c => c.id === selectedCategory)?.label}` : ''}`}
                         </Typography>
                     </Container>
                 </section>
 
-                {/* Featured Post Section - Center Aligned */}
+                {/* Featured Post Section - Keep the same but add loading state */}
                 {!isLoading && featuredPost && (
                     <section style={{ padding: '4rem 0', backgroundColor: 'var(--sage-25)' }}>
+                        {/* Keep the same featured post content */}
                         <Container maxWidth="lg">
                             <motion.div
                                 initial={{ opacity: 0, y: 40 }}
@@ -815,11 +868,11 @@ const Blog = () => {
                     </section>
                 )}
 
-                {/* Blog Posts Grid - Center Aligned */}
+                {/* Blog Posts Grid - Updated with loading indicator */}
                 <section style={{ padding: '4rem 0', backgroundColor: 'white' }}>
                     <Container maxWidth="lg">
                         {/* Loading State */}
-                        {isLoading && (
+                        {(isLoading || isFetching) && (
                             <Box>
                                 <Typography
                                     variant="h3"
@@ -922,8 +975,8 @@ const Blog = () => {
                             </Box>
                         )}
 
-                        {/* Posts Grid - Flexbox Layout for Equal Cards */}
-                        {!isLoading && !isError && posts && (
+                        {/* Posts Grid */}
+                        {!isLoading && !isFetching && !isError && posts && (
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={`${selectedCategory}-${page}`}
@@ -1028,7 +1081,7 @@ const Blog = () => {
 
                                             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
                                                 <Button
-                                                    onClick={() => setSelectedCategory('all')}
+                                                    onClick={() => handleCategoryChange('all')}
                                                     variant="contained"
                                                     sx={{
                                                         backgroundColor: 'var(--sage-400)',
@@ -1075,8 +1128,8 @@ const Blog = () => {
                             </AnimatePresence>
                         )}
 
-                        {/* Enhanced Pagination - Center Aligned */}
-                        {pagination?.totalPages > 1 && (
+                        {/* Fixed Pagination - Updated with proper handlers */}
+                        {pagination?.totalPages > 1 && !isLoading && !isFetching && (
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -1095,7 +1148,7 @@ const Blog = () => {
                                     }}
                                 >
                                     <IconButton
-                                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                                        onClick={() => handlePageChange(Math.max(1, page - 1))}
                                         disabled={page === 1}
                                         sx={{
                                             width: 36,
@@ -1128,7 +1181,7 @@ const Blog = () => {
                                         return (
                                             <Button
                                                 key={pageNum}
-                                                onClick={() => setPage(pageNum)}
+                                                onClick={() => handlePageChange(pageNum)}
                                                 sx={{
                                                     minWidth: 36,
                                                     height: 36,
@@ -1158,7 +1211,7 @@ const Blog = () => {
                                     })}
 
                                     <IconButton
-                                        onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+                                        onClick={() => handlePageChange(Math.min(pagination.totalPages, page + 1))}
                                         disabled={page === pagination.totalPages}
                                         sx={{
                                             width: 36,
@@ -1181,7 +1234,7 @@ const Blog = () => {
                     </Container>
                 </section>
 
-                {/* Newsletter/CTA Section - Center Aligned */}
+                {/* Newsletter/CTA Section - Keep the same */}
                 <section
                     style={{
                         padding: '6rem 0',

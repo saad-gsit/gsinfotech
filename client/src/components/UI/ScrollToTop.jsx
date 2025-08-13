@@ -1,8 +1,8 @@
 // src/components/UI/ScrollToTop.jsx
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { IconButton, Tooltip } from '@mui/material'
-import { KeyboardArrowUp, RocketLaunch } from '@mui/icons-material'
+import { IconButton } from '@mui/material'
+import { KeyboardArrowUp } from '@mui/icons-material'
 
 const ScrollToTop = () => {
     const [isVisible, setIsVisible] = useState(false)
@@ -40,73 +40,83 @@ const ScrollToTop = () => {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.8, y: 100 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.8, y: 100 }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
                     transition={{
-                        type: "spring",
-                        stiffness: 260,
-                        damping: 20
+                        duration: 0.3,
+                        ease: [0.4, 0, 0.2, 1]
                     }}
-                    className="fixed bottom-8 right-8 z-40"
+                    style={{
+                        position: 'fixed',
+                        bottom: '2rem',
+                        right: '2rem',
+                        zIndex: 1000,
+                    }}
                 >
-                    <Tooltip title="Back to top" placement="left" arrow>
-                        <div className="relative group">
-                            {/* Progress ring */}
-                            <svg className="absolute inset-0 w-14 h-14 transform -rotate-90">
-                                <circle
-                                    cx="28"
-                                    cy="28"
-                                    r="25"
-                                    stroke="rgba(229, 231, 235, 0.5)"
-                                    strokeWidth="3"
-                                    fill="none"
-                                />
-                                <motion.circle
-                                    cx="28"
-                                    cy="28"
-                                    r="25"
-                                    stroke="url(#gradient)"
-                                    strokeWidth="3"
-                                    fill="none"
-                                    strokeDasharray={`${2 * Math.PI * 25}`}
-                                    strokeDashoffset={`${2 * Math.PI * 25 * (1 - scrollProgress / 100)}`}
-                                    strokeLinecap="round"
-                                    transition={{ duration: 0.3 }}
-                                />
-                                <defs>
-                                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stopColor="#6366f1" />
-                                        <stop offset="100%" stopColor="#8b5cf6" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
+                    <div style={{ position: 'relative' }}>
+                        {/* Progress ring */}
+                        <svg
+                            style={{
+                                position: 'absolute',
+                                top: -3,
+                                left: -3,
+                                width: 54,
+                                height: 54,
+                                transform: 'rotate(-90deg)',
+                            }}
+                        >
+                            <circle
+                                cx="27"
+                                cy="27"
+                                r="24"
+                                stroke="var(--stone-200)"
+                                strokeWidth="2"
+                                fill="none"
+                            />
+                            <motion.circle
+                                cx="27"
+                                cy="27"
+                                r="24"
+                                stroke="var(--sage-400)"
+                                strokeWidth="2"
+                                fill="none"
+                                strokeDasharray={`${2 * Math.PI * 24}`}
+                                strokeDashoffset={`${2 * Math.PI * 24 * (1 - scrollProgress / 100)}`}
+                                strokeLinecap="round"
+                                transition={{ duration: 0.3 }}
+                            />
+                        </svg>
 
-                            {/* Button */}
-                            <motion.button
-                                onClick={scrollToTop}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="relative w-14 h-14 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center overflow-hidden group"
-                            >
-                                {/* Hover effect */}
-                                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-
-                                {/* Icon */}
-                                <KeyboardArrowUp
-                                    className="transform group-hover:translate-y-[-2px] transition-transform duration-300"
-                                    sx={{ fontSize: 28 }}
-                                />
-                            </motion.button>
-                        </div>
-                    </Tooltip>
+                        {/* Button */}
+                        <IconButton
+                            onClick={scrollToTop}
+                            sx={{
+                                width: 48,
+                                height: 48,
+                                backgroundColor: 'white',
+                                color: 'var(--sage-600)',
+                                boxShadow: '0 8px 25px -8px rgba(157, 176, 130, 0.3)',
+                                border: '1px solid var(--stone-100)',
+                                transition: 'all 0.3s ease',
+                                '&:hover': {
+                                    backgroundColor: 'var(--sage-400)',
+                                    color: 'white',
+                                    transform: 'translateY(-3px)',
+                                    boxShadow: '0 12px 35px -8px rgba(157, 176, 130, 0.4)',
+                                }
+                            }}
+                        >
+                            <KeyboardArrowUp />
+                        </IconButton>
+                    </div>
                 </motion.div>
             )}
         </AnimatePresence>
     )
 }
 
-// Alternative minimalist version
+// Alternative minimalist version matching your theme
 export const MinimalScrollToTop = () => {
     const [isVisible, setIsVisible] = useState(false)
 
@@ -126,24 +136,46 @@ export const MinimalScrollToTop = () => {
     return (
         <AnimatePresence>
             {isVisible && (
-                <motion.button
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={scrollToTop}
-                    className="fixed bottom-8 right-8 z-40 w-12 h-12 bg-black text-white rounded-none shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group"
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    style={{
+                        position: 'fixed',
+                        bottom: '2rem',
+                        right: '2rem',
+                        zIndex: 1000,
+                    }}
                 >
-                    <KeyboardArrowUp className="transform group-hover:translate-y-[-2px] transition-transform duration-200" />
-                </motion.button>
+                    <IconButton
+                        onClick={scrollToTop}
+                        sx={{
+                            width: 44,
+                            height: 44,
+                            backgroundColor: 'var(--sage-400)',
+                            color: 'white',
+                            borderRadius: '50%',
+                            boxShadow: '0 4px 20px -4px rgba(157, 176, 130, 0.4)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                                backgroundColor: 'var(--sage-500)',
+                                transform: 'translateY(-2px)',
+                                boxShadow: '0 8px 30px -4px rgba(157, 176, 130, 0.5)',
+                            }
+                        }}
+                    >
+                        <KeyboardArrowUp />
+                    </IconButton>
+                </motion.div>
             )}
         </AnimatePresence>
     )
 }
 
-// Alternative rocket version (fun variant)
-export const RocketScrollToTop = () => {
+// Elegant floating version with your theme
+export const FloatingScrollToTop = () => {
     const [isVisible, setIsVisible] = useState(false)
-    const [isLaunching, setIsLaunching] = useState(false)
 
     useEffect(() => {
         const toggleVisibility = () => {
@@ -155,48 +187,76 @@ export const RocketScrollToTop = () => {
     }, [])
 
     const scrollToTop = () => {
-        setIsLaunching(true)
-        setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-            setTimeout(() => setIsLaunching(false), 500)
-        }, 300)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     return (
         <AnimatePresence>
             {isVisible && (
-                <motion.button
-                    initial={{ opacity: 0, scale: 0 }}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
                     animate={{
                         opacity: 1,
                         scale: 1,
-                        y: isLaunching ? -100 : 0,
-                        rotate: isLaunching ? -45 : 0
+                        y: [0, -8, 0] // Floating animation
                     }}
-                    exit={{ opacity: 0, scale: 0 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
                     transition={{
-                        type: "spring",
-                        stiffness: 260,
-                        damping: 20
+                        y: {
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }
                     }}
-                    onClick={scrollToTop}
-                    className="fixed bottom-8 right-8 z-40 w-14 h-14 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group"
+                    style={{
+                        position: 'fixed',
+                        bottom: '2rem',
+                        right: '2rem',
+                        zIndex: 1000,
+                    }}
                 >
-                    <RocketLaunch
-                        className={`transform transition-all duration-300 ${isLaunching ? 'scale-125' : 'group-hover:scale-110'}`}
-                        sx={{ fontSize: 24 }}
-                    />
-
-                    {/* Launch effect */}
-                    {isLaunching && (
+                    <motion.button
+                        onClick={scrollToTop}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: '16px',
+                            background: 'linear-gradient(135deg, var(--sage-400) 0%, var(--sage-500) 100%)',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 8px 25px -8px rgba(157, 176, 130, 0.4)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                        }}
+                    >
+                        {/* Shimmer effect */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: 1, scale: 3 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-white rounded-full"
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: '-100%',
+                                width: '100%',
+                                height: '100%',
+                                background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)',
+                            }}
+                            animate={{
+                                left: '100%'
+                            }}
+                            transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
                         />
-                    )}
-                </motion.button>
+                        <KeyboardArrowUp style={{ fontSize: 24 }} />
+                    </motion.button>
+                </motion.div>
             )}
         </AnimatePresence>
     )

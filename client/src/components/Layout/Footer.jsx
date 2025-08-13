@@ -5,17 +5,14 @@ import {
     Grid,
     Typography,
     IconButton,
-    TextField,
-    Button,
     Stack,
-    Avatar
+    Divider
 } from '@mui/material'
 import {
     LinkedIn,
     Twitter,
     GitHub,
     Instagram,
-    ArrowOutward,
     EmailOutlined,
     LocationOnOutlined,
     PhoneOutlined
@@ -48,508 +45,351 @@ const Footer = () => {
 
     const socialLinks = [
         {
-            icon: <LinkedIn />,
+            icon: <LinkedIn sx={{ fontSize: 18 }} />,
             href: 'https://linkedin.com/company/gsinfotech',
             name: 'LinkedIn',
-            color: 'var(--sage-400)'
         },
         {
-            icon: <Twitter />,
+            icon: <Twitter sx={{ fontSize: 18 }} />,
             href: 'https://twitter.com/gsinfotech',
             name: 'Twitter',
-            color: 'var(--coral-400)'
         },
         {
-            icon: <GitHub />,
+            icon: <GitHub sx={{ fontSize: 18 }} />,
             href: 'https://github.com/gsinfotech',
             name: 'GitHub',
-            color: 'var(--stone-400)'
         },
         {
-            icon: <Instagram />,
+            icon: <Instagram sx={{ fontSize: 18 }} />,
             href: 'https://instagram.com/gsinfotech',
             name: 'Instagram',
-            color: 'var(--sand-400)'
-        }
-    ]
-
-    const contactInfo = [
-        {
-            icon: <EmailOutlined />,
-            text: 'hello@gsinfotech.com',
-            href: 'mailto:hello@gsinfotech.com'
-        },
-        {
-            icon: <PhoneOutlined />,
-            text: '+1 (555) 123-4567',
-            href: 'tel:+15551234567'
-        },
-        {
-            icon: <LocationOnOutlined />,
-            text: 'San Francisco, CA',
-            href: '#'
         }
     ]
 
     return (
         <footer>
-            {/* Main Footer */}
             <Box
                 sx={{
-                    background: 'linear-gradient(135deg, var(--stone-900) 0%, var(--stone-800) 100%)',
-                    position: 'relative',
-                    overflow: 'hidden',
+                    backgroundColor: 'var(--stone-900)',
+                    borderTop: '1px solid var(--stone-800)',
                 }}
             >
-                {/* Subtle Background Pattern */}
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        inset: 0,
-                        opacity: 0.03,
-                        backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,0.1) 35px, rgba(255,255,255,0.1) 70px)`,
-                    }}
-                />
-
-                <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10 }}>
-                    <Box sx={{ py: 8 }}>
-                        <Grid container spacing={6}>
-                            {/* Brand & Description */}
-                            <Grid item xs={12} md={4}>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6 }}
-                                    viewport={{ once: true }}
-                                >
-                                    {/* Logo */}
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                                        <Avatar
-                                            sx={{
-                                                width: 40,
-                                                height: 40,
-                                                backgroundColor: 'var(--sage-400)',
-                                                mr: 2,
-                                            }}
-                                        >
-                                            <Typography variant="body1" sx={{ color: 'white', fontWeight: 600 }}>
-                                                GS
-                                            </Typography>
-                                        </Avatar>
-                                        <Typography variant="h5" sx={{ color: 'white', fontWeight: 300 }}>
-                                            GS<span style={{ fontWeight: 600 }}>infotech</span>
-                                        </Typography>
-                                    </Box>
-
+                <Container maxWidth="lg">
+                    {/* Main Footer Content */}
+                    <Box sx={{ py: 6 }}>
+                        <Grid container spacing={4}>
+                            {/* Brand Section */}
+                            <Grid item xs={12} md={3}>
+                                <Box sx={{ mb: 3 }}>
                                     <Typography
-                                        variant="body1"
+                                        variant="h6"
                                         sx={{
-                                            color: 'rgba(255, 255, 255, 0.8)',
-                                            fontWeight: 300,
-                                            mb: 4,
-                                            lineHeight: 1.7,
+                                            color: 'white',
+                                            fontWeight: 600,
+                                            fontSize: '1.25rem',
+                                            mb: 2
                                         }}
                                     >
-                                        We create digital experiences that inspire, engage, and deliver exceptional results for businesses worldwide.
+                                        GS Infotech
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            color: 'rgba(255, 255, 255, 0.7)',
+                                            fontWeight: 300,
+                                            lineHeight: 1.6,
+                                            mb: 3
+                                        }}
+                                    >
+                                        Creating digital experiences that inspire and deliver exceptional results.
                                     </Typography>
 
-                                    {/* Contact Info */}
-                                    <Stack spacing={2}>
-                                        {contactInfo.map((contact, index) => (
-                                            <motion.div
-                                                key={index}
-                                                initial={{ opacity: 0, x: -20 }}
-                                                whileInView={{ opacity: 1, x: 0 }}
-                                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                                                viewport={{ once: true }}
+                                    {/* Social Links */}
+                                    <Stack direction="row" spacing={1}>
+                                        {socialLinks.map((social) => (
+                                            <IconButton
+                                                key={social.name}
+                                                component="a"
+                                                href={social.href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                size="small"
+                                                sx={{
+                                                    color: 'rgba(255, 255, 255, 0.6)',
+                                                    transition: 'all 0.3s ease',
+                                                    '&:hover': {
+                                                        color: 'var(--sage-400)',
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                                    }
+                                                }}
                                             >
-                                                <Box
-                                                    component={contact.href !== '#' ? 'a' : 'div'}
-                                                    href={contact.href !== '#' ? contact.href : undefined}
-                                                    sx={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: 1.5,
-                                                        textDecoration: 'none',
-                                                        color: 'inherit',
-                                                        cursor: contact.href !== '#' ? 'pointer' : 'default',
-                                                        transition: 'color 0.3s ease',
-                                                        '&:hover': contact.href !== '#' ? {
-                                                            color: 'var(--sage-400)',
-                                                        } : {}
-                                                    }}
-                                                >
-                                                    <Box sx={{
-                                                        color: 'rgba(255, 255, 255, 0.6)',
-                                                        fontSize: '1.2rem',
-                                                        transition: 'color 0.3s ease'
-                                                    }}>
-                                                        {contact.icon}
-                                                    </Box>
-                                                    <Typography
-                                                        variant="body2"
-                                                        sx={{
-                                                            color: 'rgba(255, 255, 255, 0.8)',
-                                                            fontSize: '0.9rem'
-                                                        }}
-                                                    >
-                                                        {contact.text}
-                                                    </Typography>
-                                                </Box>
-                                            </motion.div>
+                                                {social.icon}
+                                            </IconButton>
                                         ))}
                                     </Stack>
-                                </motion.div>
+                                </Box>
                             </Grid>
 
                             {/* Links Sections */}
                             <Grid item xs={12} md={6}>
                                 <Grid container spacing={4}>
-                                    {/* Company Links */}
-                                    <Grid item xs={12} sm={4}>
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.6, delay: 0.1 }}
-                                            viewport={{ once: true }}
+                                    <Grid item xs={6} sm={4}>
+                                        <Typography
+                                            variant="subtitle2"
+                                            sx={{
+                                                color: 'var(--sage-400)',
+                                                fontWeight: 600,
+                                                mb: 2,
+                                                fontSize: '0.875rem',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.05em'
+                                            }}
                                         >
-                                            <Typography
-                                                variant="h6"
-                                                sx={{
-                                                    color: 'var(--sage-400)',
-                                                    fontWeight: 500,
-                                                    mb: 3,
-                                                    fontSize: '1rem'
-                                                }}
-                                            >
-                                                Company
-                                            </Typography>
-                                            <Stack spacing={2}>
-                                                {footerLinks.company.map((link, index) => (
-                                                    <motion.div
-                                                        key={link.name}
-                                                        initial={{ opacity: 0, x: -10 }}
-                                                        whileInView={{ opacity: 1, x: 0 }}
-                                                        transition={{ duration: 0.4, delay: index * 0.05 }}
-                                                        viewport={{ once: true }}
+                                            Company
+                                        </Typography>
+                                        <Stack spacing={1.5}>
+                                            {footerLinks.company.map((link) => (
+                                                <Link key={link.name} to={link.href} className="no-underline">
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'rgba(255, 255, 255, 0.6)',
+                                                            fontWeight: 300,
+                                                            fontSize: '0.875rem',
+                                                            transition: 'color 0.3s ease',
+                                                            '&:hover': {
+                                                                color: 'white',
+                                                            }
+                                                        }}
                                                     >
-                                                        <Link to={link.href} className="no-underline">
-                                                            <Typography
-                                                                variant="body2"
-                                                                sx={{
-                                                                    color: 'rgba(255, 255, 255, 0.7)',
-                                                                    fontWeight: 300,
-                                                                    transition: 'all 0.3s ease',
-                                                                    position: 'relative',
-                                                                    '&:hover': {
-                                                                        color: 'white',
-                                                                        transform: 'translateX(4px)',
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {link.name}
-                                                            </Typography>
-                                                        </Link>
-                                                    </motion.div>
-                                                ))}
-                                            </Stack>
-                                        </motion.div>
+                                                        {link.name}
+                                                    </Typography>
+                                                </Link>
+                                            ))}
+                                        </Stack>
                                     </Grid>
 
-                                    {/* Services Links */}
-                                    <Grid item xs={12} sm={4}>
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.6, delay: 0.2 }}
-                                            viewport={{ once: true }}
+                                    <Grid item xs={6} sm={4}>
+                                        <Typography
+                                            variant="subtitle2"
+                                            sx={{
+                                                color: 'var(--coral-400)',
+                                                fontWeight: 600,
+                                                mb: 2,
+                                                fontSize: '0.875rem',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.05em'
+                                            }}
                                         >
-                                            <Typography
-                                                variant="h6"
-                                                sx={{
-                                                    color: 'var(--coral-400)',
-                                                    fontWeight: 500,
-                                                    mb: 3,
-                                                    fontSize: '1rem'
-                                                }}
-                                            >
-                                                Services
-                                            </Typography>
-                                            <Stack spacing={2}>
-                                                {footerLinks.services.map((link, index) => (
-                                                    <motion.div
-                                                        key={link.name}
-                                                        initial={{ opacity: 0, x: -10 }}
-                                                        whileInView={{ opacity: 1, x: 0 }}
-                                                        transition={{ duration: 0.4, delay: index * 0.05 }}
-                                                        viewport={{ once: true }}
+                                            Services
+                                        </Typography>
+                                        <Stack spacing={1.5}>
+                                            {footerLinks.services.map((link) => (
+                                                <Link key={link.name} to={link.href} className="no-underline">
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'rgba(255, 255, 255, 0.6)',
+                                                            fontWeight: 300,
+                                                            fontSize: '0.875rem',
+                                                            transition: 'color 0.3s ease',
+                                                            '&:hover': {
+                                                                color: 'white',
+                                                            }
+                                                        }}
                                                     >
-                                                        <Link to={link.href} className="no-underline">
-                                                            <Typography
-                                                                variant="body2"
-                                                                sx={{
-                                                                    color: 'rgba(255, 255, 255, 0.7)',
-                                                                    fontWeight: 300,
-                                                                    transition: 'all 0.3s ease',
-                                                                    '&:hover': {
-                                                                        color: 'white',
-                                                                        transform: 'translateX(4px)',
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {link.name}
-                                                            </Typography>
-                                                        </Link>
-                                                    </motion.div>
-                                                ))}
-                                            </Stack>
-                                        </motion.div>
+                                                        {link.name}
+                                                    </Typography>
+                                                </Link>
+                                            ))}
+                                        </Stack>
                                     </Grid>
 
-                                    {/* Resources Links */}
                                     <Grid item xs={12} sm={4}>
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.6, delay: 0.3 }}
-                                            viewport={{ once: true }}
+                                        <Typography
+                                            variant="subtitle2"
+                                            sx={{
+                                                color: 'var(--sand-400)',
+                                                fontWeight: 600,
+                                                mb: 2,
+                                                fontSize: '0.875rem',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.05em'
+                                            }}
                                         >
-                                            <Typography
-                                                variant="h6"
-                                                sx={{
-                                                    color: 'var(--sand-400)',
-                                                    fontWeight: 500,
-                                                    mb: 3,
-                                                    fontSize: '1rem'
-                                                }}
-                                            >
-                                                Resources
-                                            </Typography>
-                                            <Stack spacing={2}>
-                                                {footerLinks.resources.map((link, index) => (
-                                                    <motion.div
-                                                        key={link.name}
-                                                        initial={{ opacity: 0, x: -10 }}
-                                                        whileInView={{ opacity: 1, x: 0 }}
-                                                        transition={{ duration: 0.4, delay: index * 0.05 }}
-                                                        viewport={{ once: true }}
+                                            Resources
+                                        </Typography>
+                                        <Stack spacing={1.5}>
+                                            {footerLinks.resources.map((link) => (
+                                                <Link key={link.name} to={link.href} className="no-underline">
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: 'rgba(255, 255, 255, 0.6)',
+                                                            fontWeight: 300,
+                                                            fontSize: '0.875rem',
+                                                            transition: 'color 0.3s ease',
+                                                            '&:hover': {
+                                                                color: 'white',
+                                                            }
+                                                        }}
                                                     >
-                                                        <Link to={link.href} className="no-underline">
-                                                            <Typography
-                                                                variant="body2"
-                                                                sx={{
-                                                                    color: 'rgba(255, 255, 255, 0.7)',
-                                                                    fontWeight: 300,
-                                                                    transition: 'all 0.3s ease',
-                                                                    '&:hover': {
-                                                                        color: 'white',
-                                                                        transform: 'translateX(4px)',
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {link.name}
-                                                            </Typography>
-                                                        </Link>
-                                                    </motion.div>
-                                                ))}
-                                            </Stack>
-                                        </motion.div>
+                                                        {link.name}
+                                                    </Typography>
+                                                </Link>
+                                            ))}
+                                        </Stack>
                                     </Grid>
                                 </Grid>
                             </Grid>
 
-                            {/* Newsletter & Social */}
-                            <Grid item xs={12} md={2}>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: 0.4 }}
-                                    viewport={{ once: true }}
+                            {/* Contact Info */}
+                            <Grid item xs={12} md={3}>
+                                <Typography
+                                    variant="subtitle2"
+                                    sx={{
+                                        color: 'white',
+                                        fontWeight: 600,
+                                        mb: 2,
+                                        fontSize: '0.875rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.05em'
+                                    }}
                                 >
-                                    <Typography
-                                        variant="h6"
+                                    Get in Touch
+                                </Typography>
+                                <Stack spacing={1.5}>
+                                    <Box
+                                        component="a"
+                                        href="mailto:hello@gsinfotech.com"
                                         sx={{
-                                            color: 'white',
-                                            fontWeight: 500,
-                                            mb: 3,
-                                            fontSize: '1rem'
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            textDecoration: 'none',
+                                            color: 'inherit',
                                         }}
                                     >
-                                        Stay Connected
-                                    </Typography>
-
-                                    {/* Newsletter */}
-                                    <Box sx={{ mb: 4 }}>
+                                        <EmailOutlined sx={{ fontSize: 16, color: 'var(--sage-400)' }} />
                                         <Typography
                                             variant="body2"
                                             sx={{
-                                                color: 'rgba(255, 255, 255, 0.8)',
-                                                mb: 2,
-                                                fontSize: '0.875rem'
+                                                color: 'rgba(255, 255, 255, 0.6)',
+                                                fontSize: '0.875rem',
+                                                transition: 'color 0.3s ease',
+                                                '&:hover': { color: 'white' }
                                             }}
                                         >
-                                            Get updates & insights
+                                            hello@gsinfotech.com
                                         </Typography>
-                                        <Stack spacing={2}>
-                                            <TextField
-                                                fullWidth
-                                                placeholder="Enter email"
-                                                variant="outlined"
-                                                size="small"
-                                                InputProps={{
-                                                    sx: {
-                                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                        borderRadius: '8px',
-                                                        color: 'white',
-                                                        '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                borderColor: 'rgba(255, 255, 255, 0.2)',
-                                                            },
-                                                            '&:hover fieldset': {
-                                                                borderColor: 'var(--sage-400)',
-                                                            },
-                                                            '&.Mui-focused fieldset': {
-                                                                borderColor: 'var(--sage-400)',
-                                                            },
-                                                        },
-                                                        '& .MuiInputBase-input::placeholder': {
-                                                            color: 'rgba(255, 255, 255, 0.6)',
-                                                            opacity: 1,
-                                                        },
-                                                    }
-                                                }}
-                                            />
-                                            <Button
-                                                variant="contained"
-                                                fullWidth
-                                                endIcon={<ArrowOutward />}
-                                                sx={{
-                                                    backgroundColor: 'var(--sage-400)',
-                                                    color: 'white',
-                                                    borderRadius: '8px',
-                                                    py: 1,
-                                                    fontWeight: 500,
-                                                    textTransform: 'none',
-                                                    '&:hover': {
-                                                        backgroundColor: 'var(--sage-500)',
-                                                    }
-                                                }}
-                                            >
-                                                Subscribe
-                                            </Button>
-                                        </Stack>
                                     </Box>
 
-                                    {/* Social Links */}
-                                    <Box>
+                                    <Box
+                                        component="a"
+                                        href="tel:+15551234567"
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            textDecoration: 'none',
+                                            color: 'inherit',
+                                        }}
+                                    >
+                                        <PhoneOutlined sx={{ fontSize: 16, color: 'var(--coral-400)' }} />
                                         <Typography
                                             variant="body2"
                                             sx={{
-                                                color: 'rgba(255, 255, 255, 0.8)',
-                                                mb: 2,
+                                                color: 'rgba(255, 255, 255, 0.6)',
+                                                fontSize: '0.875rem',
+                                                transition: 'color 0.3s ease',
+                                                '&:hover': { color: 'white' }
+                                            }}
+                                        >
+                                            +1 (555) 123-4567
+                                        </Typography>
+                                    </Box>
+
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <LocationOnOutlined sx={{ fontSize: 16, color: 'var(--sand-400)' }} />
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                color: 'rgba(255, 255, 255, 0.6)',
                                                 fontSize: '0.875rem'
                                             }}
                                         >
-                                            Follow us
+                                            San Francisco, CA
                                         </Typography>
-                                        <Stack direction="row" spacing={1} flexWrap="wrap">
-                                            {socialLinks.map((social, index) => (
-                                                <motion.div
-                                                    key={social.name}
-                                                    initial={{ opacity: 0, scale: 0.8 }}
-                                                    whileInView={{ opacity: 1, scale: 1 }}
-                                                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                                                    viewport={{ once: true }}
-                                                    whileHover={{ y: -3 }}
-                                                >
-                                                    <IconButton
-                                                        component="a"
-                                                        href={social.href}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        sx={{
-                                                            width: 36,
-                                                            height: 36,
-                                                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                            color: 'rgba(255, 255, 255, 0.7)',
-                                                            transition: 'all 0.3s ease',
-                                                            '&:hover': {
-                                                                backgroundColor: social.color,
-                                                                color: 'white',
-                                                                transform: 'translateY(-3px)',
-                                                                boxShadow: `0 4px 12px -2px ${social.color}40`,
-                                                            }
-                                                        }}
-                                                        title={`Follow us on ${social.name}`}
-                                                    >
-                                                        {social.icon}
-                                                    </IconButton>
-                                                </motion.div>
-                                            ))}
-                                        </Stack>
                                     </Box>
-                                </motion.div>
+                                </Stack>
                             </Grid>
                         </Grid>
                     </Box>
 
-                    {/* Bottom Section */}
-                    <Box
-                        sx={{
-                            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                            py: 4
-                        }}
-                    >
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
-                            viewport={{ once: true }}
-                        >
-                            <Stack
-                                direction={{ xs: 'column', sm: 'row' }}
-                                spacing={3}
-                                alignItems={{ xs: 'center', sm: 'center' }}
-                                justifyContent="space-between"
-                            >
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        color: 'rgba(255, 255, 255, 0.6)',
-                                        fontSize: '0.875rem',
-                                        textAlign: { xs: 'center', sm: 'left' }
-                                    }}
-                                >
-                                    © {currentYear} GS Infotech. All rights reserved.
-                                </Typography>
+                    {/* Divider */}
+                    <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
 
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {/* Bottom Section */}
+                    <Box sx={{ py: 3 }}>
+                        <Stack
+                            direction={{ xs: 'column', sm: 'row' }}
+                            spacing={2}
+                            alignItems="center"
+                            justifyContent="space-between"
+                        >
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    fontSize: '0.813rem',
+                                    textAlign: { xs: 'center', sm: 'left' }
+                                }}
+                            >
+                                © {currentYear} GS Infotech. All rights reserved.
+                            </Typography>
+
+                            <Stack
+                                direction="row"
+                                spacing={3}
+                                divider={
                                     <Box
                                         sx={{
-                                            width: 8,
-                                            height: 8,
-                                            backgroundColor: 'var(--coral-400)',
-                                            borderRadius: '50%',
-                                            animation: 'pulse 2s infinite',
-                                            '@keyframes pulse': {
-                                                '0%': { opacity: 1 },
-                                                '50%': { opacity: 0.5 },
-                                                '100%': { opacity: 1 },
-                                            }
+                                            width: 4,
+                                            height: 4,
+                                            backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                                            borderRadius: '50%'
                                         }}
                                     />
+                                }
+                            >
+                                <Link to="/privacy" className="no-underline">
                                     <Typography
                                         variant="body2"
                                         sx={{
-                                            color: 'rgba(255, 255, 255, 0.6)',
-                                            fontSize: '0.875rem'
+                                            color: 'rgba(255, 255, 255, 0.5)',
+                                            fontSize: '0.813rem',
+                                            transition: 'color 0.3s ease',
+                                            '&:hover': { color: 'white' }
                                         }}
                                     >
-                                        Made with passion in India
+                                        Privacy
                                     </Typography>
-                                </Box>
+                                </Link>
+                                <Link to="/terms" className="no-underline">
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            color: 'rgba(255, 255, 255, 0.5)',
+                                            fontSize: '0.813rem',
+                                            transition: 'color 0.3s ease',
+                                            '&:hover': { color: 'white' }
+                                        }}
+                                    >
+                                        Terms
+                                    </Typography>
+                                </Link>
                             </Stack>
-                        </motion.div>
+                        </Stack>
                     </Box>
                 </Container>
             </Box>
