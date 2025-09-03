@@ -51,20 +51,6 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: []
         },
 
-        // Pricing (optional)
-        pricing_model: {
-            type: DataTypes.ENUM('fixed', 'hourly', 'project_based', 'monthly', 'custom'),
-            allowNull: true
-        },
-        starting_price: {
-            type: DataTypes.DECIMAL(10, 2),
-            allowNull: true
-        },
-        price_currency: {
-            type: DataTypes.STRING(3),
-            defaultValue: 'USD'
-        },
-
         // Timeline
         estimated_timeline: {
             type: DataTypes.STRING(100),
@@ -75,10 +61,6 @@ module.exports = (sequelize, DataTypes) => {
         display_order: {
             type: DataTypes.INTEGER,
             defaultValue: 0
-        },
-        is_featured: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
         },
         is_active: {
             type: DataTypes.BOOLEAN,
@@ -151,4 +133,4 @@ module.exports = (sequelize, DataTypes) => {
     };
 
     return Service;
-  };
+};

@@ -1,4 +1,4 @@
-// client/src/services/servicesAPI.js - Enhanced with debugging
+// client/src/services/servicesAPI.js - Complete and enhanced without pricing
 import { apiClient } from './api.js'
 
 export const servicesAPI = {
@@ -73,26 +73,6 @@ export const servicesAPI = {
                 throw new Error('Service not found')
             }
             throw new Error(error.response?.data?.message || 'Failed to fetch service')
-        }
-    },
-
-    // Get featured services for homepage
-    getFeaturedServices: async (limit = 4) => {
-        try {
-            console.log(`⭐ Fetching featured services, limit: ${limit}`);
-            const response = await apiClient.get('/services/featured', {
-                params: { limit }
-            })
-
-            console.log('✅ Featured services fetched:', response.data);
-
-            return {
-                data: response.data?.data || response.data || [],
-                success: true
-            }
-        } catch (error) {
-            console.error('❌ getFeaturedServices error:', error)
-            throw new Error(error.response?.data?.message || 'Failed to fetch featured services')
         }
     },
 

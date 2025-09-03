@@ -27,9 +27,7 @@ import {
 import {
     ArrowBack,
     CheckCircle,
-    AttachMoney,
     Schedule,
-    Star,
     Code,
     PhoneAndroid,
     Computer,
@@ -250,7 +248,7 @@ const ServiceDetail = () => {
                     >
                         <Grid container spacing={6} alignItems="center">
                             <Grid item xs={12} md={8}>
-                                {/* Category and Featured Badge */}
+                                {/* Category Badge */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                                     <Chip
                                         label={categoryData.label}
@@ -260,17 +258,6 @@ const ServiceDetail = () => {
                                             fontWeight: 'medium'
                                         }}
                                     />
-                                    {service.is_featured && (
-                                        <Chip
-                                            icon={<Star />}
-                                            label="Featured Service"
-                                            sx={{
-                                                bgcolor: '#FFD700',
-                                                color: 'black',
-                                                fontWeight: 'bold'
-                                            }}
-                                        />
-                                    )}
                                 </Box>
 
                                 <Typography
@@ -287,16 +274,8 @@ const ServiceDetail = () => {
                                     {service.short_description}
                                 </Typography>
 
-                                {/* Pricing and Timeline */}
+                                {/* Timeline Only */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 6 }}>
-                                    {service.starting_price && (
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <AttachMoney sx={{ color: 'primary.main' }} />
-                                            <Typography variant="h6" color="primary">
-                                                Starting from ${service.starting_price}
-                                            </Typography>
-                                        </Box>
-                                    )}
                                     {service.estimated_timeline && (
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Schedule sx={{ color: 'text.secondary' }} />
@@ -481,7 +460,7 @@ const ServiceDetail = () => {
                             </motion.div>
                         </Grid>
 
-                        {/* Sidebar */}
+                        {/* Sidebar - Removed Pricing Information */}
                         <Grid item xs={12} md={4}>
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
@@ -511,7 +490,7 @@ const ServiceDetail = () => {
                                             }
                                         }}
                                     >
-                                        Request Quote
+                                        Get Quote
                                     </Button>
                                     <Button
                                         variant="outlined"
@@ -523,7 +502,7 @@ const ServiceDetail = () => {
                                     </Button>
                                 </Card>
 
-                                {/* Service Details */}
+                                {/* Service Details - No Pricing */}
                                 <Card sx={{ p: 4 }}>
                                     <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
                                         Service Details
@@ -537,26 +516,6 @@ const ServiceDetail = () => {
                                                 {categoryData.label}
                                             </Typography>
                                         </Box>
-                                        {service.pricing_model && (
-                                            <Box>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Pricing Model
-                                                </Typography>
-                                                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                                    {service.pricing_model.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                                </Typography>
-                                            </Box>
-                                        )}
-                                        {service.starting_price && (
-                                            <Box>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Starting Price
-                                                </Typography>
-                                                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                                    ${service.starting_price} {service.price_currency}
-                                                </Typography>
-                                            </Box>
-                                        )}
                                         {service.estimated_timeline && (
                                             <Box>
                                                 <Typography variant="body2" color="text.secondary">
@@ -595,6 +554,7 @@ const ServiceDetail = () => {
                                             service={relatedService}
                                             index={index}
                                             compact={true}
+                                            showPricing={false}
                                         />
                                     </Grid>
                                 ))}

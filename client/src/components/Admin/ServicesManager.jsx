@@ -1,4 +1,4 @@
-// client/src/components/Admin/ServicesManager.jsx - Updated to use ServiceForm
+// client/src/components/Admin/ServicesManager.jsx - Updated without pricing
 import React, { useState, useEffect } from 'react';
 import {
     Box,
@@ -51,9 +51,7 @@ import {
     CheckCircle,
     Cancel,
     FilterList,
-    AttachMoney,
     Schedule,
-    Star,
     Web,
     PhoneAndroid,
     Computer,
@@ -325,7 +323,7 @@ const ServicesManager = () => {
                 </Box>
             </Box>
 
-            {/* Stats Cards */}
+            {/* Stats Cards - Updated without pricing stats */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 <Grid item xs={12} sm={6} md={3}>
                     <Card>
@@ -355,10 +353,10 @@ const ServicesManager = () => {
                     <Card>
                         <CardContent>
                             <Typography color="text.secondary" gutterBottom>
-                                Featured
+                                Categories
                             </Typography>
                             <Typography variant="h4" color="primary.main">
-                                {services.filter(s => s.is_featured).length}
+                                {new Set(services.map(s => s.category)).size}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -367,10 +365,10 @@ const ServicesManager = () => {
                     <Card>
                         <CardContent>
                             <Typography color="text.secondary" gutterBottom>
-                                Categories
+                                With Features
                             </Typography>
                             <Typography variant="h4" color="warning.main">
-                                {new Set(services.map(s => s.category)).size}
+                                {services.filter(s => s.features && s.features.length > 0).length}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -490,21 +488,6 @@ const ServicesManager = () => {
                                         />
                                     </Box>
 
-                                    {/* Featured Badge */}
-                                    {service.is_featured && (
-                                        <Chip
-                                            label="Featured"
-                                            size="small"
-                                            color="primary"
-                                            sx={{
-                                                position: 'absolute',
-                                                top: 8,
-                                                right: 8,
-                                                zIndex: 1
-                                            }}
-                                        />
-                                    )}
-
                                     {/* Service Image or Icon */}
                                     <Box sx={{ p: 3, textAlign: 'center', bgcolor: 'grey.50' }}>
                                         {service.featured_image ? (
@@ -514,9 +497,9 @@ const ServicesManager = () => {
                                                 style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
                                             />
                                         ) : (
-                                                <Avatar sx={{ width: 80, height: 80, bgcolor: 'primary.main', mx: 'auto' }}>
-                                                    {React.cloneElement(getCategoryIcon(service.category), { sx: { fontSize: 40 } })}
-                                                </Avatar>
+                                            <Avatar sx={{ width: 80, height: 80, bgcolor: 'primary.main', mx: 'auto' }}>
+                                                {React.cloneElement(getCategoryIcon(service.category), { sx: { fontSize: 40 } })}
+                                            </Avatar>
                                         )}
                                     </Box>
 
@@ -580,16 +563,6 @@ const ServicesManager = () => {
                                                         sx={{ mr: 0.5, mb: 0.5, fontSize: '0.75rem' }}
                                                     />
                                                 )}
-                                            </Box>
-                                        )}
-
-                                        {/* Pricing */}
-                                        {service.starting_price && (
-                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                                <AttachMoney sx={{ fontSize: 16, mr: 0.5 }} />
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Starting from ${service.starting_price}
-                                                </Typography>
                                             </Box>
                                         )}
 

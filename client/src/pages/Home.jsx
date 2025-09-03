@@ -394,7 +394,7 @@ const Home = () => {
                                 </Link>
                             </Stack>
 
-                            {/* Social Proof - Centered */}
+                            {/* Social Proof - Centered
                             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                                 <Box sx={{ textAlign: 'center' }}>
                                     <Typography variant="h3" sx={{ fontWeight: 300, color: 'var(--stone-800)', mb: 0.5 }}>
@@ -436,7 +436,7 @@ const Home = () => {
                                         </Typography>
                                     </Stack>
                                 </Box>
-                            </Box>
+                            </Box> */}
 
                             {/* Hero Image - Centered */}
                             <Box sx={{ mt: 8, display: 'flex', justifyContent: 'center' }}>

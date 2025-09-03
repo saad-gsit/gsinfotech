@@ -1,4 +1,4 @@
-// client/src/components/Forms/ServiceForm.jsx
+// client/src/components/Forms/ServiceForm.jsx - Updated without pricing fields
 import React, { useState, useEffect } from 'react';
 import {
     Dialog,
@@ -26,7 +26,6 @@ import {
 import {
     Add,
     Delete,
-    AttachMoney,
     Schedule,
     CloudUpload,
     Close,
@@ -41,7 +40,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useDropzone } from 'react-dropzone';
 
-// Validation Schema
+// Validation Schema - Updated without pricing fields
 const serviceSchema = yup.object({
     name: yup.string()
         .required('Service name is required')
@@ -62,9 +61,9 @@ const serviceSchema = yup.object({
     technologies: yup.array()
         .of(yup.string().min(1, 'Technology cannot be empty'))
         .min(1, 'At least one technology is required'),
-    starting_price: yup.number()
+    estimated_timeline: yup.string()
         .nullable()
-        .min(0, 'Price cannot be negative')
+        .max(100, 'Timeline must be less than 100 characters')
 });
 
 // Image Upload Component
@@ -191,15 +190,7 @@ const ServiceForm = ({
         'Sketch', 'Photoshop', 'Illustrator'
     ];
 
-    const pricingModels = [
-        { value: 'fixed', label: 'Fixed Price' },
-        { value: 'hourly', label: 'Hourly Rate' },
-        { value: 'project_based', label: 'Project Based' },
-        { value: 'monthly', label: 'Monthly Retainer' },
-        { value: 'custom', label: 'Custom Quote' }
-    ];
-
-    // Form setup
+    // Form setup - Updated default values without pricing
     const { control, handleSubmit, formState: { errors }, reset, watch } = useForm({
         resolver: yupResolver(serviceSchema),
         defaultValues: {
@@ -209,14 +200,14 @@ const ServiceForm = ({
             category: '',
             features: [],
             technologies: [],
-            pricing_model: '',
-            starting_price: '',
-            price_currency: 'USD',
             estimated_timeline: '',
-            is_featured: false,
             is_active: true,
             show_in_homepage: true,
-            process_steps: []
+            display_order: 0,
+            process_steps: [],
+            seo_title: '',
+            seo_description: '',
+            seo_keywords: []
         }
     });
 
@@ -236,6 +227,11 @@ const ServiceForm = ({
         name: 'technologies'
     });
 
+    const { fields: keywordFields, append: appendKeyword, remove: removeKeyword } = useFieldArray({
+        control,
+        name: 'seo_keywords'
+    });
+
     // Reset form when editing service changes
     useEffect(() => {
         if (editingService) {
@@ -243,7 +239,8 @@ const ServiceForm = ({
                 ...editingService,
                 features: editingService.features || [],
                 technologies: editingService.technologies || [],
-                process_steps: editingService.process_steps || []
+                process_steps: editingService.process_steps || [],
+                seo_keywords: editingService.seo_keywords || []
             });
         } else {
             reset({
@@ -253,14 +250,14 @@ const ServiceForm = ({
                 category: '',
                 features: [],
                 technologies: [],
-                pricing_model: '',
-                starting_price: '',
-                price_currency: 'USD',
                 estimated_timeline: '',
-                is_featured: false,
                 is_active: true,
                 show_in_homepage: true,
-                process_steps: []
+                display_order: 0,
+                process_steps: [],
+                seo_title: '',
+                seo_description: '',
+                seo_keywords: []
             });
         }
         setUploadedImage(null);
@@ -407,6 +404,47 @@ const ServiceForm = ({
                                         )}
                                     />
                                 </Grid>
+
+                                {/* Timeline and Display Order */}
+                                <Grid item xs={12} md={6}>
+                                    <Controller
+                                        name="estimated_timeline"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="Estimated Timeline"
+                                                placeholder="e.g., 2-4 weeks, 1-3 months"
+                                                error={!!errors.estimated_timeline}
+                                                helperText={errors.estimated_timeline?.message}
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Schedule />
+                                                        </InputAdornment>
+                                                    )
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Grid>
+
+                                <Grid item xs={12} md={6}>
+                                    <Controller
+                                        name="display_order"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="Display Order"
+                                                type="number"
+                                                helperText="Order for sorting (0 = first)"
+                                            />
+                                        )}
+                                    />
+                                </Grid>
                             </Grid>
                         </Grid>
 
@@ -426,6 +464,7 @@ const ServiceForm = ({
                                                 label={watch(`technologies.${index}`)}
                                                 onDelete={() => removeTechnology(index)}
                                                 variant="outlined"
+                                                color="primary"
                                             />
                                         ))}
                                     </Box>
@@ -537,111 +576,130 @@ const ServiceForm = ({
                             </Typography>
 
                             {processFields.map((field, index) => (
-                                <Box key={field.id} sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                                    <Controller
-                                        name={`process_steps.${index}`}
-                                        control={control}
-                                        render={({ field: inputField }) => (
-                                            <TextField
-                                                {...inputField}
-                                                fullWidth
-                                                label={`Step ${index + 1}`}
+                                <Paper key={field.id} sx={{ p: 2, mb: 2 }}>
+                                    <Grid container spacing={2} alignItems="center">
+                                        <Grid item xs={12} sm={4}>
+                                            <Controller
+                                                name={`process_steps.${index}.title`}
+                                                control={control}
+                                                render={({ field: inputField }) => (
+                                                    <TextField
+                                                        {...inputField}
+                                                        fullWidth
+                                                        label={`Step ${index + 1} Title`}
+                                                        placeholder="e.g., Discovery & Planning"
+                                                    />
+                                                )}
                                             />
-                                        )}
-                                    />
-                                    <IconButton
-                                        onClick={() => removeProcess(index)}
-                                        color="error"
-                                    >
-                                        <Delete />
-                                    </IconButton>
-                                </Box>
+                                        </Grid>
+                                        <Grid item xs={12} sm={7}>
+                                            <Controller
+                                                name={`process_steps.${index}.description`}
+                                                control={control}
+                                                render={({ field: inputField }) => (
+                                                    <TextField
+                                                        {...inputField}
+                                                        fullWidth
+                                                        label="Description"
+                                                        placeholder="Brief description of this step"
+                                                    />
+                                                )}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={1}>
+                                            <IconButton
+                                                onClick={() => removeProcess(index)}
+                                                color="error"
+                                            >
+                                                <Delete />
+                                            </IconButton>
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
                             ))}
 
                             <Button
                                 variant="outlined"
-                                onClick={() => appendProcess('')}
+                                onClick={() => appendProcess({ title: '', description: '' })}
                                 startIcon={<Add />}
                             >
-                                Add Step
+                                Add Process Step
                             </Button>
                         </Grid>
 
-                        {/* Pricing */}
+                        {/* SEO Settings */}
                         <Grid item xs={12}>
                             <Divider sx={{ my: 2 }} />
                             <Typography variant="h6" gutterBottom>
-                                Pricing Information (Optional)
+                                SEO Settings (Optional)
                             </Typography>
-                        </Grid>
 
-                        <Grid item xs={12} md={4}>
-                            <Controller
-                                name="pricing_model"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControl fullWidth>
-                                        <InputLabel>Pricing Model</InputLabel>
-                                        <Select
-                                            {...field}
-                                            label="Pricing Model"
-                                        >
-                                            <MenuItem value="">Select pricing model</MenuItem>
-                                            {pricingModels.map((model) => (
-                                                <MenuItem key={model.value} value={model.value}>
-                                                    {model.label}
-                                                </MenuItem>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} md={6}>
+                                    <Controller
+                                        name="seo_title"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="SEO Title"
+                                                helperText={`${field.value?.length || 0}/60 characters`}
+                                                inputProps={{ maxLength: 60 }}
+                                            />
+                                        )}
+                                    />
+                                </Grid>
+
+                                <Grid item xs={12} md={6}>
+                                    <Controller
+                                        name="seo_description"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                fullWidth
+                                                label="SEO Description"
+                                                multiline
+                                                rows={2}
+                                                helperText={`${field.value?.length || 0}/160 characters`}
+                                                inputProps={{ maxLength: 160 }}
+                                            />
+                                        )}
+                                    />
+                                </Grid>
+
+                                <Grid item xs={12}>
+                                    {keywordFields.length > 0 && (
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                                            {keywordFields.map((field, index) => (
+                                                <Chip
+                                                    key={field.id}
+                                                    label={watch(`seo_keywords.${index}`)}
+                                                    onDelete={() => removeKeyword(index)}
+                                                    variant="outlined"
+                                                    color="info"
+                                                />
                                             ))}
-                                        </Select>
-                                    </FormControl>
-                                )}
-                            />
-                        </Grid>
+                                        </Box>
+                                    )}
 
-                        <Grid item xs={12} md={4}>
-                            <Controller
-                                name="starting_price"
-                                control={control}
-                                render={({ field }) => (
                                     <TextField
-                                        {...field}
                                         fullWidth
-                                        label="Starting Price"
-                                        type="number"
-                                        error={!!errors.starting_price}
-                                        helperText={errors.starting_price?.message}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <AttachMoney />
-                                                </InputAdornment>
-                                            )
+                                        placeholder="Add SEO keyword and press Enter"
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                const value = e.target.value.trim();
+                                                if (value && !watch('seo_keywords').includes(value)) {
+                                                    appendKeyword(value);
+                                                    e.target.value = '';
+                                                }
+                                            }
                                         }}
                                     />
-                                )}
-                            />
-                        </Grid>
-
-                        <Grid item xs={12} md={4}>
-                            <Controller
-                                name="estimated_timeline"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        label="Estimated Timeline"
-                                        placeholder="e.g., 2-4 weeks, 1-3 months"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <Schedule />
-                                                </InputAdornment>
-                                            )
-                                        }}
-                                    />
-                                )}
-                            />
+                                </Grid>
+                            </Grid>
                         </Grid>
 
                         {/* Display Settings */}
@@ -650,60 +708,44 @@ const ServiceForm = ({
                             <Typography variant="h6" gutterBottom>
                                 Display Settings
                             </Typography>
-                        </Grid>
 
-                        <Grid item xs={12} md={4}>
-                            <Controller
-                                name="is_featured"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={field.value}
-                                                onChange={field.onChange}
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} md={4}>
+                                    <Controller
+                                        name="is_active"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <FormControlLabel
+                                                control={
+                                                    <Switch
+                                                        checked={field.value}
+                                                        onChange={field.onChange}
+                                                    />
+                                                }
+                                                label="Active Service"
                                             />
-                                        }
-                                        label="Featured Service"
+                                        )}
                                     />
-                                )}
-                            />
-                        </Grid>
+                                </Grid>
 
-                        <Grid item xs={12} md={4}>
-                            <Controller
-                                name="is_active"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={field.value}
-                                                onChange={field.onChange}
+                                <Grid item xs={12} md={4}>
+                                    <Controller
+                                        name="show_in_homepage"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <FormControlLabel
+                                                control={
+                                                    <Switch
+                                                        checked={field.value}
+                                                        onChange={field.onChange}
+                                                    />
+                                                }
+                                                label="Show in Homepage"
                                             />
-                                        }
-                                        label="Active Service"
+                                        )}
                                     />
-                                )}
-                            />
-                        </Grid>
-
-                        <Grid item xs={12} md={4}>
-                            <Controller
-                                name="show_in_homepage"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={field.value}
-                                                onChange={field.onChange}
-                                            />
-                                        }
-                                        label="Show in Homepage"
-                                    />
-                                )}
-                            />
+                                </Grid>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </DialogContent>

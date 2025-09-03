@@ -1,4 +1,4 @@
-// server/routes/services.js - Fixed to match your auth system
+// server/routes/services.js - Updated without pricing validation
 const express = require('express');
 const router = express.Router();
 const serviceController = require('../controllers/serviceController');
@@ -37,7 +37,7 @@ const upload = multer({
     }
 });
 
-// Validation middleware
+// Validation middleware - Updated without pricing fields
 const validateService = [
     body('name')
         .trim()
@@ -68,25 +68,11 @@ const validateService = [
         .isArray({ min: 0 })
         .withMessage('Technologies must be an array'),
 
-    body('pricing_model')
+    body('estimated_timeline')
         .optional()
-        .isIn(['fixed', 'hourly', 'project_based', 'monthly', 'custom'])
-        .withMessage('Invalid pricing model'),
-
-    body('starting_price')
-        .optional()
-        .isFloat({ min: 0 })
-        .withMessage('Starting price must be a positive number'),
-
-    body('price_currency')
-        .optional()
-        .isLength({ min: 3, max: 3 })
-        .withMessage('Currency code must be 3 characters'),
-
-    body('is_featured')
-        .optional()
-        .isBoolean()
-        .withMessage('is_featured must be a boolean'),
+        .trim()
+        .isLength({ max: 100 })
+        .withMessage('Timeline must be less than 100 characters'),
 
     body('is_active')
         .optional()
@@ -97,6 +83,33 @@ const validateService = [
         .optional()
         .isBoolean()
         .withMessage('show_in_homepage must be a boolean'),
+
+    body('display_order')
+        .optional()
+        .isInt({ min: 0 })
+        .withMessage('Display order must be a positive integer'),
+
+    body('process_steps')
+        .optional()
+        .isArray({ min: 0 })
+        .withMessage('Process steps must be an array'),
+
+    body('seo_title')
+        .optional()
+        .trim()
+        .isLength({ max: 60 })
+        .withMessage('SEO title must be less than 60 characters'),
+
+    body('seo_description')
+        .optional()
+        .trim()
+        .isLength({ max: 160 })
+        .withMessage('SEO description must be less than 160 characters'),
+
+    body('seo_keywords')
+        .optional()
+        .isArray({ min: 0 })
+        .withMessage('SEO keywords must be an array'),
 
     validation.handleValidationErrors
 ];
@@ -125,15 +138,26 @@ const validateServiceUpdate = [
         .isIn(['web_development', 'mobile_development', 'custom_software', 'ui_ux_design', 'enterprise_solutions'])
         .withMessage('Invalid service category'),
 
-    body('pricing_model')
+    body('estimated_timeline')
         .optional()
-        .isIn(['fixed', 'hourly', 'project_based', 'monthly', 'custom'])
-        .withMessage('Invalid pricing model'),
+        .trim()
+        .isLength({ max: 100 })
+        .withMessage('Timeline must be less than 100 characters'),
 
-    body('starting_price')
+    body('features')
         .optional()
-        .isFloat({ min: 0 })
-        .withMessage('Starting price must be a positive number'),
+        .isArray({ min: 0 })
+        .withMessage('Features must be an array'),
+
+    body('technologies')
+        .optional()
+        .isArray({ min: 0 })
+        .withMessage('Technologies must be an array'),
+
+    body('process_steps')
+        .optional()
+        .isArray({ min: 0 })
+        .withMessage('Process steps must be an array'),
 
     validation.handleValidationErrors
 ];
@@ -174,9 +198,6 @@ router.get('/',
 // GET /api/services/stats - Get service statistics (for dashboard)
 router.get('/stats', serviceController.getServiceStats);
 
-// GET /api/services/featured - Get featured services
-router.get('/featured', serviceController.getFeaturedServices);
-
 // GET /api/services/category/:category - Get services by category
 router.get('/category/:category',
     [
@@ -188,6 +209,7 @@ router.get('/category/:category',
     serviceController.getServicesByCategory
 );
 
+// GET /api/services/test-db - Test database connection
 router.get('/test-db', serviceController.testDatabaseConnection);
 
 // GET /api/services/:id - Get single service by ID or slug

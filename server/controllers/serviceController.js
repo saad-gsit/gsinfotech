@@ -1,4 +1,4 @@
-// server/controllers/serviceController.js - FIXED VERSION
+// server/controllers/serviceController.js - Updated without pricing functionality
 const { Service } = require('../models');
 const { Op } = require('sequelize');
 
@@ -29,7 +29,6 @@ const getAllServices = async (req, res) => {
             limit = 10,
             search,
             category,
-            featured,
             active,
             sort = 'display_order',
             order = 'ASC'
@@ -52,11 +51,6 @@ const getAllServices = async (req, res) => {
         // Category filter
         if (category && category !== 'all') {
             whereClause.category = category;
-        }
-
-        // Featured filter
-        if (featured === 'true') {
-            whereClause.is_featured = true;
         }
 
         // Active filter (default to true if not specified)
@@ -159,7 +153,6 @@ const getServiceStats = async (req, res) => {
         const total = await Service.count();
         const active = await Service.count({ where: { is_active: true } });
         const inactive = await Service.count({ where: { is_active: false } });
-        const featured = await Service.count({ where: { is_featured: true } });
 
         // Get services by category
         const servicesByCategory = await Service.findAll({
@@ -170,12 +163,21 @@ const getServiceStats = async (req, res) => {
 
         const categories = new Set(servicesByCategory.map(s => s.category)).size;
 
+        // Get services with features count
+        const servicesWithFeatures = await Service.count({
+            where: {
+                features: {
+                    [Op.ne]: null
+                }
+            }
+        });
+
         const stats = {
             total,
             active,
             inactive,
-            featured,
             categories,
+            servicesWithFeatures,
             servicesByCategory
         };
 
@@ -498,39 +500,6 @@ const getServicesByCategory = async (req, res) => {
     }
 };
 
-// Get featured services for homepage
-const getFeaturedServices = async (req, res) => {
-    try {
-        const { limit = 4 } = req.query;
-        console.log('⭐ Getting featured services, limit:', limit);
-
-        const services = await Service.findAll({
-            where: {
-                is_featured: true,
-                is_active: true
-            },
-            order: [['display_order', 'ASC'], ['created_at', 'DESC']],
-            limit: parseInt(limit)
-        });
-
-        console.log(`✅ Found ${services.length} featured services`);
-
-        res.json({
-            success: true,
-            data: services,
-            count: services.length
-        });
-
-    } catch (error) {
-        console.error('❌ Get featured services error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching featured services',
-            error: error.message
-        });
-    }
-};
-
 // Test database connection (useful for debugging)
 const testDatabaseConnection = async (req, res) => {
     try {
@@ -570,6 +539,5 @@ module.exports = {
     bulkUpdateServices,
     bulkDeleteServices,
     getServicesByCategory,
-    getFeaturedServices,
     testDatabaseConnection
 };
